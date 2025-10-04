@@ -179,32 +179,34 @@ module.exports = class ModUtils {
 
     try {
       let messages;
+      const fetchLimit = Math.min(amount, 100);
+      
       switch(type) {
         case "ALL":
-          messages = await channel.messages.fetch({ limit: amount, cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: fetchLimit, cache: false, force: true });
           break;
         case "BOT": {
-          messages = await channel.messages.fetch({cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: 100, cache: false, force: true });
           messages = messages.filter(message => message.author.bot).first(amount);
           break;
         }
         case "LINK": {
-          messages = await channel.messages.fetch({cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: 100, cache: false, force: true });
           messages = messages.filter(message => containsLink(message.content)).first(amount);
           break;
         }
         case "TOKEN": {
-          messages = await channel.messages.fetch({cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: 100, cache: false, force: true });
           messages = messages.filter(message => message.content.includes(argument)).first(amount);
           break;
         }
         case "ATTACHMENT": {
-          messages = await channel.messages.fetch({cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: 100, cache: false, force: true });
           messages = messages.filter(message => message.attachments.size > 0).first(amount);
           break;
         }
         case "USER": {
-          messages = await channel.messages.fetch({cache: false, force: true });
+          messages = await channel.messages.fetch({ limit: 100, cache: false, force: true });
           messages = messages.filter(message => message.author.id === argument).first(amount);
           break;
         }
