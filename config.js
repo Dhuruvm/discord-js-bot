@@ -30,7 +30,7 @@ module.exports = {
   // PLUGINS
 
   AUTOMOD: {
-    ENABLED: false,
+    ENABLED: true,
     LOG_EMBED: "#36393F",
     DM_EMBED: "#36393F",
   },
@@ -43,7 +43,7 @@ module.exports = {
   },
 
   ECONOMY: {
-    ENABLED: false,
+    ENABLED: true,
     CURRENCY: "₪",
     DAILY_COINS: 100, // coins to be received by daily command
     MIN_BEG_AMOUNT: 100, // minimum coins to be received when beg command is used
@@ -69,23 +69,23 @@ module.exports = {
   },
 
   GIVEAWAYS: {
-    ENABLED: false,
+    ENABLED: true,
     REACTION: "🎁",
     START_EMBED: "#FF468A",
     END_EMBED: "#FF468A",
   },
 
   IMAGE: {
-    ENABLED: false,
+    ENABLED: true,
     BASE_API: "https://strangeapi.hostz.me/api",
   },
 
   INVITE: {
-    ENABLED: false,
+    ENABLED: true,
   },
 
   MODERATION: {
-    ENABLED: false,
+    ENABLED: true,
     EMBED_COLORS: {
       TIMEOUT: "#102027",
       UNTIMEOUT: "#4B636E",
@@ -111,13 +111,13 @@ module.exports = {
   },
 
   STATS: {
-    ENABLED: false,
+    ENABLED: true,
     XP_COOLDOWN: 5, // Cooldown in seconds between messages
     DEFAULT_LVL_UP_MSG: "{member:tag}, You just advanced to **Level {level}**",
   },
 
   SUGGESTIONS: {
-    ENABLED: false, // Should the suggestion system be enabled
+    ENABLED: true, // Should the suggestion system be enabled
     EMOJI: {
       UP_VOTE: "⬆️",
       DOWN_VOTE: "⬇️",
@@ -128,7 +128,7 @@ module.exports = {
   },
 
   TICKET: {
-    ENABLED: false,
+    ENABLED: true,
     CREATE_EMBED: "#068ADD",
     CLOSE_EMBED: "#068ADD",
   },
