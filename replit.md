@@ -8,6 +8,17 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
+**October 4, 2025 - Major UI/UX Improvements**
+- Fixed critical purge command bug where amount was treated as string (purging 1 would delete 11 messages)
+- Created custom emoji constants system for consistent UI across all commands
+- Updated all moderation commands (ban, kick, warn, timeout, purge) with modern Discord embeds
+- Added proper error messages with custom emojis matching Discord's style
+- Improved profilecard command with better error handling and embed presentation
+- All command responses now use professional embeds with timestamps and proper formatting
+- Error messages now display with ❌ emoji and styled embeds (matching user's reference image)
+- Success messages use ✅ emoji with green embeds
+- Warning messages use ⚠️ emoji with yellow embeds
+
 **October 4, 2025 - Replit Environment Setup**
 - Successfully imported GitHub repository to Replit
 - Installed all npm dependencies (472 packages)

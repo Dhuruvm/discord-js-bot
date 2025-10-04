@@ -1,7 +1,7 @@
-
-const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
-const { createCanvas, loadImage, registerFont } = require("canvas");
+const { AttachmentBuilder, ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+const { createCanvas, loadImage } = require("canvas");
 const { EMBED_COLORS } = require("@root/config");
+const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -44,16 +44,29 @@ module.exports = {
 
   async messageRun(message, args) {
     try {
+      await message.channel.sendTyping();
+      
       const user = message.mentions.users.first() || message.author;
-      const member = message.guild.members.cache.get(user.id);
+      const member = await message.guild.members.fetch(user.id).catch(() => null);
       
       const buffer = await generateProfileCard(user, member);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
-      await message.safeReply({ files: [attachment] });
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.BOT_EMBED)
+        .setTitle(`${EMOJIS.PERSON} Profile Card`)
+        .setDescription(`Profile card for **${user.username}**`)
+        .setImage("attachment://profile.png")
+        .setTimestamp();
+      
+      await message.safeReply({ embeds: [embed], files: [attachment] });
     } catch (error) {
       console.error("Error generating profile card:", error);
-      await message.safeReply("Failed to generate profile card. Please try again later.");
+      const errorEmbed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card. Error: ${error.message}`)
+        .setTimestamp();
+      await message.safeReply({ embeds: [errorEmbed] });
     }
   },
 
@@ -62,17 +75,28 @@ module.exports = {
     
     try {
       const user = interaction.options.getUser("user") || interaction.user;
-      const member = interaction.guild.members.cache.get(user.id);
+      const member = await interaction.guild.members.fetch(user.id).catch(() => null);
       const customBanner = interaction.options.getString("banner");
       const customBio = interaction.options.getString("bio");
       
       const buffer = await generateProfileCard(user, member, customBanner, customBio);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
-      await interaction.followUp({ files: [attachment] });
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.BOT_EMBED)
+        .setTitle(`${EMOJIS.PERSON} Profile Card`)
+        .setDescription(`Profile card for **${user.username}**`)
+        .setImage("attachment://profile.png")
+        .setTimestamp();
+      
+      await interaction.followUp({ embeds: [embed], files: [attachment] });
     } catch (error) {
       console.error("Error generating profile card:", error);
-      await interaction.followUp({ content: "Failed to generate profile card. Please try again later.", ephemeral: true });
+      const errorEmbed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card. Error: ${error.message}`)
+        .setTimestamp();
+      await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
     }
   },
 };

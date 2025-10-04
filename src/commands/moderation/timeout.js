@@ -1,5 +1,7 @@
 const { timeoutTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config");
+const EMOJIS = require("@helpers/EmojiConstants");
 const ems = require("enhanced-ms");
 
 /**
@@ -71,11 +73,55 @@ module.exports = {
 };
 
 async function timeout(issuer, target, ms, reason) {
-  if (isNaN(ms)) return "Please provide a valid duration. Example: 1d/1h/1m/1s";
+  if (isNaN(ms)) {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${EMOJIS.ERROR} | Please provide a valid duration. Example: \`1d/1h/1m/1s\``)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
   const response = await timeoutTarget(issuer, target, ms, reason);
-  if (typeof response === "boolean") return `${target.user.username} is timed out!`;
-  if (response === "BOT_PERM") return `I do not have permission to timeout ${target.user.username}`;
-  else if (response === "MEMBER_PERM") return `You do not have permission to timeout ${target.user.username}`;
-  else if (response === "ALREADY_TIMEOUT") return `${target.user.username} is already timed out!`;
-  else return `Failed to timeout ${target.user.username}`;
+  
+  if (typeof response === "boolean") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.SUCCESS)
+      .setDescription(`${EMOJIS.TIMEOUT} | **${target.user.username}** has been timed out!`)
+      .addFields(
+        { name: "Reason", value: reason || "No reason provided", inline: false },
+        { name: "Duration", value: `<t:${Math.round((Date.now() + ms) / 1000)}:R>`, inline: false }
+      )
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  if (response === "BOT_PERM") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${EMOJIS.ERROR} | I do not have permission to timeout **${target.user.username}**!`)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  if (response === "MEMBER_PERM") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command!`)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  if (response === "ALREADY_TIMEOUT") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.WARNING)
+      .setDescription(`${EMOJIS.WARNING} | **${target.user.username}** is already timed out!`)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.ERROR)
+    .setDescription(`${EMOJIS.ERROR} | Failed to timeout **${target.user.username}**`)
+    .setTimestamp();
+  return { embeds: [embed] };
 }
