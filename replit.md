@@ -8,7 +8,16 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
-**October 4, 2025**
+**October 4, 2025 - Replit Environment Setup**
+- Successfully imported GitHub repository to Replit
+- Installed all npm dependencies (472 packages)
+- Configured workflow to run the Discord bot with `npm start`
+- Bot is running and connected as "Cybork#2032"
+- MongoDB connection established successfully
+- Loaded 96 commands, 77 slash commands, and 15 events
+- Dashboard is disabled by default (can be enabled in config.js)
+
+**October 4, 2025 - Help Command Customization**
 - Customized help command with new embed design (white color scheme)
 - Updated help menu layout to match BlaZe HQ style
 - Modified button layout: Main Module, Extra Module, Search Command
@@ -173,3 +182,46 @@ Preferred communication style: Simple, everyday language.
 - ESLint with JSDoc plugin for code quality
 - Prettier for code formatting
 - Nodemon for development hot-reload
+
+## Replit Environment Setup
+
+### Required Environment Variables
+The following environment variables must be set in Replit Secrets:
+- `BOT_TOKEN`: Your Discord bot token (required)
+- `MONGO_CONNECTION`: MongoDB connection string (required)
+- `BOT_SECRET`: Discord OAuth2 client secret (required for dashboard)
+- `SESSION_PASSWORD`: Session secret for dashboard authentication (required for dashboard)
+
+### Optional Environment Variables
+- `WEATHERSTACK_KEY`: API key for weather command functionality
+- `STRANGE_API_KEY`: API key for image manipulation commands
+- `SPOTIFY_CLIENT_ID`: Spotify client ID for music integration
+- `SPOTIFY_CLIENT_SECRET`: Spotify client secret for music integration
+- `ERROR_LOGS`: Discord webhook URL for error logging
+- `JOIN_LEAVE_LOGS`: Discord webhook URL for join/leave event logging
+
+### Running the Bot
+The bot is configured to run automatically via Replit workflow:
+- Workflow name: "Discord Bot"
+- Command: `npm start`
+- Output type: Console (no web interface, backend only)
+
+### Current Status
+- Bot is running as "Cybork#2032"
+- MongoDB connection is active
+- 96 commands loaded (77 slash commands)
+- 15 events registered
+- Dashboard is disabled (can be enabled in `config.js` by setting `DASHBOARD.enabled` to `true`)
+
+### Enabling the Dashboard
+To enable the web dashboard:
+1. Set `DASHBOARD.enabled` to `true` in `config.js`
+2. Configure `DASHBOARD.baseURL` and `DASHBOARD.failureURL` to match your Replit URL
+3. Ensure `BOT_SECRET` and `SESSION_PASSWORD` are set in Replit Secrets
+4. The dashboard will be available on port 5000
+
+### Configuration
+- Main configuration file: `config.js`
+- Bot prefix: `!` (configurable per server)
+- Slash commands: Disabled by default (enable in `config.js` under `INTERACTIONS.SLASH`)
+- Music system: Disabled by default (requires Lavalink server setup)
