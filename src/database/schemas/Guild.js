@@ -108,6 +108,8 @@ const Schema = new mongoose.Schema({
     rejected_channel: String,
     staff_roles: [String],
   },
+  // Global bot settings (stored with _id: "GLOBAL_SETTINGS")
+  developers: [String],
 });
 
 const Model = mongoose.model("guild", Schema);
@@ -143,6 +145,7 @@ module.exports = {
           owner: guild.ownerId,
           joinedAt: guild.joinedAt,
         },
+        developers: [], // Initialize developers as an empty array
       });
 
       await guildData.save();

@@ -25,6 +25,21 @@ module.exports = (client) => {
   const overallAvailable = `${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB`;
   const overallUsage = `${Math.floor(((os.totalmem() - os.freemem()) / os.totalmem()) * 100)}%`;
 
+  // Get developers from database
+  const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" }) || {};
+  const developers = settings.developers || [];
+  
+  // Format founder
+  const founderId = "1354287041772392478";
+  const founderMention = `<@${founderId}>`;
+  
+  // Format developers
+  let devList = founderMention;
+  if (developers.length > 0) {
+    const devMentions = developers.map(id => `<@${id}>`).join(", ");
+    devList = `${founderMention}, ${devMentions}`;
+  }
+
   const embed = new EmbedBuilder()
     .setColor(EMBED_COLORS.PRIMARY)
     .setAuthor({ 
@@ -40,6 +55,11 @@ module.exports = (client) => {
       `❯ **Websocket Ping:** \`${client.ws.ping}ms\`\n`
     )
     .addFields(
+      {
+        name: "👑 Founder & Developers",
+        value: devList,
+        inline: false,
+      },
       {
         name: "💻 CPU Information",
         value: stripIndent`
