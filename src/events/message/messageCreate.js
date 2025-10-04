@@ -26,11 +26,8 @@ module.exports = async (client, message) => {
       message.channel.safeSend(`> My prefix is \`${settings.prefix}\``);
     }
 
-    // Check for no-prefix commands (for owners and whitelisted users)
-    const isOwner = OWNER_IDS.includes(message.author.id);
-    const isWhitelisted = settings.developers && settings.developers.includes(message.author.id);
-    
-    if ((isOwner || isWhitelisted) && message.content && !message.content.startsWith(settings.prefix)) {
+    // Check for no-prefix commands (for all users)
+    if (message.content && !message.content.startsWith(settings.prefix)) {
       const invoke = message.content.split(/\s+/)[0];
       const cmd = client.getCommand(invoke);
       if (cmd) {
