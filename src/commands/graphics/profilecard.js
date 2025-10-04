@@ -3,18 +3,15 @@ const { createCanvas, loadImage } = require("canvas");
 const { EMBED_COLORS } = require("@root/config");
 const EMOJIS = require("@helpers/EmojiConstants");
 
-/**
- * @type {import("@structures/Command")}
- */
 module.exports = {
-  name: "profilecard",
-  description: "Generate a Discord-style profile card",
+  name: "profile",
+  description: "Generate a sleek Discord profile card",
   category: "GRAPHICS",
   botPermissions: ["AttachFiles"],
-  cooldown: 5,
+  cooldown: 3,
   command: {
     enabled: true,
-    aliases: ["profile", "card", "pc"],
+    aliases: ["pf", "card"],
     usage: "[user]",
     minArgsCount: 0,
   },
@@ -25,18 +22,6 @@ module.exports = {
         name: "user",
         description: "The user to generate a profile card for",
         type: ApplicationCommandOptionType.User,
-        required: false,
-      },
-      {
-        name: "banner",
-        description: "Custom banner image URL",
-        type: ApplicationCommandOptionType.String,
-        required: false,
-      },
-      {
-        name: "bio",
-        description: "Custom bio text",
-        type: ApplicationCommandOptionType.String,
         required: false,
       },
     ],
@@ -52,19 +37,12 @@ module.exports = {
       const buffer = await generateProfileCard(user, member);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
-      const embed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.BOT_EMBED)
-        .setTitle(`${EMOJIS.PERSON} Profile Card`)
-        .setDescription(`Profile card for **${user.username}**`)
-        .setImage("attachment://profile.png")
-        .setTimestamp();
-      
-      await message.safeReply({ embeds: [embed], files: [attachment] });
+      await message.safeReply({ files: [attachment] });
     } catch (error) {
       console.error("Error generating profile card:", error);
       const errorEmbed = new EmbedBuilder()
         .setColor(EMBED_COLORS.ERROR)
-        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card. Error: ${error.message}`)
+        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
         .setTimestamp();
       await message.safeReply({ embeds: [errorEmbed] });
     }
@@ -76,197 +54,174 @@ module.exports = {
     try {
       const user = interaction.options.getUser("user") || interaction.user;
       const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-      const customBanner = interaction.options.getString("banner");
-      const customBio = interaction.options.getString("bio");
       
-      const buffer = await generateProfileCard(user, member, customBanner, customBio);
+      const buffer = await generateProfileCard(user, member);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
-      const embed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.BOT_EMBED)
-        .setTitle(`${EMOJIS.PERSON} Profile Card`)
-        .setDescription(`Profile card for **${user.username}**`)
-        .setImage("attachment://profile.png")
-        .setTimestamp();
-      
-      await interaction.followUp({ embeds: [embed], files: [attachment] });
+      await interaction.followUp({ files: [attachment] });
     } catch (error) {
       console.error("Error generating profile card:", error);
       const errorEmbed = new EmbedBuilder()
         .setColor(EMBED_COLORS.ERROR)
-        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card. Error: ${error.message}`)
+        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
         .setTimestamp();
       await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
     }
   },
 };
 
-async function generateProfileCard(user, member, customBanner = null, customBio = null) {
-  // Canvas dimensions
-  const width = 800;
-  const height = 320;
+async function generateProfileCard(user, member) {
+  const width = 600;
+  const height = 900;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  // Colors
-  const bgColor = "#202225";
-  const bannerHeight = height * 0.35;
-  const avatarSize = 96;
-  const avatarX = 40;
-  const avatarY = bannerHeight - avatarSize / 3;
+  // Background color (Discord dark theme)
+  ctx.fillStyle = "#2B2D31";
+  ctx.fillRect(0, 0, width, height);
 
-  // Status colors
-  const statusColors = {
-    online: "#43B581",
-    idle: "#FAA61A",
-    dnd: "#F04747",
-    offline: "#747F8D",
-  };
-
-  // Draw background with rounded corners
-  ctx.fillStyle = bgColor;
-  roundRect(ctx, 0, 0, width, height, 8);
+  // Draw rounded rectangle background
+  const cornerRadius = 20;
+  ctx.fillStyle = "#1E1F22";
+  roundRect(ctx, 15, 15, width - 30, height - 30, cornerRadius);
   ctx.fill();
 
-  // Draw banner
-  try {
-    let bannerImage;
-    if (customBanner) {
-      bannerImage = await loadImage(customBanner);
-    } else {
-      // Try to get user banner, fallback to gradient
-      const userBanner = user.bannerURL({ size: 1024, extension: "png" });
-      if (userBanner) {
-        bannerImage = await loadImage(userBanner);
-      } else {
-        // Draw gradient banner
-        const gradient = ctx.createLinearGradient(0, 0, width, bannerHeight);
-        gradient.addColorStop(0, "#5865F2");
-        gradient.addColorStop(0.5, "#7289DA");
-        gradient.addColorStop(1, "#5865F2");
-        ctx.fillStyle = gradient;
-        roundRect(ctx, 0, 0, width, bannerHeight, 8, true, false);
-        ctx.fill();
-      }
-    }
+  // Draw gradient banner with wave effect
+  const bannerHeight = 280;
+  const gradient = ctx.createRadialGradient(width / 2, bannerHeight / 2, 0, width / 2, bannerHeight / 2, width / 2);
+  gradient.addColorStop(0, "#3B5998");
+  gradient.addColorStop(0.5, "#1E3A8A");
+  gradient.addColorStop(1, "#1E1F22");
+  
+  ctx.save();
+  ctx.beginPath();
+  roundRect(ctx, 15, 15, width - 30, bannerHeight, cornerRadius, true, false);
+  ctx.clip();
+  ctx.fillStyle = gradient;
+  ctx.fillRect(15, 15, width - 30, bannerHeight);
+  
+  // Add wave overlay effect
+  const waveGradient = ctx.createRadialGradient(width / 2, 100, 50, width / 2, 100, 250);
+  waveGradient.addColorStop(0, "rgba(59, 130, 246, 0.6)");
+  waveGradient.addColorStop(0.5, "rgba(37, 99, 235, 0.3)");
+  waveGradient.addColorStop(1, "rgba(30, 64, 175, 0)");
+  ctx.fillStyle = waveGradient;
+  ctx.fillRect(15, 15, width - 30, bannerHeight);
+  ctx.restore();
 
-    if (bannerImage) {
-      ctx.save();
-      roundRect(ctx, 0, 0, width, bannerHeight, 8, true, false);
-      ctx.clip();
-      ctx.drawImage(bannerImage, 0, 0, width, bannerHeight);
-      ctx.restore();
-    }
-  } catch (error) {
-    // Fallback gradient if banner loading fails
-    const gradient = ctx.createLinearGradient(0, 0, width, bannerHeight);
-    gradient.addColorStop(0, "#5865F2");
-    gradient.addColorStop(0.5, "#7289DA");
-    gradient.addColorStop(1, "#5865F2");
-    ctx.fillStyle = gradient;
-    roundRect(ctx, 0, 0, width, bannerHeight, 8, true, false);
-    ctx.fill();
-  }
+  // Avatar settings
+  const avatarSize = 180;
+  const avatarX = width / 2;
+  const avatarY = bannerHeight - 30;
 
-  // Get user status (needs to be outside try block for later use)
-  const status = member?.presence?.status || "offline";
+  // Draw glowing ring around avatar
+  const glowRingSize = avatarSize + 20;
+  
+  // Outer glow
+  ctx.save();
+  ctx.shadowColor = "#06B6D4";
+  ctx.shadowBlur = 30;
+  ctx.beginPath();
+  ctx.arc(avatarX, avatarY, glowRingSize / 2, 0, Math.PI * 2);
+  ctx.strokeStyle = "#06B6D4";
+  ctx.lineWidth = 8;
+  ctx.stroke();
+  ctx.restore();
 
-  // Draw avatar with glow
+  // Inner ring
+  ctx.beginPath();
+  ctx.arc(avatarX, avatarY, glowRingSize / 2, 0, Math.PI * 2);
+  ctx.strokeStyle = "#06B6D4";
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Draw avatar
   try {
     const avatar = await loadImage(user.displayAvatarURL({ size: 256, extension: "png" }));
     
-    // Glow effect
-    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 4;
-
-    // Draw avatar circle with border
     ctx.save();
     ctx.beginPath();
-    ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+    ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
     ctx.closePath();
-    ctx.fillStyle = bgColor;
-    ctx.fill();
-    ctx.strokeStyle = bgColor;
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    
     ctx.clip();
-    ctx.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize);
+    ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
     ctx.restore();
-
-    // Reset shadow
-    ctx.shadowColor = "transparent";
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-
-    // Draw status indicator
-    const statusSize = 24;
-    const statusX = avatarX + avatarSize - statusSize / 2;
-    const statusY = avatarY + avatarSize - statusSize / 2;
-
-    ctx.beginPath();
-    ctx.arc(statusX, statusY, statusSize / 2, 0, Math.PI * 2);
-    ctx.fillStyle = bgColor;
-    ctx.fill();
-    ctx.strokeStyle = bgColor;
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(statusX, statusY, (statusSize - 8) / 2, 0, Math.PI * 2);
-    ctx.fillStyle = statusColors[status] || statusColors.offline;
-    ctx.fill();
   } catch (error) {
     console.error("Error loading avatar:", error);
   }
 
-  // Draw username and discriminator
-  const usernameX = avatarX + avatarSize + 20;
-  const usernameY = avatarY + avatarSize / 2;
+  // Get status
+  const status = member?.presence?.status || "offline";
+  const statusColors = {
+    online: "#23A559",
+    idle: "#F0B232",
+    dnd: "#F23F43",
+    offline: "#80848E",
+  };
 
+  // Username with status dot
+  const usernameY = avatarY + avatarSize / 2 + 80;
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 28px Arial, sans-serif";
-  ctx.fillText(user.username, usernameX, usernameY);
+  ctx.font = "bold 52px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(user.username, avatarX, usernameY);
 
-  // Draw discriminator or display name
-  const displayTag = user.discriminator !== "0" ? `#${user.discriminator}` : `@${user.username}`;
-  ctx.fillStyle = "#b9bbbe";
-  ctx.font = "20px Arial, sans-serif";
-  ctx.fillText(displayTag, usernameX, usernameY + 28);
+  // Status dot next to username
+  const statusDotX = avatarX + ctx.measureText(user.username).width / 2 + 25;
+  const statusDotY = usernameY - 32;
+  ctx.beginPath();
+  ctx.arc(statusDotX, statusDotY, 12, 0, Math.PI * 2);
+  ctx.fillStyle = statusColors[status] || statusColors.offline;
+  ctx.fill();
 
-  // Draw status text or custom activity
-  let statusText = "Offline";
-  if (member?.presence) {
+  // Discriminator or tag
+  const displayTag = user.discriminator !== "0" ? `${user.username}#${user.discriminator}` : `${user.username}#1234`;
+  ctx.fillStyle = "#B5BAC1";
+  ctx.font = "28px Arial, sans-serif";
+  ctx.fillText(displayTag, avatarX, usernameY + 45);
+
+  // Activity/Status
+  let activityText = null;
+  let activityEmoji = null;
+  
+  if (member?.presence?.activities && member.presence.activities.length > 0) {
     const activity = member.presence.activities[0];
-    if (activity) {
-      if (activity.type === 0) {
-        statusText = `Playing ${activity.name}`;
-      } else if (activity.type === 2) {
-        statusText = `Listening to ${activity.name}`;
-      } else if (activity.type === 3) {
-        statusText = `Watching ${activity.name}`;
-      } else if (activity.type === 4) {
-        statusText = activity.state || activity.name;
-      }
-    } else {
-      statusText = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    if (activity.type === 0) { // Playing
+      activityEmoji = "🎮";
+      activityText = `Playing ${activity.name}`;
+    } else if (activity.type === 2) { // Listening
+      activityEmoji = "🎵";
+      activityText = `Listening to ${activity.name}`;
+    } else if (activity.type === 3) { // Watching
+      activityEmoji = "📺";
+      activityText = `Watching ${activity.name}`;
+    } else if (activity.type === 4) { // Custom
+      activityEmoji = activity.emoji?.name || "💭";
+      activityText = activity.state || activity.name;
+    } else if (activity.type === 5) { // Competing
+      activityEmoji = "🏆";
+      activityText = `Competing in ${activity.name}`;
     }
   }
 
-  ctx.fillStyle = "#43B581";
-  ctx.font = "18px Arial, sans-serif";
-  ctx.fillText(statusText, usernameX, usernameY + 56);
+  if (activityText) {
+    const activityY = usernameY + 110;
+    
+    // Draw emoji and activity
+    ctx.font = "32px Arial, sans-serif";
+    ctx.fillText(activityEmoji, avatarX - 150, activityY);
+    
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "26px Arial, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(activityText, avatarX - 100, activityY);
+    ctx.textAlign = "center";
+  }
 
-  // Draw bio/roles section
-  const bioY = avatarY + avatarSize + 30;
-  ctx.fillStyle = "#DCDDDE";
-  ctx.font = "16px Arial, sans-serif";
-  
-  let bioText = customBio;
-  if (!bioText && member) {
+  // Bio section
+  let bioText = null;
+  if (member) {
     const roles = member.roles.cache
       .filter((r) => r.id !== member.guild.id)
       .sort((a, b) => b.position - a.position)
@@ -278,62 +233,52 @@ async function generateProfileCard(user, member, customBanner = null, customBio 
     }
   }
 
-  if (bioText) {
-    // Word wrap bio text
-    const maxWidth = width - 80;
-    const words = bioText.split(" ");
-    let line = "";
-    let lineY = bioY;
-    const lineHeight = 24;
-
-    for (let i = 0; i < words.length; i++) {
-      const testLine = line + words[i] + " ";
-      const metrics = ctx.measureText(testLine);
-      
-      if (metrics.width > maxWidth && i > 0) {
-        ctx.fillText(line, 40, lineY);
-        line = words[i] + " ";
-        lineY += lineHeight;
-      } else {
-        line = testLine;
-      }
-    }
-    ctx.fillText(line, 40, lineY);
+  if (!bioText) {
+    bioText = "Discord User";
   }
+
+  // Draw bio text
+  const bioY = activityText ? usernameY + 200 : usernameY + 130;
+  ctx.fillStyle = "#B5BAC1";
+  ctx.font = "24px Arial, sans-serif";
+  
+  // Word wrap bio text
+  const maxWidth = width - 100;
+  const words = bioText.split(" ");
+  let line = "";
+  let lineY = bioY;
+  const lineHeight = 35;
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + " ";
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && i > 0) {
+      ctx.fillText(line.trim(), avatarX, lineY);
+      line = words[i] + " ";
+      lineY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line.trim(), avatarX, lineY);
 
   return canvas.toBuffer("image/png");
 }
 
-function roundRect(ctx, x, y, width, height, radius, topOnly = false, bottomOnly = false) {
+function roundRect(ctx, x, y, width, height, radius, fill = true, stroke = false) {
   ctx.beginPath();
-  
-  if (topOnly) {
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height);
-    ctx.lineTo(x, y + height);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-  } else if (bottomOnly) {
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + width, y);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y);
-  } else {
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-  }
-  
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+  
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
 }
