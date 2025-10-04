@@ -20,7 +20,7 @@ const IDLE_TIMEOUT = 30;
  */
 module.exports = {
   name: "help",
-  description: "command help menu",
+  description: "Interactive help menu with all commands",
   category: "UTILITY",
   botPermissions: ["EmbedLinks"],
   command: {
@@ -42,42 +42,36 @@ module.exports = {
   async messageRun(message, args, data) {
     let trigger = args[0];
 
-    // !help
     if (!trigger) {
       const response = await getHelpMenu(message);
       const sentMsg = await message.safeReply(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
 
-    // check if command help (!help cat)
     const cmd = message.client.getCommand(trigger);
     if (cmd) {
       const embed = getCommandUsage(cmd, data.prefix, trigger);
       return message.safeReply({ embeds: [embed] });
     }
 
-    // No matching command/category found
     await message.safeReply("No matching command found");
   },
 
   async interactionRun(interaction) {
     let cmdName = interaction.options.getString("command");
 
-    // !help
     if (!cmdName) {
       const response = await getHelpMenu(interaction);
       const sentMsg = await interaction.followUp(response);
       return waiter(sentMsg, interaction.user.id);
     }
 
-    // check if command help (!help cat)
     const cmd = interaction.client.slashCommands.get(cmdName);
     if (cmd) {
       const embed = getSlashUsage(cmd);
       return interaction.followUp({ embeds: [embed] });
     }
 
-    // No matching command/category found
     await interaction.followUp("No matching command found");
   },
 };
@@ -86,7 +80,45 @@ module.exports = {
  * @param {CommandInteraction} interaction
  */
 async function getHelpMenu({ client, guild }) {
-  // Menu Row
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.PRIMARY)
+    .setAuthor({ 
+      name: `Get Started with Cybork! Here are some quick actions to help you out!`,
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setDescription(
+      `Looking for commands? Here are some quick actions to help you out!\n\n` +
+      `**Need Assistance?**\n` +
+      `Check out \`$help\` for a full list of commands or visit our ${SUPPORT_SERVER ? `[Support Server](${SUPPORT_SERVER})` : 'Support Server'} to get help and stay updated.\n\n` +
+      `**Unlock More Power**\n` +
+      `Get advanced features, enhanced automation, priority updates, and exclusive all-in-one tools with Cybork. Perfect for keeping your community safe and secure!\n\n` +
+      `**Developed with ❤️ by Your Team**`
+    )
+    .setThumbnail(client.user.displayAvatarURL())
+    .setFooter({ text: `Interactive Help System | ${guild.name}`, iconURL: guild.iconURL() })
+    .setTimestamp();
+
+  const buttonRow1 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("home-btn")
+      .setLabel("Home")
+      .setEmoji("🏠")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId("commands-list-btn")
+      .setLabel("Commands List")
+      .setEmoji("📋")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  const buttonRow2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("buttons-menu-btn")
+      .setLabel("Buttons Menu")
+      .setEmoji("🎮")
+      .setStyle(ButtonStyle.Secondary)
+  );
+
   const options = [];
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
@@ -101,33 +133,33 @@ async function getHelpMenu({ client, guild }) {
   const menuRow = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId("help-menu")
-      .setPlaceholder("Choose the command category")
+      .setPlaceholder("Choose a Category")
       .addOptions(options)
   );
 
-  // Buttons Row
-  let components = [];
-  components.push(
-    new ButtonBuilder().setCustomId("previousBtn").setEmoji("⬅️").setStyle(ButtonStyle.Secondary).setDisabled(true),
-    new ButtonBuilder().setCustomId("nextBtn").setEmoji("➡️").setStyle(ButtonStyle.Secondary).setDisabled(true)
-  );
-
-  let buttonsRow = new ActionRowBuilder().addComponents(components);
-
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setThumbnail(client.user.displayAvatarURL())
-    .setDescription(
-      "**About Me:**\n" +
-        `Hello I am ${guild.members.me.displayName}!\n` +
-        "A cool multipurpose discord bot which can serve all your needs\n\n" +
-        `**Invite Me:** [Here](${client.getInvite()})\n` +
-        `**Support Server:** [Join](${SUPPORT_SERVER})`
+  if (SUPPORT_SERVER) {
+    buttonRow1.addComponents(
+      new ButtonBuilder()
+        .setLabel("Support")
+        .setEmoji("🔗")
+        .setStyle(ButtonStyle.Link)
+        .setURL(SUPPORT_SERVER)
     );
+  }
+
+  if (client.getInvite) {
+    buttonRow1.addComponents(
+      new ButtonBuilder()
+        .setLabel("Invite Cybork")
+        .setEmoji("🔗")
+        .setStyle(ButtonStyle.Link)
+        .setURL(client.getInvite())
+    );
+  }
 
   return {
     embeds: [embed],
-    components: [menuRow, buttonsRow],
+    components: [buttonRow1, buttonRow2, menuRow],
   };
 }
 
@@ -146,43 +178,93 @@ const waiter = (msg, userId, prefix) => {
 
   let arrEmbeds = [];
   let currentPage = 0;
-  let menuRow = msg.components[0];
-  let buttonsRow = msg.components[1];
+  let currentView = "home";
+  let currentCategory = null;
 
   collector.on("collect", async (response) => {
-    if (!["help-menu", "previousBtn", "nextBtn"].includes(response.customId)) return;
     await response.deferUpdate();
 
     switch (response.customId) {
+      case "home-btn": {
+        currentView = "home";
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild });
+        msg.editable && (await msg.edit(homeResponse));
+        break;
+      }
+
+      case "commands-list-btn": {
+        currentView = "list";
+        const listEmbed = getCategoriesListEmbed(msg.client);
+        msg.editable && (await msg.edit({ embeds: [listEmbed], components: msg.components }));
+        break;
+      }
+
+      case "buttons-menu-btn": {
+        currentView = "buttons";
+        const buttonsEmbed = getButtonsMenuEmbed(msg.client);
+        const components = getCategoryButtons(msg.client);
+        msg.editable && (await msg.edit({ embeds: [buttonsEmbed], components }));
+        break;
+      }
+
       case "help-menu": {
         const cat = response.values[0].toUpperCase();
+        currentCategory = cat;
         arrEmbeds = prefix ? getMsgCategoryEmbeds(msg.client, cat, prefix) : getSlashCategoryEmbeds(msg.client, cat);
         currentPage = 0;
 
-        // Buttons Row
-        let components = [];
-        buttonsRow.components.forEach((button) =>
-          components.push(ButtonBuilder.from(button).setDisabled(arrEmbeds.length > 1 ? false : true))
+        const navigationRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("home-btn")
+            .setLabel("Home")
+            .setEmoji("🏠")
+            .setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId("previousBtn")
+            .setEmoji("⬅️")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(arrEmbeds.length <= 1),
+          new ButtonBuilder()
+            .setCustomId("nextBtn")
+            .setEmoji("➡️")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(arrEmbeds.length <= 1)
         );
 
-        buttonsRow = new ActionRowBuilder().addComponents(components);
-        msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]], components: [menuRow, buttonsRow] }));
+        msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]], components: [navigationRow, msg.components[2]] }));
         break;
       }
 
       case "previousBtn":
         if (currentPage !== 0) {
           --currentPage;
-          msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]], components: [menuRow, buttonsRow] }));
+          msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]] }));
         }
         break;
 
       case "nextBtn":
         if (currentPage < arrEmbeds.length - 1) {
           currentPage++;
-          msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]], components: [menuRow, buttonsRow] }));
+          msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]] }));
         }
         break;
+    }
+
+    if (response.customId.startsWith("cat-")) {
+      const cat = response.customId.replace("cat-", "").toUpperCase();
+      currentCategory = cat;
+      arrEmbeds = prefix ? getMsgCategoryEmbeds(msg.client, cat, prefix) : getSlashCategoryEmbeds(msg.client, cat);
+      currentPage = 0;
+
+      const backRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId("buttons-menu-btn")
+          .setLabel("Back to Menu")
+          .setEmoji("◀️")
+          .setStyle(ButtonStyle.Secondary)
+      );
+
+      msg.editable && (await msg.edit({ embeds: [arrEmbeds[currentPage]], components: [backRow] }));
     }
   });
 
@@ -192,6 +274,77 @@ const waiter = (msg, userId, prefix) => {
   });
 };
 
+function getCategoriesListEmbed(client) {
+  let description = "";
+  
+  for (const [k, v] of Object.entries(CommandCategory)) {
+    if (v.enabled === false) continue;
+    const cmds = client.slashCommands.filter(cmd => cmd.category === k);
+    if (cmds.size > 0) {
+      description += `${v.emoji} **${v.name}**\n`;
+    }
+  }
+
+  description += `\n**Links:**\n`;
+  description += `[Support Server](${SUPPORT_SERVER || "#"}) | [Invite Me](${client.getInvite ? client.getInvite() : "#"})\n`;
+  description += `[Privacy Policy](#) | [Terms of Service](#)`;
+
+  return new EmbedBuilder()
+    .setColor(EMBED_COLORS.PRIMARY)
+    .setAuthor({ 
+      name: "Interactive Help System",
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setDescription(description)
+    .setFooter({ text: `Cybork Help Menu` })
+    .setTimestamp();
+}
+
+function getButtonsMenuEmbed(client) {
+  return new EmbedBuilder()
+    .setColor(EMBED_COLORS.PRIMARY)
+    .setAuthor({ 
+      name: "Choose a Category",
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setDescription("Click on a category button below to view its commands!")
+    .setFooter({ text: `Cybork Category Menu` })
+    .setTimestamp();
+}
+
+function getCategoryButtons(client) {
+  const buttons = [];
+  const rows = [];
+  
+  for (const [k, v] of Object.entries(CommandCategory)) {
+    if (v.enabled === false) continue;
+    
+    buttons.push(
+      new ButtonBuilder()
+        .setCustomId(`cat-${k.toLowerCase()}`)
+        .setEmoji(v.emoji)
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
+
+  while (buttons.length > 0) {
+    const row = new ActionRowBuilder().addComponents(buttons.splice(0, 5));
+    rows.push(row);
+  }
+
+  const backRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("home-btn")
+      .setLabel("Home")
+      .setEmoji("🏠")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  rows.push(backRow);
+
+  return rows.slice(0, 5);
+}
+
 /**
  * Returns an array of message embeds for a particular command category [SLASH COMMANDS]
  * @param {BotClient} client
@@ -200,7 +353,6 @@ const waiter = (msg, userId, prefix) => {
 function getSlashCategoryEmbeds(client, category) {
   let collector = "";
 
-  // For IMAGE Category
   if (category === "IMAGE") {
     client.slashCommands
       .filter((cmd) => cmd.category === category)
@@ -208,34 +360,43 @@ function getSlashCategoryEmbeds(client, category) {
 
     const availableFilters = client.slashCommands
       .get("filter")
-      .slashCommand.options[0].choices.map((ch) => ch.name)
+      ?.slashCommand.options[0]?.choices?.map((ch) => ch.name)
       .join(", ");
 
     const availableGens = client.slashCommands
       .get("generator")
-      .slashCommand.options[0].choices.map((ch) => ch.name)
+      ?.slashCommand.options[0]?.choices?.map((ch) => ch.name)
       .join(", ");
 
-    collector +=
-      "**Available Filters:**\n" + `${availableFilters}` + `*\n\n**Available Generators**\n` + `${availableGens}`;
+    if (availableFilters) {
+      collector += "**Available Filters:**\n" + `${availableFilters}\n\n`;
+    }
+    if (availableGens) {
+      collector += "**Available Generators:**\n" + `${availableGens}`;
+    }
 
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription(collector);
 
     return [embed];
   }
 
-  // For REMAINING Categories
   const commands = Array.from(client.slashCommands.filter((cmd) => cmd.category === category).values());
 
   if (commands.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription("No commands in this category");
 
     return [embed];
@@ -251,7 +412,7 @@ function getSlashCategoryEmbeds(client, category) {
       const subCmds = cmd.slashCommand.options?.filter((opt) => opt.type === ApplicationCommandOptionType.Subcommand);
       const subCmdsString = subCmds?.map((s) => s.name).join(", ");
 
-      return `\`/${cmd.name}\`\n ❯ **Description**: ${cmd.description}\n ${
+      return `\`/${cmd.name}\`\n ❯ ${cmd.description}\n ${
         !subCmds?.length ? "" : `❯ **SubCommands [${subCmds?.length}]**: ${subCmdsString}\n`
       } `;
     });
@@ -261,11 +422,14 @@ function getSlashCategoryEmbeds(client, category) {
 
   arrSplitted.forEach((item, index) => {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription(item.join("\n"))
-      .setFooter({ text: `page ${index + 1} of ${arrSplitted.length}` });
+      .setFooter({ text: `Page ${index + 1} of ${arrSplitted.length}` });
     arrEmbeds.push(embed);
   });
 
@@ -281,7 +445,6 @@ function getSlashCategoryEmbeds(client, category) {
 function getMsgCategoryEmbeds(client, category, prefix) {
   let collector = "";
 
-  // For IMAGE Category
   if (category === "IMAGE") {
     client.commands
       .filter((cmd) => cmd.category === category)
@@ -299,22 +462,27 @@ function getMsgCategoryEmbeds(client, category, prefix) {
       `**${prefix}cmd [attachment]:** Picks attachment image`;
 
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription(collector);
 
     return [embed];
   }
 
-  // For REMAINING Categories
   const commands = client.commands.filter((cmd) => cmd.category === category);
 
   if (commands.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription("No commands in this category");
 
     return [embed];
@@ -331,12 +499,15 @@ function getMsgCategoryEmbeds(client, category, prefix) {
 
   arrSplitted.forEach((item, index) => {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setColor(EMBED_COLORS.PRIMARY)
       .setThumbnail(CommandCategory[category]?.image)
-      .setAuthor({ name: `${category} Commands` })
+      .setAuthor({ 
+        name: `${CommandCategory[category]?.emoji} ${CommandCategory[category]?.name} Commands`,
+        iconURL: CommandCategory[category]?.image
+      })
       .setDescription(item.join("\n"))
       .setFooter({
-        text: `page ${index + 1} of ${arrSplitted.length} | Type ${prefix}help <command> for more command information`,
+        text: `Page ${index + 1} of ${arrSplitted.length} | Type ${prefix}help <command> for more command information`,
       });
     arrEmbeds.push(embed);
   });

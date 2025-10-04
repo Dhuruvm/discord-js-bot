@@ -12,11 +12,13 @@ module.exports = {
     TEST_GUILD_ID: "xxxxxxxxxxx", // Guild ID where the interactions should be registered. [** Test you commands here first **]
   },
   EMBED_COLORS: {
-    BOT_EMBED: "#068ADD",
-    TRANSPARENT: "#36393F",
-    SUCCESS: "#00A56A",
-    ERROR: "#D61A3C",
-    WARNING: "#F7E919",
+    BOT_EMBED: "#5865F2",
+    TRANSPARENT: "#2B2D31",
+    SUCCESS: "#57F287",
+    ERROR: "#ED4245",
+    WARNING: "#FEE75C",
+    PRIMARY: "#5865F2",
+    SECONDARY: "#4752C4",
   },
   CACHE_SIZE: {
     GUILDS: 100,
@@ -103,11 +105,11 @@ module.exports = {
   },
 
   PRESENCE: {
-    ENABLED: false, // Whether or not the bot should update its status
+    ENABLED: true, // Whether or not the bot should update its status
     STATUS: "online", // The bot's status [online, idle, dnd, invisible]
     TYPE: "WATCHING", // Status type for the bot [ CUSTOM | PLAYING | LISTENING | WATCHING | COMPETING ]
     // Your bot status message (note: in custom status type you won't have "Playing", "Listening", "Competing" prefix)
-    MESSAGE: ["{members} members in {servers} servers"],
+    MESSAGE: ["{members} members in {servers} servers", "Cybork is here to help!", "Use /help for commands"],
   },
 
   STATS: {

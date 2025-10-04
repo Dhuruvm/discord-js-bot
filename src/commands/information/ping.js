@@ -1,9 +1,12 @@
+const { EmbedBuilder } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config");
+
 /**
  * @type {import("@structures/Command")}
  */
 module.exports = {
   name: "ping",
-  description: "shows the current ping from the bot to the discord servers",
+  description: "Shows the current latency from the bot to Discord servers",
   category: "INFORMATION",
   command: {
     enabled: true,
@@ -15,10 +18,24 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    await message.safeReply(`🏓 Pong : \`${Math.floor(message.client.ws.ping)}ms\``);
+    const ping = Math.floor(message.client.ws.ping);
+    const embed = new EmbedBuilder()
+      .setColor(ping < 100 ? EMBED_COLORS.SUCCESS : ping < 200 ? EMBED_COLORS.WARNING : EMBED_COLORS.ERROR)
+      .setDescription(`🏓 **Pong!**\n\nLatency: \`${ping}ms\``)
+      .setFooter({ text: `Cybork Ping` })
+      .setTimestamp();
+    
+    await message.safeReply({ embeds: [embed] });
   },
 
   async interactionRun(interaction) {
-    await interaction.followUp(`🏓 Pong : \`${Math.floor(interaction.client.ws.ping)}ms\``);
+    const ping = Math.floor(interaction.client.ws.ping);
+    const embed = new EmbedBuilder()
+      .setColor(ping < 100 ? EMBED_COLORS.SUCCESS : ping < 200 ? EMBED_COLORS.WARNING : EMBED_COLORS.ERROR)
+      .setDescription(`🏓 **Pong!**\n\nLatency: \`${ping}ms\``)
+      .setFooter({ text: `Cybork Ping` })
+      .setTimestamp();
+    
+    await interaction.followUp({ embeds: [embed] });
   },
 };
