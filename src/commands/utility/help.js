@@ -163,7 +163,7 @@ const waiter = (msg, userId, prefix) => {
   });
 
   let currentView = "home";
-  
+
   const options = [];
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
@@ -252,7 +252,7 @@ const waiter = (msg, userId, prefix) => {
 
 function getCategoriesListEmbed(client, guild) {
   let description = "";
-  
+
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
     const cmds = client.slashCommands.filter(cmd => cmd.category === k);
@@ -287,7 +287,7 @@ function getListButtons() {
       .setLabel("🎮 Buttons Menu")
       .setStyle(ButtonStyle.Secondary)
   );
-  
+
   return [backButton];
 }
 
@@ -306,10 +306,10 @@ function getButtonsMenuEmbed(client) {
 function getCategoryButtons(client) {
   const buttons = [];
   const rows = [];
-  
+
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
-    
+
     buttons.push(
       new ButtonBuilder()
         .setCustomId(`cat-${k.toLowerCase()}`)

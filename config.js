@@ -1,4 +1,5 @@
 module.exports = {
+  DEVELOPER: "Blackbit Studio", // Bot developer credit
   OWNER_IDS: ["1354287041772392478"], // Bot owner ID's
   SUPPORT_SERVER: "", // Your bot support server
   PREFIX_COMMANDS: {
