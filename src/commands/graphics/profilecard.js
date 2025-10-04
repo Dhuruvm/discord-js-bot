@@ -168,6 +168,9 @@ async function generateProfileCard(user, member, customBanner = null, customBio 
     ctx.fill();
   }
 
+  // Get user status (needs to be outside try block for later use)
+  const status = member?.presence?.status || "offline";
+
   // Draw avatar with glow
   try {
     const avatar = await loadImage(user.displayAvatarURL({ size: 256, extension: "png" }));
@@ -200,7 +203,6 @@ async function generateProfileCard(user, member, customBanner = null, customBio 
     ctx.shadowOffsetY = 0;
 
     // Draw status indicator
-    const status = member?.presence?.status || "offline";
     const statusSize = 24;
     const statusX = avatarX + avatarSize - statusSize / 2;
     const statusY = avatarY + avatarSize - statusSize / 2;
