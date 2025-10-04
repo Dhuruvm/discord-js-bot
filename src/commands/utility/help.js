@@ -55,12 +55,12 @@ module.exports = {
     // check if category
     const direction = trigger?.toUpperCase();
     if (Object.prototype.hasOwnProperty.call(CommandCategory, direction)) {
-      const embed = getMemberSettings(message.member, direction, data.settings);
-      const buttonsRow = getDisabledButtons();
+      const categoryEmbed = getCategoryEmbed(message.client, direction, data.prefix);
+      const backRow = getBackButton();
 
       return message.channel.send({
-        embeds: [embed],
-        components: [buttonsRow],
+        embeds: [categoryEmbed],
+        components: [backRow],
       });
     }
 
@@ -336,23 +336,5 @@ function getBackButton() {
       .setCustomId("home-btn")
       .setLabel("◀️ Back")
       .setStyle(ButtonStyle.Secondary)
-  );
-}
-
-// Dummy functions to resolve undefined errors
-function getMemberSettings(member, direction, settings) {
-  return new EmbedBuilder()
-    .setColor("#FFFFFF")
-    .setAuthor({ name: "User Settings", iconURL: member.displayAvatarURL() })
-    .setDescription(`Settings for category: ${direction}`);
-}
-
-function getDisabledButtons() {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("home-btn")
-      .setLabel("◀️ Back")
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(true)
   );
 }
