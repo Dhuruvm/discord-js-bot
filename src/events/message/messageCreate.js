@@ -10,6 +10,14 @@ module.exports = async (client, message) => {
   if (!message.guild || message.author.bot) return;
   const settings = await getSettings(message.guild);
 
+  // AFK check
+  try {
+    const afkCommand = require("@src/commands/utility/afk");
+    if (afkCommand.checkAFK) afkCommand.checkAFK(message);
+  } catch (err) {
+    // AFK command not loaded
+  }
+
   // command handler
   let isCommand = false;
   if (PREFIX_COMMANDS.ENABLED) {

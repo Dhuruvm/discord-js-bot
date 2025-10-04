@@ -18,7 +18,7 @@ module.exports = {
     ERROR: "#ED4245",
     WARNING: "#FEE75C",
     PRIMARY: "#5865F2",
-    SECONDARY: "#4752C4",
+    SECONDARY: "#4E5D94",
   },
   CACHE_SIZE: {
     GUILDS: 100,

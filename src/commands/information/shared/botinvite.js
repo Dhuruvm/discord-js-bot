@@ -10,14 +10,14 @@ module.exports = (client) => {
     })
     .setThumbnail(client.user.displayAvatarURL())
     .setDescription(
-      "Hey there! Thanks for considering to invite me! 🎉\n\n" +
-      "**What I Can Do:**\n" +
-      "• Advanced moderation tools\n" +
-      "• Fun commands and games\n" +
-      "• Music playback\n" +
-      "• Custom automation\n" +
-      "• And much more!\n\n" +
-      "Use the buttons below to get started!"
+      `**Hey there! Thanks for considering to invite me!** 🎉\n\n` +
+      `**What I Can Do:**\n` +
+      `• **Advanced moderation tools**\n` +
+      `• **Fun commands and games**\n` +
+      `• **Music playback**\n` +
+      `• **Custom automation**\n` +
+      `• **And much more!**\n\n` +
+      `**Use the buttons below to get started!**`
     )
     .setFooter({ text: "Cybork - Your All-in-One Discord Bot" })
     .setTimestamp();

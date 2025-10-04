@@ -28,42 +28,42 @@ module.exports = (client) => {
   const embed = new EmbedBuilder()
     .setColor(EMBED_COLORS.PRIMARY)
     .setAuthor({ 
-      name: "Cybork Statistics",
+      name: "📊 Cybork Statistics",
       iconURL: client.user.displayAvatarURL()
     })
     .setThumbnail(client.user.displayAvatarURL())
     .setDescription(
-      `📊 **Bot Overview**\n` +
-      `❯ Total Guilds: **${guilds}**\n` +
-      `❯ Total Users: **${users.toLocaleString()}**\n` +
-      `❯ Total Channels: **${channels}**\n` +
-      `❯ Websocket Ping: **${client.ws.ping}ms**\n`
+      `**📊 Bot Overview**\n` +
+      `❯ **Total Guilds:** \`${guilds}\`\n` +
+      `❯ **Total Users:** \`${users.toLocaleString()}\`\n` +
+      `❯ **Total Channels:** \`${channels}\`\n` +
+      `❯ **Websocket Ping:** \`${client.ws.ping}ms\`\n`
     )
     .addFields(
       {
         name: "💻 CPU Information",
         value: stripIndent`
-        ❯ **OS:** ${platform} [${architecture}]
-        ❯ **Cores:** ${cores}
-        ❯ **Usage:** ${cpuUsage}
+        ❯ **OS:** \`${platform}\` **[${architecture}]**
+        ❯ **Cores:** \`${cores}\`
+        ❯ **Usage:** \`${cpuUsage}\`
         `,
         inline: true,
       },
       {
         name: "🔧 Bot's RAM",
         value: stripIndent`
-        ❯ **Used:** ${botUsed}
-        ❯ **Available:** ${botAvailable}
-        ❯ **Usage:** ${botUsage}
+        ❯ **Used:** \`${botUsed}\`
+        ❯ **Available:** \`${botAvailable}\`
+        ❯ **Usage:** \`${botUsage}\`
         `,
         inline: true,
       },
       {
         name: "💾 Overall RAM",
         value: stripIndent`
-        ❯ **Used:** ${overallUsed}
-        ❯ **Available:** ${overallAvailable}
-        ❯ **Usage:** ${overallUsage}
+        ❯ **Used:** \`${overallUsed}\`
+        ❯ **Available:** \`${overallAvailable}\`
+        ❯ **Usage:** \`${overallUsage}\`
         `,
         inline: true,
       },
