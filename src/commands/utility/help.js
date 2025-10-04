@@ -83,7 +83,7 @@ async function getHelpMenu({ client, guild }) {
     .setColor(EMBED_COLORS.PRIMARY)
     .setDescription(
       `**My help is here for you!**\n\n` +
-      `**Developed with ❤️ by Revenant </>`
+      `**Developed by Blackbit Studio**`
     )
     .setTimestamp();
 
