@@ -92,7 +92,7 @@ async function getHelpMenu({ client, guild }, prefix) {
   const extraSection = extraCategories.length > 0 ? `\n\n**Extra Module:**\n${extraCategories.join('\n')}` : '';
 
   const prefixText = prefix || '!';
-  const description = `• **Prefix is ${prefixText}**\n• **${prefixText}help <command | module> for more information.**\n\n${mainSection}${extraSection}`;
+  const description = `**• Prefix is ${prefixText}**\n**• ${prefixText}help <command | module> for more information.**\n\n${mainSection}${extraSection}`;
 
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
