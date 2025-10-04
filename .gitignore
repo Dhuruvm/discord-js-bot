@@ -4,3 +4,17 @@ node_modules/
 *.log
 *.tar.gz
 .env
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+dist/
+build/
+.cache/
+
+*.pid
+*.seed
+*.pid.lock
