@@ -1,7 +1,6 @@
-
 {
-  "success": "✅",
-  "error": "❌",
+  "success": "<:success:1424072640829722745>",
+  "error": "<:error:1424072711671382076>",
   "warning": "⚠️",
   "info": "ℹ️",
   "loading": "⏳",
