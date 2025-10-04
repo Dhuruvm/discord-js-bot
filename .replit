@@ -22,12 +22,11 @@ name = "Discord Bot"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "webview"
+outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm start"
-waitForPort = 5000
 
 [agent]
 expertMode = true
