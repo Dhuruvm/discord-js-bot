@@ -38,19 +38,33 @@ module.exports = {
   async messageRun(message, args, data) {
     let trigger = args[0];
 
+    // !help
     if (!trigger) {
       const response = await getHelpMenu(message, data.prefix);
       const sentMsg = await message.channel.send(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
 
+    // check if command
     const cmd = message.client.getCommand(trigger);
     if (cmd) {
       const embed = getCommandUsage(cmd, data.prefix, trigger);
       return message.channel.send({ embeds: [embed] });
     }
 
-    await message.channel.send("No matching command found");
+    // check if category
+    const direction = trigger?.toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(CommandCategory, direction)) {
+      const embed = getMemberSettings(message.member, direction, data.settings);
+      const buttonsRow = getDisabledButtons();
+
+      return message.channel.send({
+        embeds: [embed],
+        components: [buttonsRow],
+      });
+    }
+
+    await message.channel.send("No command or category found matching your input");
   },
 
   async interactionRun(interaction) {
@@ -322,5 +336,23 @@ function getBackButton() {
       .setCustomId("home-btn")
       .setLabel("◀️ Back")
       .setStyle(ButtonStyle.Secondary)
+  );
+}
+
+// Dummy functions to resolve undefined errors
+function getMemberSettings(member, direction, settings) {
+  return new EmbedBuilder()
+    .setColor("#FFFFFF")
+    .setAuthor({ name: "User Settings", iconURL: member.displayAvatarURL() })
+    .setDescription(`Settings for category: ${direction}`);
+}
+
+function getDisabledButtons() {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("home-btn")
+      .setLabel("◀️ Back")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(true)
   );
 }
