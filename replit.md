@@ -6,6 +6,15 @@ This is a comprehensive, multipurpose Discord bot built using Discord.js v14. Th
 
 The bot is designed as a production-ready, feature-rich solution with optional web dashboard support, extensive configuration options, and robust error handling.
 
+## Recent Changes
+
+**October 4, 2025**
+- Customized help command with new embed design (white color scheme)
+- Updated help menu layout to match BlaZe HQ style
+- Modified button layout: Main Module, Extra Module, Search Command
+- Footer changed to "Powered by BlaZe HQ"
+- Category command display changed to comma-separated format
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
