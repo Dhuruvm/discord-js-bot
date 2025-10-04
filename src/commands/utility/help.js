@@ -101,7 +101,10 @@ async function getHelpMenu({ client, guild }, prefix) {
       iconURL: client.user.displayAvatarURL()
     })
     .setDescription(description)
-    .setFooter({ text: "Powered by BlaZe HQ" });
+    .setFooter({ 
+      text: "Powered by Blackbit Studio",
+      iconURL: client.user.displayAvatarURL()
+    });
 
   const buttonRow1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -139,7 +142,7 @@ async function getHelpMenu({ client, guild }, prefix) {
 
   const buttonRow3 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setLabel("Invite BlaZe")
+      .setLabel(`Invite ${client.user.username}`)
       .setStyle(ButtonStyle.Link)
       .setURL(client.getInvite ? client.getInvite() : "https://discord.com"),
     new ButtonBuilder()
@@ -188,7 +191,10 @@ const waiter = (msg, userId, prefix) => {
             iconURL: msg.client.user.displayAvatarURL()
           })
           .setDescription(`Use \`${prefix || '!'}help <command>\` to search for a specific command.\n\nExample: \`${prefix || '!'}help ban\``)
-          .setFooter({ text: "Powered by BlaZe HQ" });
+          .setFooter({ 
+            text: "Powered by Blackbit Studio",
+            iconURL: msg.client.user.displayAvatarURL()
+          });
         
         const backRow = getBackButton();
         msg.editable && (await msg.edit({ embeds: [searchEmbed], components: [backRow] }));
@@ -234,7 +240,10 @@ function getModuleEmbed(client, type, prefix) {
       iconURL: client.user.displayAvatarURL()
     })
     .setDescription(`**${type.charAt(0).toUpperCase() + type.slice(1)} Module**\n\n${categoryList}`)
-    .setFooter({ text: "Powered by BlaZe HQ" });
+    .setFooter({ 
+      text: "Powered by Blackbit Studio",
+      iconURL: client.user.displayAvatarURL()
+    });
 
   return embed;
 }
@@ -250,7 +259,10 @@ function getCategoryEmbed(client, category, prefix) {
         iconURL: client.user.displayAvatarURL()
       })
       .setDescription(`**${CommandCategory[category]?.name}**\n\nNo commands in this category`)
-      .setFooter({ text: "Powered by BlaZe HQ" });
+      .setFooter({ 
+        text: "Powered by Blackbit Studio",
+        iconURL: client.user.displayAvatarURL()
+      });
   }
 
   const commandsList = commands.map(cmd => {
@@ -270,7 +282,10 @@ function getCategoryEmbed(client, category, prefix) {
       iconURL: client.user.displayAvatarURL()
     })
     .setDescription(`**${CommandCategory[category]?.name}**\n\n${commandsList}`)
-    .setFooter({ text: "Powered by BlaZe HQ" });
+    .setFooter({ 
+      text: "Powered by Blackbit Studio",
+      iconURL: client.user.displayAvatarURL()
+    });
 
   return embed;
 }
