@@ -40,17 +40,17 @@ module.exports = {
 
     if (!trigger) {
       const response = await getHelpMenu(message, data.prefix);
-      const sentMsg = await message.safeReply(response);
+      const sentMsg = await message.channel.send(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
 
     const cmd = message.client.getCommand(trigger);
     if (cmd) {
       const embed = getCommandUsage(cmd, data.prefix, trigger);
-      return message.safeReply({ embeds: [embed] });
+      return message.channel.send({ embeds: [embed] });
     }
 
-    await message.safeReply("No matching command found");
+    await message.channel.send("No matching command found");
   },
 
   async interactionRun(interaction) {
