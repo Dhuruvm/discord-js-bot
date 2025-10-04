@@ -14,8 +14,18 @@ module.exports = {
    */
   handlePrefixCommand: async function (message, cmd, settings) {
     const prefix = settings.prefix;
-    const args = message.content.replace(prefix, "").split(/\s+/);
-    const invoke = args.shift().toLowerCase();
+    let args;
+    let invoke;
+    
+    // Check if message starts with prefix or is no-prefix
+    if (message.content.startsWith(prefix)) {
+      args = message.content.replace(prefix, "").split(/\s+/);
+      invoke = args.shift().toLowerCase();
+    } else {
+      // No-prefix command
+      args = message.content.split(/\s+/);
+      invoke = args.shift().toLowerCase();
+    }
 
     const data = {};
     data.settings = settings;
