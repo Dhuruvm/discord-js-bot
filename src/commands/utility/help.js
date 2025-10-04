@@ -12,7 +12,7 @@ const {
 } = require("discord.js");
 const { getCommandUsage, getSlashUsage } = require("@handlers/command");
 
-const IDLE_TIMEOUT = 30;
+const IDLE_TIMEOUT = 120;
 
 module.exports = {
   name: "help",
@@ -162,8 +162,10 @@ const waiter = (msg, userId, prefix) => {
     filter: (reactor) => reactor.user.id === userId && msg.id === reactor.message.id,
     idle: IDLE_TIMEOUT * 1000,
     dispose: true,
-    time: 5 * 60 * 1000,
+    time: 10 * 60 * 1000,
   });
+
+  let currentComponents = msg.components;
 
   collector.on("collect", async (response) => {
     await response.deferUpdate();
@@ -172,14 +174,16 @@ const waiter = (msg, userId, prefix) => {
       case "main-module-btn": {
         const mainEmbed = getModuleEmbed(msg.client, "main", prefix);
         const backRow = getBackButton();
-        msg.editable && (await msg.edit({ embeds: [mainEmbed], components: [backRow] }));
+        currentComponents = [backRow];
+        msg.editable && (await msg.edit({ embeds: [mainEmbed], components: currentComponents }));
         break;
       }
 
       case "extra-module-btn": {
         const extraEmbed = getModuleEmbed(msg.client, "extra", prefix);
         const backRow = getBackButton();
-        msg.editable && (await msg.edit({ embeds: [extraEmbed], components: [backRow] }));
+        currentComponents = [backRow];
+        msg.editable && (await msg.edit({ embeds: [extraEmbed], components: currentComponents }));
         break;
       }
 
@@ -197,12 +201,14 @@ const waiter = (msg, userId, prefix) => {
           });
         
         const backRow = getBackButton();
-        msg.editable && (await msg.edit({ embeds: [searchEmbed], components: [backRow] }));
+        currentComponents = [backRow];
+        msg.editable && (await msg.edit({ embeds: [searchEmbed], components: currentComponents }));
         break;
       }
 
       case "home-btn": {
         const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild }, prefix);
+        currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
       }
@@ -211,7 +217,8 @@ const waiter = (msg, userId, prefix) => {
         const cat = response.values[0].toUpperCase();
         const categoryEmbed = getCategoryEmbed(msg.client, cat, prefix);
         const backRow = getBackButton();
-        msg.editable && (await msg.edit({ embeds: [categoryEmbed], components: [backRow] }));
+        currentComponents = [backRow];
+        msg.editable && (await msg.edit({ embeds: [categoryEmbed], components: currentComponents }));
         break;
       }
     }
@@ -219,7 +226,26 @@ const waiter = (msg, userId, prefix) => {
 
   collector.on("end", () => {
     if (!msg.guild || !msg.channel) return;
-    return msg.editable && msg.edit({ components: [] });
+    
+    const disabledComponents = currentComponents.map(row => {
+      const newRow = new ActionRowBuilder();
+      row.components.forEach(component => {
+        if (component.data.style === ButtonStyle.Link) {
+          newRow.addComponents(component);
+        } else if (component.type === 3) {
+          newRow.addComponents(
+            StringSelectMenuBuilder.from(component.data).setDisabled(true)
+          );
+        } else {
+          newRow.addComponents(
+            ButtonBuilder.from(component.data).setDisabled(true)
+          );
+        }
+      });
+      return newRow;
+    });
+
+    return msg.editable && msg.edit({ components: disabledComponents });
   });
 };
 
