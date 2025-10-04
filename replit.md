@@ -8,14 +8,25 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
+**October 4, 2025 - Profile Card Complete Redesign**
+- Completely rewrote profile card generator to match premium Discord profile design
+- Changed command name from "profilecard" to "profile" (aliases: pf, card)
+- Implemented dark theme with Discord colors (#2B2D31 background, #1E1F22 card)
+- Added stunning blue/purple gradient banner with radial wave effects
+- Created glowing cyan ring around avatar with proper shadow effects
+- Positioned status indicator dot next to username (green/yellow/red/gray based on status)
+- Added activity display with emoji icons (Playing 🎮, Listening 🎵, etc.)
+- Optimized rendering for faster processing (reduced cooldown to 3 seconds)
+- Bio displays user's top 3 roles or custom text
+- Removed embed wrapper for cleaner image output
+
 **October 4, 2025 - Major UI/UX Improvements**
 - Fixed critical purge command bug where amount was treated as string (purging 1 would delete 11 messages)
 - Created custom emoji constants system for consistent UI across all commands
 - Updated all moderation commands (ban, kick, warn, timeout, purge) with modern Discord embeds
 - Added proper error messages with custom emojis matching Discord's style
-- Improved profilecard command with better error handling and embed presentation
 - All command responses now use professional embeds with timestamps and proper formatting
-- Error messages now display with ❌ emoji and styled embeds (matching user's reference image)
+- Error messages now display with ❌ emoji and styled embeds
 - Success messages use ✅ emoji with green embeds
 - Warning messages use ⚠️ emoji with yellow embeds
 
