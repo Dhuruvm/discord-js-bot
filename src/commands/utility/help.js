@@ -88,8 +88,8 @@ async function getHelpMenu({ client, guild }, prefix) {
     }
   }
 
-  const mainSection = mainCategories.length > 0 ? `**Main**\n${mainCategories.join('\n')}` : '';
-  const extraSection = extraCategories.length > 0 ? `\n\n**Extra**\n${extraCategories.join('\n')}` : '';
+  const mainSection = mainCategories.length > 0 ? `**Main Module:**\n${mainCategories.join('\n')}` : '';
+  const extraSection = extraCategories.length > 0 ? `\n\n**Extra Module:**\n${extraCategories.join('\n')}` : '';
 
   const prefixText = prefix || '!';
   const description = `• Prefix is ${prefixText}\n• ${prefixText}help <command | module> for more information.\n\n${mainSection}${extraSection}`;
@@ -265,7 +265,7 @@ function getModuleEmbed(client, type, prefix) {
       name: client.user.username,
       iconURL: client.user.displayAvatarURL()
     })
-    .setDescription(`**${type.charAt(0).toUpperCase() + type.slice(1)} Module**\n\n${categoryList}`)
+    .setDescription(`**${type.charAt(0).toUpperCase() + type.slice(1)} Module:**\n\n${categoryList}`)
     .setFooter({ 
       text: "Powered by Blackbit Studio",
       iconURL: client.user.displayAvatarURL()
@@ -295,10 +295,10 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `${cmd.name} ${trigger}`;
+        return `\`${cmd.name} ${trigger}\``;
       }).join(', ');
     }
-    return cmd.name;
+    return `\`${cmd.name}\``;
   }).join(', ');
 
   const embed = new EmbedBuilder()
