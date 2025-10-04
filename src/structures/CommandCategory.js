@@ -76,7 +76,7 @@ module.exports = {
   STATS: {
     name: "Statistics",
     enabled: config.STATS.ENABLED,
-    image: "https://icons.iconarchive.com/icons/graphicloads/flat-finance/256/dollar-stats-icon.png",
+    image: "https://icons.iconarchive.com/icons/graphicloads/100-flat/128/analytics-icon.png",
     emoji: "📈",
   },
   SUGGESTION: {
@@ -84,6 +84,11 @@ module.exports = {
     enabled: config.SUGGESTIONS.ENABLED,
     image: "https://cdn-icons-png.flaticon.com/512/1484/1484815.png",
     emoji: "📝",
+  },
+  GRAPHICS: {
+    name: "Graphics",
+    image: "https://cdn-icons-png.flaticon.com/512/3342/3342137.png",
+    emoji: "🎨",
   },
   TICKET: {
     name: "Ticket",
