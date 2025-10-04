@@ -114,7 +114,7 @@ module.exports = {
 
     // bot
     else if (sub === "bot") {
-      response = botInfo(interaction.client);
+      response = await botInfo(interaction.client);
     }
 
     // avatar

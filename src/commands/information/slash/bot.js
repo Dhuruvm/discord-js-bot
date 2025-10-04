@@ -58,7 +58,7 @@ module.exports = {
 
     // Stats
     else if (sub === "stats") {
-      const response = botstats(interaction.client);
+      const response = await botstats(interaction.client);
       return interaction.followUp(response);
     }
 

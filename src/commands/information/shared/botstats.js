@@ -1,3 +1,4 @@
+
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { EMBED_COLORS, SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
@@ -7,7 +8,7 @@ const { stripIndent } = require("common-tags");
 /**
  * @param {import('@structures/BotClient')} client
  */
-module.exports = (client) => {
+module.exports = async (client) => {
   const guilds = client.guilds.cache.size;
   const channels = client.channels.cache.size;
   const users = client.guilds.cache.reduce((size, g) => size + g.memberCount, 0);
@@ -26,8 +27,13 @@ module.exports = (client) => {
   const overallUsage = `${Math.floor(((os.totalmem() - os.freemem()) / os.totalmem()) * 100)}%`;
 
   // Get developers from database
-  const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" }) || {};
-  const developers = settings.developers || [];
+  let developers = [];
+  try {
+    const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+    developers = settings?.developers || [];
+  } catch (error) {
+    console.error("Error fetching developers:", error);
+  }
   
   // Format founder
   const founderId = "1354287041772392478";
