@@ -1,4 +1,7 @@
 const { purgeMessages } = require("@helpers/ModUtils");
+const { EmbedBuilder } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config");
+const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -16,24 +19,44 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    const amount = args[0];
+    const amount = parseInt(args[0]);
 
     if (isNaN(amount)) return message.safeReply("Numbers are only allowed");
-    if (parseInt(amount) > 99) return message.safeReply("The max amount of messages that I can delete is 99");
+    if (amount > 99) return message.safeReply("The max amount of messages that I can delete is 99");
 
     const { channel } = message;
     const response = await purgeMessages(message.member, channel, "ALL", amount + 1);
 
     if (typeof response === "number") {
-      return channel.safeSend(`Successfully deleted ${response} messages`, 5);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.SUCCESS)
+        .setDescription(`${EMOJIS.SUCCESS} | Successfully deleted **${response}** messages`)
+        .setTimestamp();
+      return channel.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
     } else if (response === "BOT_PERM") {
-      return message.safeReply("I don't have `Read Message History` & `Manage Messages` to delete messages", 5);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | I don't have \`Read Message History\` & \`Manage Messages\` permissions to delete messages!`)
+        .setTimestamp();
+      return message.safeReply({ embeds: [embed] });
     } else if (response === "MEMBER_PERM") {
-      return message.safeReply("You don't have `Read Message History` & `Manage Messages` to delete messages", 5);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | You don't have \`Read Message History\` & \`Manage Messages\` permissions to delete messages!`)
+        .setTimestamp();
+      return message.safeReply({ embeds: [embed] });
     } else if (response === "NO_MESSAGES") {
-      return channel.safeSend("No messages found that can be cleaned", 5);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.WARNING)
+        .setDescription(`${EMOJIS.WARNING} | No messages found that can be cleaned`)
+        .setTimestamp();
+      return channel.send({ embeds: [embed] }).then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
     } else {
-      return message.safeReply(`Error occurred! Failed to delete messages`);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | Error occurred! Failed to delete messages`)
+        .setTimestamp();
+      return message.safeReply({ embeds: [embed] });
     }
   },
 };

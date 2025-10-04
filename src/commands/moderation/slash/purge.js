@@ -1,5 +1,7 @@
 const { purgeMessages } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, ChannelType } = require("discord.js");
+const { ApplicationCommandOptionType, ChannelType, EmbedBuilder } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config");
+const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -196,29 +198,47 @@ module.exports = {
 
     // Success
     if (typeof response === "number") {
-      return interaction.followUp(`Successfully cleaned ${response} messages in ${channel}`);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.SUCCESS)
+        .setDescription(`${EMOJIS.SUCCESS} | Successfully cleaned **${response}** messages in ${channel}`)
+        .setTimestamp();
+      return interaction.followUp({ embeds: [embed] });
     }
 
     // Member missing permissions
     else if (response === "MEMBER_PERM") {
-      return interaction.followUp(
-        `You do not have permissions to Read Message History & Manage Messages in ${channel}`
-      );
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | You do not have \`Read Message History\` & \`Manage Messages\` permissions in ${channel}!`)
+        .setTimestamp();
+      return interaction.followUp({ embeds: [embed] });
     }
 
     // Bot missing permissions
     else if (response === "BOT_PERM") {
-      return interaction.followUp(`I do not have permissions to Read Message History & Manage Messages in ${channel}`);
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | I do not have \`Read Message History\` & \`Manage Messages\` permissions in ${channel}!`)
+        .setTimestamp();
+      return interaction.followUp({ embeds: [embed] });
     }
 
     // No messages
     else if (response === "NO_MESSAGES") {
-      return interaction.followUp("Found no messages that can be cleaned");
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.WARNING)
+        .setDescription(`${EMOJIS.WARNING} | Found no messages that can be cleaned`)
+        .setTimestamp();
+      return interaction.followUp({ embeds: [embed] });
     }
 
     // Remaining
     else {
-      return interaction.followUp("Failed to clean messages");
+      const embed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${EMOJIS.ERROR} | Failed to clean messages`)
+        .setTimestamp();
+      return interaction.followUp({ embeds: [embed] });
     }
   },
 };

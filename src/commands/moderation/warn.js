@@ -1,5 +1,7 @@
 const { warnTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config");
+const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -52,8 +54,35 @@ module.exports = {
 
 async function warn(issuer, target, reason) {
   const response = await warnTarget(issuer, target, reason);
-  if (typeof response === "boolean") return `${target.user.username} is warned!`;
-  if (response === "BOT_PERM") return `I do not have permission to warn ${target.user.username}`;
-  else if (response === "MEMBER_PERM") return `You do not have permission to warn ${target.user.username}`;
-  else return `Failed to warn ${target.user.username}`;
+  
+  if (typeof response === "boolean") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.WARNING)
+      .setDescription(`${EMOJIS.WARNING} | **${target.user.username}** has been warned!`)
+      .addFields({ name: "Reason", value: reason || "No reason provided", inline: false })
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  if (response === "BOT_PERM") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${EMOJIS.ERROR} | I do not have permission to warn **${target.user.username}**!`)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  if (response === "MEMBER_PERM") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command!`)
+      .setTimestamp();
+    return { embeds: [embed] };
+  }
+  
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.ERROR)
+    .setDescription(`${EMOJIS.ERROR} | Failed to warn **${target.user.username}**`)
+    .setTimestamp();
+  return { embeds: [embed] };
 }
