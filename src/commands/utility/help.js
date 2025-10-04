@@ -78,9 +78,9 @@ async function getHelpMenu({ client, guild }, prefix) {
 
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
-    
+
     const categoryLine = `${v.emoji} : ${v.name}`;
-    
+
     if (['ADMIN', 'MODERATION', 'MUSIC', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL'].includes(k)) {
       mainCategories.push(categoryLine);
     } else {
@@ -199,7 +199,7 @@ const waiter = (msg, userId, prefix) => {
             text: "Powered by Blackbit Studio",
             iconURL: msg.client.user.displayAvatarURL()
           });
-        
+
         const backRow = getBackButton();
         currentComponents = [backRow];
         msg.editable && (await msg.edit({ embeds: [searchEmbed], components: currentComponents }));
@@ -226,7 +226,7 @@ const waiter = (msg, userId, prefix) => {
 
   collector.on("end", () => {
     if (!msg.guild || !msg.channel) return;
-    
+
     const disabledComponents = currentComponents.map(row => {
       const newRow = new ActionRowBuilder();
       row.components.forEach(component => {

@@ -16,6 +16,7 @@ const CommandCategory = require("./CommandCategory");
 const lavaclient = require("../handlers/lavaclient");
 const giveawaysHandler = require("../handlers/giveaway");
 const { DiscordTogether } = require("discord-together");
+const EmojiManager = require("../helpers/EmojiManager");
 
 module.exports = class BotClient extends Client {
   constructor() {
@@ -56,6 +57,7 @@ module.exports = class BotClient extends Client {
      */
     this.contextMenus = new Collection(); // store contextMenus
     this.counterUpdateQueue = []; // store guildId's that needs counter update
+    this.emoji = EmojiManager;
 
     // initialize webhook for sending guild join/leave details
     this.joinLeaveWebhook = process.env.JOIN_LEAVE_LOGS
