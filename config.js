@@ -135,4 +135,23 @@ module.exports = {
     CREATE_EMBED: "#068ADD",
     CLOSE_EMBED: "#068ADD",
   },
+
+  // Command Categories
+  COMMAND_CATEGORIES: {
+    FUN: {
+      name: "Fun",
+      image: "https://icons.iconarchive.com/icons/flameia/aqua-smiles/64/make-fun-icon.png",
+      emoji: "😂",
+    },
+    GRAPHICS: {
+      name: "Graphics",
+      image: "https://icons.iconarchive.com/icons/graphicloads/100-flat/64/paint-icon.png",
+      emoji: "🎨",
+    },
+    IMAGE: {
+      name: "Image",
+      image: "https://icons.iconarchive.com/icons/dapino/summer-holiday/64/photo-icon.png",
+      emoji: "🖼️",
+    },
+  },
 };

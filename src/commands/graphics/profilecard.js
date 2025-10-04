@@ -14,6 +14,7 @@ module.exports = {
   cooldown: 5,
   command: {
     enabled: true,
+    aliases: ["profile", "card", "pc"],
     usage: "[user]",
     minArgsCount: 0,
   },
@@ -42,27 +43,37 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    const user = message.mentions.users.first() || message.author;
-    const member = message.guild.members.cache.get(user.id);
-    
-    const buffer = await generateProfileCard(user, member);
-    const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
-    
-    await message.safeReply({ files: [attachment] });
+    try {
+      const user = message.mentions.users.first() || message.author;
+      const member = message.guild.members.cache.get(user.id);
+      
+      const buffer = await generateProfileCard(user, member);
+      const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
+      
+      await message.safeReply({ files: [attachment] });
+    } catch (error) {
+      console.error("Error generating profile card:", error);
+      await message.safeReply("Failed to generate profile card. Please try again later.");
+    }
   },
 
   async interactionRun(interaction) {
     await interaction.deferReply();
     
-    const user = interaction.options.getUser("user") || interaction.user;
-    const member = interaction.guild.members.cache.get(user.id);
-    const customBanner = interaction.options.getString("banner");
-    const customBio = interaction.options.getString("bio");
-    
-    const buffer = await generateProfileCard(user, member, customBanner, customBio);
-    const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
-    
-    await interaction.followUp({ files: [attachment] });
+    try {
+      const user = interaction.options.getUser("user") || interaction.user;
+      const member = interaction.guild.members.cache.get(user.id);
+      const customBanner = interaction.options.getString("banner");
+      const customBio = interaction.options.getString("bio");
+      
+      const buffer = await generateProfileCard(user, member, customBanner, customBio);
+      const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
+      
+      await interaction.followUp({ files: [attachment] });
+    } catch (error) {
+      console.error("Error generating profile card:", error);
+      await interaction.followUp({ content: "Failed to generate profile card. Please try again later.", ephemeral: true });
+    }
   },
 };
 
