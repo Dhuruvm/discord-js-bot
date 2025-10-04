@@ -17,7 +17,7 @@ module.exports = {
     SUCCESS: "#2B2D31",
     ERROR: "#2B2D31",
     WARNING: "#2B2D31",
-    PRIMARY: "#2B2D31 ",
+    PRIMARY: "#2B2D31",
     SECONDARY: "#2B2D31",
   },
   CACHE_SIZE: {
