@@ -12,7 +12,7 @@ module.exports = {
   cooldown: 5,
   command: {
     enabled: true,
-    aliases: ["botstats", "stats", "bi"],
+    aliases: ["botstats", "bi"],
   },
 
   async messageRun(message, args) {
