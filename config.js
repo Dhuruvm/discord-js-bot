@@ -1,7 +1,7 @@
 module.exports = {
   DEVELOPER: "Blackbit Studio", // Bot developer credit
   OWNER_IDS: ["1354287041772392478"], // Bot owner ID's
-  SUPPORT_SERVER: "", // Your bot support server
+  SUPPORT_SERVER: "https://discord.gg/mvusstXJS", // Your bot support server
   PREFIX_COMMANDS: {
     ENABLED: true, // Enable/Disable prefix commands
     DEFAULT_PREFIX: "!", // Default prefix for the bot
@@ -13,13 +13,13 @@ module.exports = {
     TEST_GUILD_ID: "xxxxxxxxxxx", // Guild ID where the interactions should be registered. [** Test you commands here first **]
   },
   EMBED_COLORS: {
-    BOT_EMBED: "#2B2D31",
-    TRANSPARENT: "#2B2D31",
-    SUCCESS: "#2B2D31",
-    ERROR: "#2B2D31",
-    WARNING: "#2B2D31",
-    PRIMARY: "#2B2D31",
-    SECONDARY: "#2B2D31",
+    BOT_EMBED: "#303136",
+    TRANSPARENT: "#303136",
+    SUCCESS: "#303136",
+    ERROR: "#303136",
+    WARNING: "#303136",
+    PRIMARY: "#303136",
+    SECONDARY: "#303136",
   },
   CACHE_SIZE: {
     GUILDS: 100,
