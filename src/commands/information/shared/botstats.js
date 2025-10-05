@@ -1,5 +1,5 @@
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, ComponentType } = require("discord.js");
 const { EMBED_COLORS, SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
 const os = require("os");
@@ -46,73 +46,113 @@ module.exports = async (client) => {
     devList = `${founderMention}, ${devMentions}`;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setAuthor({ 
-      name: "📊 Cybork Statistics",
-      iconURL: client.user.displayAvatarURL()
-    })
-    .setThumbnail(client.user.displayAvatarURL())
-    .setDescription(
-      `╭───── **Bot Overview** ─────╮\n\n` +
-      `🌐 **Total Guilds:** \`${guilds}\`\n` +
-      `👥 **Total Users:** \`${users.toLocaleString()}\`\n` +
-      `📢 **Total Channels:** \`${channels}\`\n` +
-      `📡 **Websocket Ping:** \`${client.ws.ping}ms\`\n\n` +
-      `╰──────────────────────╯`
-    )
-    .addFields(
+  // Modern Container with Components V2
+  const container = {
+    type: ComponentType.Container,
+    accent_color: 0x5865F2,
+    components: [
+      // Header Section
       {
-        name: "👑 Founder & Developers",
-        value: devList,
-        inline: false,
+        type: ComponentType.Section,
+        components: [
+          {
+            type: ComponentType.TextDisplay,
+            content: `# 📊 ${client.user.username} Statistics\n\nComprehensive statistics and system information about your bot.`
+          }
+        ],
+        accessory: {
+          type: ComponentType.Thumbnail,
+          media: { url: client.user.displayAvatarURL() },
+          description: `${client.user.username} Avatar`
+        }
       },
+      
+      // Separator
       {
-        name: "💻 CPU Information",
-        value: stripIndent`
-        \`\`\`fix
-        OS:     ${platform} [${architecture}]
-        Cores:  ${cores}
-        Usage:  ${cpuUsage}
-        \`\`\`
-        `,
-        inline: true,
+        type: ComponentType.Separator,
+        divider: true,
+        spacing: 2
       },
+      
+      // Bot Overview Section
       {
-        name: "🔧 Bot's RAM",
-        value: stripIndent`
-        \`\`\`fix
-        Used:      ${botUsed}
-        Available: ${botAvailable}
-        Usage:     ${botUsage}
-        \`\`\`
-        `,
-        inline: true,
+        type: ComponentType.TextDisplay,
+        content: `### 🌐 Bot Overview\n\n` +
+          `**Total Guilds:** \`${guilds}\`\n` +
+          `**Total Users:** \`${users.toLocaleString()}\`\n` +
+          `**Total Channels:** \`${channels}\`\n` +
+          `**Websocket Ping:** \`${client.ws.ping}ms\``
       },
+      
+      // Separator
       {
-        name: "💾 Overall RAM",
-        value: stripIndent`
-        \`\`\`fix
-        Used:      ${overallUsed}
-        Available: ${overallAvailable}
-        Usage:     ${overallUsage}
-        \`\`\`
-        `,
-        inline: true,
+        type: ComponentType.Separator,
+        divider: true,
+        spacing: 2
       },
+      
+      // Team Section
       {
-        name: "⚙️ Node.js Version",
-        value: `\`\`\`\n${process.versions.node}\`\`\``,
-        inline: true,
+        type: ComponentType.TextDisplay,
+        content: `### 👑 Founder & Developers\n\n${devList}`
       },
+      
+      // Separator
       {
-        name: "⏱️ Uptime",
-        value: `\`\`\`\n${timeformat(process.uptime())}\`\`\``,
-        inline: true,
+        type: ComponentType.Separator,
+        divider: true,
+        spacing: 2
+      },
+      
+      // System Information Section
+      {
+        type: ComponentType.TextDisplay,
+        content: `### 💻 System Information\n\n` +
+          stripIndent`
+          **Operating System:** ${platform} [${architecture}]
+          **CPU Cores:** ${cores}
+          **CPU Usage:** ${cpuUsage}
+          **Node.js Version:** ${process.versions.node}
+          **Bot Uptime:** ${timeformat(process.uptime())}
+          `
+      },
+      
+      // Separator
+      {
+        type: ComponentType.Separator,
+        divider: true,
+        spacing: 2
+      },
+      
+      // Memory Information Section
+      {
+        type: ComponentType.TextDisplay,
+        content: `### 🔧 Memory Usage\n\n` +
+          stripIndent`
+          **Bot Memory Used:** ${botUsed}
+          **Bot Memory Available:** ${botAvailable}
+          **Bot Memory Usage:** ${botUsage}
+          
+          **System Memory Used:** ${overallUsed}
+          **System Memory Available:** ${overallAvailable}
+          **System Memory Usage:** ${overallUsage}
+          `
+      },
+      
+      // Separator
+      {
+        type: ComponentType.Separator,
+        divider: false,
+        spacing: 1
+      },
+      
+      // Footer
+      {
+        type: ComponentType.TextDisplay,
+        content: `*${client.user.username} • Powered by Discord.js* • <t:${Math.floor(Date.now() / 1000)}:R>`
       }
-    )
-    .setFooter({ text: "Cybork • Powered by Discord.js", iconURL: client.user.displayAvatarURL() })
-    .setTimestamp();
+    ]
+  };
 
   let row1Components = [];
   let row2Components = [];
@@ -159,10 +199,14 @@ module.exports = async (client) => {
       .setStyle(ButtonStyle.Link)
   );
 
-  let components = [new ActionRowBuilder().addComponents(row1Components)];
+  let components = [container];
+  
+  if (row1Components.length > 0) {
+    components.push(new ActionRowBuilder().addComponents(row1Components));
+  }
   if (row2Components.length > 0) {
     components.push(new ActionRowBuilder().addComponents(row2Components));
   }
 
-  return { embeds: [embed], components };
+  return { components, flags: MessageFlags.IsComponentsV2 };
 };
