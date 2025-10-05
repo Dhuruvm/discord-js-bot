@@ -86,7 +86,7 @@ module.exports = {
   },
 };
 
-async function getHelpMenu({ client, guild, author }, prefix) {
+async function getHelpMenu({ client, guild, author, user }, prefix) {
   const mainCategories = [];
   const extraCategories = [];
 
@@ -108,11 +108,12 @@ async function getHelpMenu({ client, guild, author }, prefix) {
   const prefixText = prefix || '!';
   const description = `**• Prefix is ${prefixText}**\n**• ${prefixText}help <command | module> for more information.**\n\n${mainSection}${extraSection}`;
 
+  const displayUser = author || user;
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: author ? author.username : client.user.username,
-      iconURL: author ? author.displayAvatarURL() : client.user.displayAvatarURL()
+      name: displayUser ? displayUser.username : client.user.username,
+      iconURL: displayUser ? displayUser.displayAvatarURL() : client.user.displayAvatarURL()
     })
     .setDescription(description)
     .setThumbnail(guild ? guild.iconURL() : null)
