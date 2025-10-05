@@ -121,7 +121,7 @@ async function addDeveloper({ client, guild }, userId) {
     
     return { embeds: [embed] };
   } catch (error) {
-    console.error(error);
+    client.logger.error("Error adding developer:", error);
     return { content: "An error occurred while adding the developer." };
   }
 }
@@ -148,7 +148,7 @@ async function removeDeveloper({ client }, userId) {
     
     return { embeds: [embed] };
   } catch (error) {
-    console.error(error);
+    client.logger.error("Error removing developer:", error);
     return { content: "An error occurred while removing the developer." };
   }
 }
@@ -178,7 +178,7 @@ async function listDevelopers({ client }) {
     
     return { embeds: [embed] };
   } catch (error) {
-    console.error(error);
+    client.logger.error("Error fetching developers:", error);
     return { content: "An error occurred while fetching developers." };
   }
 }

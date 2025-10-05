@@ -7,7 +7,7 @@ const EMOJIS = require("@helpers/EmojiConstants");
  * @type {import("@structures/Command")}
  */
 module.exports = {
-  name: "bot",
+  name: "grantaccess",
   description: "Grant full bot access to a user (owner only)",
   category: "OWNER",
   botPermissions: ["EmbedLinks"],

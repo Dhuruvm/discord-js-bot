@@ -55,34 +55,45 @@ module.exports = {
 async function warn(issuer, target, reason) {
   const response = await warnTarget(issuer, target, reason);
   
+  const targetUser = target.user || target;
+  const targetUsername = targetUser.username || target.username;
+  
   if (typeof response === "boolean") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.WARNING)
-      .setDescription(`${EMOJIS.WARNING} | **${target.user.username}** has been warned!`)
-      .addFields({ name: "Reason", value: reason || "No reason provided", inline: false })
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setAuthor({ name: "Member Warned", iconURL: targetUser.displayAvatarURL() })
+      .setDescription(
+        `╭───── **Moderation Action** ─────╮\n\n` +
+        `👤 **User:** ${targetUsername}\n` +
+        `⚠️ **Action:** Warned\n` +
+        `📝 **Reason:** ${reason || "No reason provided"}\n\n` +
+        `╰────────────────────────╯`
+      )
+      .setThumbnail(targetUser.displayAvatarURL())
+      .setFooter({ text: `Warned by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "BOT_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | I do not have permission to warn **${target.user.username}**!`)
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setDescription(`${EMOJIS.ERROR} **Error:** I do not have permission to warn **${targetUsername}**`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "MEMBER_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command!`)
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setDescription(`${EMOJIS.ERROR} **Error:** You need to have a higher role than me to execute this command`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.ERROR)
-    .setDescription(`${EMOJIS.ERROR} | Failed to warn **${target.user.username}**`)
+    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setDescription(`${EMOJIS.ERROR} **Error:** Failed to warn **${targetUsername}**`)
     .setTimestamp();
   return { embeds: [embed] };
 }

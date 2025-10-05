@@ -32,7 +32,7 @@ module.exports = async (client) => {
     const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
     developers = settings?.developers || [];
   } catch (error) {
-    console.error("Error fetching developers:", error);
+    client.logger.error("Error fetching developers:", error);
   }
   
   // Format founder
@@ -47,18 +47,19 @@ module.exports = async (client) => {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.PRIMARY)
+    .setColor(EMBED_COLORS.BOT_EMBED)
     .setAuthor({ 
       name: "📊 Cybork Statistics",
       iconURL: client.user.displayAvatarURL()
     })
     .setThumbnail(client.user.displayAvatarURL())
     .setDescription(
-      `**📊 Bot Overview**\n` +
-      `❯ **Total Guilds:** \`${guilds}\`\n` +
-      `❯ **Total Users:** \`${users.toLocaleString()}\`\n` +
-      `❯ **Total Channels:** \`${channels}\`\n` +
-      `❯ **Websocket Ping:** \`${client.ws.ping}ms\`\n`
+      `╭───── **Bot Overview** ─────╮\n\n` +
+      `🌐 **Total Guilds:** \`${guilds}\`\n` +
+      `👥 **Total Users:** \`${users.toLocaleString()}\`\n` +
+      `📢 **Total Channels:** \`${channels}\`\n` +
+      `📡 **Websocket Ping:** \`${client.ws.ping}ms\`\n\n` +
+      `╰──────────────────────╯`
     )
     .addFields(
       {
@@ -69,42 +70,48 @@ module.exports = async (client) => {
       {
         name: "💻 CPU Information",
         value: stripIndent`
-        ❯ **OS:** \`${platform}\` **[${architecture}]**
-        ❯ **Cores:** \`${cores}\`
-        ❯ **Usage:** \`${cpuUsage}\`
+        \`\`\`fix
+        OS:     ${platform} [${architecture}]
+        Cores:  ${cores}
+        Usage:  ${cpuUsage}
+        \`\`\`
         `,
         inline: true,
       },
       {
         name: "🔧 Bot's RAM",
         value: stripIndent`
-        ❯ **Used:** \`${botUsed}\`
-        ❯ **Available:** \`${botAvailable}\`
-        ❯ **Usage:** \`${botUsage}\`
+        \`\`\`fix
+        Used:      ${botUsed}
+        Available: ${botAvailable}
+        Usage:     ${botUsage}
+        \`\`\`
         `,
         inline: true,
       },
       {
         name: "💾 Overall RAM",
         value: stripIndent`
-        ❯ **Used:** \`${overallUsed}\`
-        ❯ **Available:** \`${overallAvailable}\`
-        ❯ **Usage:** \`${overallUsage}\`
+        \`\`\`fix
+        Used:      ${overallUsed}
+        Available: ${overallAvailable}
+        Usage:     ${overallUsage}
+        \`\`\`
         `,
         inline: true,
       },
       {
         name: "⚙️ Node.js Version",
-        value: `\`${process.versions.node}\``,
+        value: `\`\`\`\n${process.versions.node}\`\`\``,
         inline: true,
       },
       {
         name: "⏱️ Uptime",
-        value: `\`${timeformat(process.uptime())}\``,
+        value: `\`\`\`\n${timeformat(process.uptime())}\`\`\``,
         inline: true,
       }
     )
-    .setFooter({ text: "Cybork - Powered by Discord.js" })
+    .setFooter({ text: "Cybork • Powered by Discord.js", iconURL: client.user.displayAvatarURL() })
     .setTimestamp();
 
   let components = [];

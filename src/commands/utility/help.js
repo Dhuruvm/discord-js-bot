@@ -105,24 +105,30 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     }
   }
 
-  const mainSection = mainCategories.length > 0 ? `**Main Module:**\n${mainCategories.map(cat => `**${cat}**`).join('\n')}` : '';
-  const extraSection = extraCategories.length > 0 ? `\n\n**Extra Module:**\n${extraCategories.map(cat => `**${cat}**`).join('\n')}` : '';
+  const mainSection = mainCategories.length > 0 ? `**Main Module:**\n${mainCategories.map(cat => `${cat}`).join('\n')}` : '';
+  const extraSection = extraCategories.length > 0 ? `\n\n**Extra Module:**\n${extraCategories.map(cat => `${cat}`).join('\n')}` : '';
 
   const prefixText = prefix || '!';
-  const description = `**• Prefix is ${prefixText}**\n**• ${prefixText}help <command | module> for more information.**\n\n${mainSection}${extraSection}`;
-
+  
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: displayUser ? displayUser.username : client.user.username,
+      name: `${displayUser ? displayUser.username : client.user.username} • Help Menu`,
       iconURL: displayUser ? displayUser.displayAvatarURL() : client.user.displayAvatarURL()
     })
-    .setDescription(description)
+    .setDescription(
+      `╭───── **Help Menu** ─────╮\n\n` +
+      `📋 **Prefix:** \`${prefixText}\`\n` +
+      `💡 **Usage:** \`${prefixText}help <command | module>\`\n\n` +
+      `${mainSection}${extraSection}\n\n` +
+      `╰─────────────────────╯`
+    )
     .setThumbnail(guild ? guild.iconURL() : null)
     .setFooter({ 
       text: "Powered by Blackbit Studio",
       iconURL: client.user.displayAvatarURL()
-    });
+    })
+    .setTimestamp();
 
   const buttonRow1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -209,14 +215,21 @@ const waiter = (msg, userId, prefix) => {
         const searchEmbed = new EmbedBuilder()
           .setColor("#FFFFFF")
           .setAuthor({
-            name: msg.client.user.username,
+            name: `${msg.client.user.username} • Search Commands`,
             iconURL: msg.client.user.displayAvatarURL()
           })
-          .setDescription(`Use \`${prefix || '!'}help <command>\` to search for a specific command.\n\nExample: \`${prefix || '!'}help ban\``)
+          .setDescription(
+            `╭───── **Command Search** ─────╮\n\n` +
+            `🔍 **How to search:**\n` +
+            `Use \`${prefix || '!'}help <command>\` to search for a specific command.\n\n` +
+            `📝 **Example:**\n\`${prefix || '!'}help ban\`\n\n` +
+            `╰──────────────────────╯`
+          )
           .setFooter({ 
             text: "Powered by Blackbit Studio",
             iconURL: msg.client.user.displayAvatarURL()
-          });
+          })
+          .setTimestamp();
 
         const backRow = getBackButton();
         currentComponents = [backRow];
@@ -225,7 +238,7 @@ const waiter = (msg, userId, prefix) => {
       }
 
       case "home-btn": {
-        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild }, prefix);
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, user: response.user }, prefix);
         currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
@@ -282,14 +295,19 @@ function getModuleEmbed(client, type, prefix, userId) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: client.user.username,
+      name: `${client.user.username} • ${type.charAt(0).toUpperCase() + type.slice(1)} Modules`,
       iconURL: client.user.displayAvatarURL()
     })
-    .setDescription(`**${type.charAt(0).toUpperCase() + type.slice(1)} Module:**\n\n${categoryList}`)
+    .setDescription(
+      `╭───── **${type.charAt(0).toUpperCase() + type.slice(1)} Module** ─────╮\n\n` +
+      `${categoryList}\n\n` +
+      `╰──────────────────────╯`
+    )
     .setFooter({ 
       text: "Powered by Blackbit Studio",
       iconURL: client.user.displayAvatarURL()
-    });
+    })
+    .setTimestamp();
 
   return embed;
 }
@@ -301,14 +319,19 @@ function getCategoryEmbed(client, category, prefix) {
     return new EmbedBuilder()
       .setColor("#FFFFFF")
       .setAuthor({ 
-        name: client.user.username,
+        name: `${client.user.username} • ${CommandCategory[category]?.name}`,
         iconURL: client.user.displayAvatarURL()
       })
-      .setDescription(`**${CommandCategory[category]?.name}**\n\nNo commands in this category`)
+      .setDescription(
+        `╭───── **${CommandCategory[category]?.name}** ─────╮\n\n` +
+        `❌ No commands in this category\n\n` +
+        `╰──────────────────────╯`
+      )
       .setFooter({ 
         text: "Powered by Blackbit Studio",
         iconURL: client.user.displayAvatarURL()
-      });
+      })
+      .setTimestamp();
   }
 
   const commandsList = commands.map(cmd => {
@@ -324,14 +347,19 @@ function getCategoryEmbed(client, category, prefix) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({ 
-      name: client.user.username,
+      name: `${client.user.username} • ${CommandCategory[category]?.name}`,
       iconURL: client.user.displayAvatarURL()
     })
-    .setDescription(`**${CommandCategory[category]?.name}**\n\n${commandsList}`)
+    .setDescription(
+      `╭───── **${CommandCategory[category]?.name}** ─────╮\n\n` +
+      `${commandsList}\n\n` +
+      `╰──────────────────────╯`
+    )
     .setFooter({ 
       text: "Powered by Blackbit Studio",
       iconURL: client.user.displayAvatarURL()
-    });
+    })
+    .setTimestamp();
 
   return embed;
 }

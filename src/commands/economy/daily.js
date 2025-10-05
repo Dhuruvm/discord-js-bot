@@ -54,9 +54,14 @@ async function daily(user) {
     .setColor(EMBED_COLORS.BOT_EMBED)
     .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
     .setDescription(
-      `You got ${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY} as your daily reward\n` +
-        `**Updated Balance:** ${userDb.coins}${ECONOMY.CURRENCY}`
-    );
+      `╭───── **Daily Reward** ─────╮\n\n` +
+      `💰 **Received:** \`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\`\n` +
+      `🔥 **Streak:** \`${streak} day${streak !== 1 ? 's' : ''}\`\n` +
+      `💳 **Balance:** \`${userDb.coins}${ECONOMY.CURRENCY}\`\n\n` +
+      `╰─────────────────────╯`
+    )
+    .setFooter({ text: "Come back tomorrow for another reward!", iconURL: user.displayAvatarURL() })
+    .setTimestamp();
 
   return { embeds: [embed] };
 }

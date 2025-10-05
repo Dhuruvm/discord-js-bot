@@ -56,34 +56,45 @@ module.exports = {
 async function kick(issuer, target, reason) {
   const response = await kickTarget(issuer, target, reason);
   
+  const targetUser = target.user || target;
+  const targetUsername = targetUser.username || target.username;
+  
   if (typeof response === "boolean") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.SUCCESS)
-      .setDescription(`${EMOJIS.KICK} | **${target.user.username}** has been kicked!`)
-      .addFields({ name: "Reason", value: reason || "No reason provided", inline: false })
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setAuthor({ name: "Member Kicked", iconURL: targetUser.displayAvatarURL() })
+      .setDescription(
+        `╭───── **Moderation Action** ─────╮\n\n` +
+        `👤 **User:** ${targetUsername}\n` +
+        `⚠️ **Action:** Kicked\n` +
+        `📝 **Reason:** ${reason || "No reason provided"}\n\n` +
+        `╰────────────────────────╯`
+      )
+      .setThumbnail(targetUser.displayAvatarURL())
+      .setFooter({ text: `Kicked by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "BOT_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | I do not have permission to kick **${target.user.username}**!`)
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setDescription(`${EMOJIS.ERROR} **Error:** I do not have permission to kick **${targetUsername}**`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "MEMBER_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command!`)
+      .setColor(EMBED_COLORS.BOT_EMBED)
+      .setDescription(`${EMOJIS.ERROR} **Error:** You need to have a higher role than me to execute this command`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.ERROR)
-    .setDescription(`${EMOJIS.ERROR} | Failed to kick **${target.user.username}**`)
+    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setDescription(`${EMOJIS.ERROR} **Error:** Failed to kick **${targetUsername}**`)
     .setTimestamp();
   return { embeds: [embed] };
 }

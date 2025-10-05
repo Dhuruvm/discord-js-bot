@@ -201,7 +201,7 @@ async function search({ member, guild, channel }, query) {
             .setFooter({ text: `Requested By: ${member.user.username}` });
         }
       } catch (err) {
-        console.log(err);
+        guild.client.logger.error("Music search error:", err);
         await sentMsg.delete();
         return "🚫 Failed to register your response";
       }

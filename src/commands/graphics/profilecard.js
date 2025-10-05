@@ -42,9 +42,9 @@ module.exports = {
       
       await message.safeReply({ files: [attachment] });
     } catch (error) {
-      console.error("Error generating profile card:", error);
+      message.client.logger.error("Error generating profile card:", error);
       const errorEmbed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.ERROR)
+        .setColor(EMBED_COLORS.BOT_EMBED)
         .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
         .setTimestamp();
       await message.safeReply({ embeds: [errorEmbed] });
@@ -64,9 +64,9 @@ module.exports = {
       
       await interaction.followUp({ files: [attachment] });
     } catch (error) {
-      console.error("Error generating profile card:", error);
+      interaction.client.logger.error("Error generating profile card:", error);
       const errorEmbed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.ERROR)
+        .setColor(EMBED_COLORS.BOT_EMBED)
         .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
         .setTimestamp();
       await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
@@ -149,7 +149,7 @@ async function generateProfileCard(user, member, userDb) {
     ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
     ctx.restore();
   } catch (error) {
-    console.error("Error loading avatar:", error);
+    // Avatar loading failed, will continue without avatar
   }
 
   // Get status
