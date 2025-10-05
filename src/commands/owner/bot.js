@@ -13,6 +13,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["grant", "grantbotaccess"],
     usage: "<@user>",
     minArgsCount: 1,
   },

@@ -14,6 +14,7 @@ module.exports = {
   userPermissions: ["BanMembers"],
   command: {
     enabled: true,
+    aliases: ["banuser", "banmember"],
     usage: "<ID|@member> [reason]",
     minArgsCount: 1,
   },

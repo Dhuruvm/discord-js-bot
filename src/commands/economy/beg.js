@@ -13,6 +13,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["begmoney", "plead"],
   },
   slashCommand: {
     enabled: true,

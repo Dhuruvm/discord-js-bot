@@ -11,6 +11,7 @@ module.exports = {
   botPermissions: ["SendMessages", "EmbedLinks", "AddReactions", "ReadMessageHistory", "ManageMessages"],
   command: {
     enabled: true,
+    aliases: ["snakegame", "playsnake"],
   },
   slashCommand: {
     enabled: true,

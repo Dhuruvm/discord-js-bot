@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["ud", "urbandictionary"],
     usage: "<word>",
     minArgsCount: 1,
   },

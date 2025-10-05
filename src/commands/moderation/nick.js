@@ -12,6 +12,7 @@ module.exports = {
   userPermissions: ["ManageNicknames"],
   command: {
     enabled: true,
+    aliases: ["nickname", "setnick"],
     minArgsCount: 2,
     subcommands: [
       {

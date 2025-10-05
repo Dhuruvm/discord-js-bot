@@ -10,6 +10,7 @@ module.exports = {
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
+    aliases: ["maxwarning", "warnlimit"],
     minArgsCount: 1,
     subcommands: [
       {

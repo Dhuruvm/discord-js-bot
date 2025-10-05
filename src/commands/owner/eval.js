@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["evaluate", "exec"],
     usage: "<script>",
     minArgsCount: 1,
   },

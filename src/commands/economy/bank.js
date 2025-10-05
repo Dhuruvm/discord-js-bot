@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["bal", "money"],
     minArgsCount: 1,
     subcommands: [
       {

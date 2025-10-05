@@ -10,6 +10,7 @@ module.exports = {
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
+    aliases: ["autoassign", "joinrole"],
     usage: "<role|off>",
     minArgsCount: 1,
   },

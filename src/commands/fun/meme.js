@@ -20,6 +20,7 @@ module.exports = {
   cooldown: 20,
   command: {
     enabled: true,
+    aliases: ["memes", "randommeme"],
     usage: "[category]",
   },
   slashCommand: {

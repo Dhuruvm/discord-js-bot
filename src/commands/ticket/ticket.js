@@ -23,6 +23,7 @@ module.exports = {
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
+    aliases: ["tickets", "ticketsetup"],
     minArgsCount: 1,
     subcommands: [
       {

@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["AttachFiles"],
   command: {
     enabled: true,
+    aliases: ["level", "lvl"],
     usage: "[@member|id]",
   },
   slashCommand: {

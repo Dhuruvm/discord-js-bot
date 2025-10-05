@@ -21,6 +21,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["h", "commands"],
     usage: "[command]",
   },
   slashCommand: {

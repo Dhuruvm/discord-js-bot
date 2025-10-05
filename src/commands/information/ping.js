@@ -10,6 +10,7 @@ module.exports = {
   category: "INFORMATION",
   command: {
     enabled: true,
+    aliases: ["pong", "latency"],
   },
   slashCommand: {
     enabled: true,

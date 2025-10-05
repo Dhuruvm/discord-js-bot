@@ -16,6 +16,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["animals", "animalimg"],
     usage: "<type>",
     minArgsCount: 1,
   },

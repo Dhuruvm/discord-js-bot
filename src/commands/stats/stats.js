@@ -13,6 +13,7 @@ module.exports = {
   category: "STATS",
   command: {
     enabled: true,
+    aliases: ["statistics", "serverstats"],
     usage: "[@member|id]",
   },
   slashCommand: {

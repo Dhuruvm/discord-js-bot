@@ -12,6 +12,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["pastebin", "bin"],
     minArgsCount: 2,
     usage: "<title> <content>",
   },

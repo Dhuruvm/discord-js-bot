@@ -13,6 +13,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["dailyreward", "dailybonus"],
   },
   slashCommand: {
     enabled: true,

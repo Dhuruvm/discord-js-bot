@@ -11,6 +11,7 @@ module.exports = {
   botPermissions: ["ManageChannels"],
   command: {
     enabled: true,
+    aliases: ["setupcounter", "countersetup"],
     usage: "<type> <channel-name>",
     minArgsCount: 1,
   },

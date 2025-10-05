@@ -10,6 +10,7 @@ module.exports = {
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
+    aliases: ["xp", "lvlup"],
     minArgsCount: 1,
     subcommands: [
       {

@@ -12,6 +12,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["emojis", "emojictl"],
     usage: "<add|remove|list|reload> [key] [emoji]",
     minArgsCount: 1,
   },

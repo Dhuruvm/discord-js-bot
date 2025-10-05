@@ -10,6 +10,7 @@ module.exports = {
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
+    aliases: ["modlogs", "moderationlog"],
     usage: "<#channel|off>",
     minArgsCount: 1,
   },
