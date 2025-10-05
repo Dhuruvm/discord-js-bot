@@ -109,7 +109,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   }
 
   const prefixText = prefix || '!';
-
+  
   // Modern Container with Components V2
   const container = {
     type: ComponentType.Container,
@@ -130,14 +130,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
           description: `${guild.name} Server Icon`
         } : undefined
       },
-
+      
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-
+      
       // Prefix & Usage Section
       {
         type: ComponentType.Section,
@@ -155,14 +155,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
           emoji: { name: "🔍" }
         }
       },
-
+      
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-
+      
       // Main Modules Section
       {
         type: ComponentType.Section,
@@ -180,14 +180,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
           emoji: { name: "📦" }
         }
       },
-
+      
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-
+      
       // Extra Modules Section
       {
         type: ComponentType.Section,
@@ -205,14 +205,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
           emoji: { name: "🎁" }
         }
       },
-
+      
       // Separator
       {
         type: ComponentType.Separator,
         divider: false,
         spacing: 1
       },
-
+      
       // Footer
       {
         type: ComponentType.TextDisplay,
