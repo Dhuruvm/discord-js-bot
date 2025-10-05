@@ -40,7 +40,7 @@ module.exports = {
 
     // !help
     if (!trigger) {
-      const response = await getHelpMenu(message, data.prefix);
+      const response = await getHelpMenu({ ...message, author: message.author }, data.prefix);
       const sentMsg = await message.channel.send(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
@@ -71,7 +71,7 @@ module.exports = {
     let cmdName = interaction.options.getString("command");
 
     if (!cmdName) {
-      const response = await getHelpMenu(interaction);
+      const response = await getHelpMenu({ ...interaction, author: interaction.user });
       const sentMsg = await interaction.followUp(response);
       return waiter(sentMsg, interaction.user.id);
     }
@@ -86,7 +86,7 @@ module.exports = {
   },
 };
 
-async function getHelpMenu({ client, guild }, prefix) {
+async function getHelpMenu({ client, guild, author }, prefix) {
   const mainCategories = [];
   const extraCategories = [];
 
@@ -111,10 +111,11 @@ async function getHelpMenu({ client, guild }, prefix) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: client.user.username,
-      iconURL: client.user.displayAvatarURL()
+      name: author ? author.username : client.user.username,
+      iconURL: author ? author.displayAvatarURL() : client.user.displayAvatarURL()
     })
     .setDescription(description)
+    .setThumbnail(guild ? guild.iconURL() : null)
     .setFooter({ 
       text: "Powered by Blackbit Studio",
       iconURL: client.user.displayAvatarURL()
@@ -221,7 +222,7 @@ const waiter = (msg, userId, prefix) => {
       }
 
       case "home-btn": {
-        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild }, prefix);
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: msg.author || msg.interaction?.user }, prefix);
         currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
