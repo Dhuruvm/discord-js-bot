@@ -1,6 +1,6 @@
-const { EmbedBuilder, ChannelType, GuildVerificationLevel, MessageFlags, ComponentType } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
+const { EmbedBuilder, ChannelType, GuildVerificationLevel } = require("discord.js");
 const moment = require("moment");
+const { stripIndent } = require("common-tags");
 
 /**
  * @param {import('discord.js').Guild} guild
@@ -63,125 +63,63 @@ module.exports = async (guild) => {
     [GuildVerificationLevel.VeryHigh]: "🔒"
   }[guild.verificationLevel] || "📋";
 
-  // Build header section conditionally
-  const headerSection = {
-    type: ComponentType.Section,
-    components: [
-      {
-        type: ComponentType.TextDisplay,
-        content: `# 🏰 ${name}\n\nComprehensive server information and statistics.`
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`🏰 ${name}`)
+    .setDescription("Comprehensive server information and statistics.")
+    .addFields(
+      { 
+        name: "📋 Server Details", 
+        value: stripIndent`
+          **Server ID:** \`${id}\`
+          **Server Name:** ${name}
+          **Owner:** ${owner.user.username}
+          **Region:** ${preferredLocale}
+        `,
+        inline: false 
+      },
+      { 
+        name: `👥 Server Members [${all}]`, 
+        value: stripIndent`
+          **Members:** ${users}
+          **Bots:** ${bots}
+          
+          **Online Members:** ${onlineUsers}
+          **Online Bots:** ${onlineBots}
+          **Total Online:** ${onlineAll}
+        `,
+        inline: false 
+      },
+      { 
+        name: `📢 Channels & Categories [${totalChannels}]`, 
+        value: `**Categories:** ${categories} • **Text:** ${textChannels} • **Voice:** ${voiceChannels} • **Threads:** ${threadChannels}`,
+        inline: false 
+      },
+      { 
+        name: `🎭 Roles [${rolesCount}]`, 
+        value: rolesString || "No roles",
+        inline: false 
+      },
+      { 
+        name: "⚙️ Server Configuration", 
+        value: stripIndent`
+          **Verification Level:** ${verificationEmoji} ${verificationLevel}
+          **Boost Level:** 🚀 Tier ${guild.premiumTier} (${guild.premiumSubscriptionCount} boosts)
+        `,
+        inline: false 
+      },
+      { 
+        name: "📅 Server Created", 
+        value: `<t:${Math.floor(guild.createdAt.getTime() / 1000)}:F> (${createdAt.fromNow()})`,
+        inline: false 
       }
-    ]
-  };
-  
-  // Only add accessory if guild has an icon
+    )
+    .setFooter({ text: "Server Information" })
+    .setTimestamp();
+
   if (guild.iconURL()) {
-    headerSection.accessory = {
-      type: ComponentType.Thumbnail,
-      media: { url: guild.iconURL() },
-      description: `${name} Server Icon`
-    };
+    embed.setThumbnail(guild.iconURL());
   }
 
-  const container = {
-    type: ComponentType.Container,
-    accent_color: 0x5865F2,
-    components: [
-      // Header Section
-      headerSection,
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Basic Info Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 📋 Server Details\n\n**Server ID:** \`${id}\`\n**Server Name:** ${name}\n**Owner:** ${owner.user.username}\n**Region:** ${preferredLocale}`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Members Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 👥 Server Members [${all}]\n\n**Members:** ${users}\n**Bots:** ${bots}\n\n**Online Members:** ${onlineUsers}\n**Online Bots:** ${onlineBots}\n**Total Online:** ${onlineAll}`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Channels Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 📢 Channels & Categories [${totalChannels}]\n\n**Categories:** ${categories} • **Text:** ${textChannels} • **Voice:** ${voiceChannels} • **Threads:** ${threadChannels}`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Roles Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 🎭 Roles [${rolesCount}]\n\n${rolesString}`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Server Stats Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### ⚙️ Server Configuration\n\n**Verification Level:** ${verificationEmoji} ${verificationLevel}\n**Boost Level:** 🚀 Tier ${guild.premiumTier} (${guild.premiumSubscriptionCount} boosts)`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Creation Date Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 📅 Server Created\n\n<t:${Math.floor(guild.createdAt.getTime() / 1000)}:F> (${createdAt.fromNow()})`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: false,
-        spacing: 1
-      },
-      
-      // Footer
-      {
-        type: ComponentType.TextDisplay,
-        content: `*Server Information* • <t:${Math.floor(Date.now() / 1000)}:R>`
-      }
-    ]
-  };
-
-  return { components: [container], flags: MessageFlags.IsComponentsV2 };
+  return { embeds: [embed] };
 };

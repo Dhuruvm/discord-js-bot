@@ -9,8 +9,6 @@ const {
   CommandInteraction,
   ApplicationCommandOptionType,
   ButtonStyle,
-  MessageFlags,
-  ComponentType,
 } = require("discord.js");
 const { getCommandUsage, getSlashUsage } = require("@handlers/command");
 
@@ -110,116 +108,33 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
 
   const prefixText = prefix || '!';
   
-  // Modern Container with Components V2
-  const container = {
-    type: ComponentType.Container,
-    accent_color: 0x5865F2,
-    components: [
-      // Header Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `# ${client?.user?.username || 'Bot'} Help Menu\n\nExplore all available commands and features. Use the menu below to navigate through different command categories.`
-          }
-        ],
-        accessory: guild?.iconURL() ? {
-          type: ComponentType.Thumbnail,
-          media: { url: guild.iconURL() },
-          description: `${guild.name} Server Icon`
-        } : undefined
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`📚 ${client?.user?.username || 'Bot'} Help Menu`)
+    .setDescription("Explore all available commands and features. Use the menu below to navigate through different command categories.")
+    .addFields(
+      { 
+        name: "📋 Getting Started", 
+        value: `**Command Prefix:** \`${prefixText}\`\n**Usage:** \`${prefixText}help <command | module>\``,
+        inline: false 
       },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
+      { 
+        name: "🎯 Main Modules", 
+        value: mainCategories.join(' • '),
+        inline: false 
       },
-      
-      // Prefix & Usage Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `### 📋 Getting Started\n\n**Command Prefix:** \`${prefixText}\`\n**Usage:** \`${prefixText}help <command | module>\``
-          }
-        ],
-        accessory: {
-          type: ComponentType.Button,
-          style: ButtonStyle.Secondary,
-          label: "Search Command",
-          custom_id: "search-command-btn",
-          emoji: { name: "🔍" }
-        }
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Main Modules Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `### 🎯 Main Modules\n\n${mainCategories.join(' • ')}`
-          }
-        ],
-        accessory: {
-          type: ComponentType.Button,
-          style: ButtonStyle.Primary,
-          label: "Main Module",
-          custom_id: "main-module-btn",
-          emoji: { name: "📦" }
-        }
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Extra Modules Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `### ✨ Extra Modules\n\n${extraCategories.join(' • ')}`
-          }
-        ],
-        accessory: {
-          type: ComponentType.Button,
-          style: ButtonStyle.Primary,
-          label: "Extra Module",
-          custom_id: "extra-module-btn",
-          emoji: { name: "🎁" }
-        }
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: false,
-        spacing: 1
-      },
-      
-      // Footer
-      {
-        type: ComponentType.TextDisplay,
-        content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
+      { 
+        name: "✨ Extra Modules", 
+        value: extraCategories.join(' • '),
+        inline: false 
       }
-    ]
-  };
+    )
+    .setFooter({ text: "Powered by Blackbit Studio" })
+    .setTimestamp();
+
+  if (guild?.iconURL()) {
+    embed.setThumbnail(guild.iconURL());
+  }
 
   // Category selector menu
   const menuRow = new ActionRowBuilder().addComponents(
@@ -253,8 +168,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   );
 
   return {
-    components: [container, menuRow, linksRow],
-    flags: MessageFlags.IsComponentsV2
+    embeds: [embed],
+    components: [menuRow, linksRow]
   };
 }
 
@@ -288,7 +203,7 @@ const waiter = (msg, userId, prefix) => {
             .setEmoji("💬")
         );
         currentComponents = [backRow, linkRow];
-        msg.editable && (await msg.edit({ ...mainResponse, components: [...mainResponse.components, ...currentComponents] }));
+        msg.editable && (await msg.edit({ embeds: mainResponse.embeds, components: currentComponents }));
         break;
       }
 
@@ -308,64 +223,33 @@ const waiter = (msg, userId, prefix) => {
             .setEmoji("💬")
         );
         currentComponents = [backRow, linkRow];
-        msg.editable && (await msg.edit({ ...extraResponse, components: [...extraResponse.components, ...currentComponents] }));
+        msg.editable && (await msg.edit({ embeds: extraResponse.embeds, components: currentComponents }));
         break;
       }
 
       case "search-command-btn": {
-        const searchContainer = {
-          type: ComponentType.Container,
-          accent_color: 0x57F287,
-          components: [
-            {
-              type: ComponentType.Section,
-              components: [
-                {
-                  type: ComponentType.TextDisplay,
-                  content: `# 🔍 Command Search\n\nNeed help with a specific command? Search for it directly using the prefix command.`
-                }
-              ],
-              accessory: {
-                type: ComponentType.Button,
-                style: ButtonStyle.Secondary,
-                label: "Back",
-                custom_id: "home-btn",
-                emoji: { name: "◀️" }
-              }
+        const searchEmbed = new EmbedBuilder()
+          .setColor(0x57F287)
+          .setTitle("🔍 Command Search")
+          .setDescription("Need help with a specific command? Search for it directly using the prefix command.")
+          .addFields(
+            { 
+              name: "🔍 How to Search", 
+              value: `Use \`${prefix || '!'}help <command>\` to get detailed information about any command.`,
+              inline: false 
             },
-            {
-              type: ComponentType.Separator,
-              divider: true,
-              spacing: 2
-            },
-            {
-              type: ComponentType.TextDisplay,
-              content: `### 🔍 How to Search\n\nUse \`${prefix || '!'}help <command>\` to get detailed information about any command.`
-            },
-            {
-              type: ComponentType.Separator,
-              divider: true,
-              spacing: 2
-            },
-            {
-              type: ComponentType.TextDisplay,
-              content: `### 📝 Example\n\n\`${prefix || '!'}help ban\`\n\nThis will show you everything you need to know about the ban command.`
-            },
-            {
-              type: ComponentType.Separator,
-              divider: false,
-              spacing: 1
-            },
-            {
-              type: ComponentType.TextDisplay,
-              content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
+            { 
+              name: "📝 Example", 
+              value: `\`${prefix || '!'}help ban\`\n\nThis will show you everything you need to know about the ban command.`,
+              inline: false 
             }
-          ]
-        };
+          )
+          .setFooter({ text: "Powered by Blackbit Studio" })
+          .setTimestamp();
 
         const backRow = getBackButton();
         currentComponents = [backRow];
-        msg.editable && (await msg.edit({ components: [searchContainer, ...currentComponents], flags: MessageFlags.IsComponentsV2 }));
+        msg.editable && (await msg.edit({ embeds: [searchEmbed], components: currentComponents }));
         break;
       }
 
@@ -393,7 +277,7 @@ const waiter = (msg, userId, prefix) => {
             .setEmoji("💬")
         );
         currentComponents = [backRow, linkRow];
-        msg.editable && (await msg.edit({ ...categoryResponse, components: [...categoryResponse.components, ...currentComponents] }));
+        msg.editable && (await msg.edit({ embeds: categoryResponse.embeds, components: currentComponents }));
         break;
       }
     }
@@ -439,46 +323,16 @@ function getModuleEmbed(client, type, prefix, userId) {
   const moduleTitle = type.charAt(0).toUpperCase() + type.slice(1);
   const moduleIcon = type === "main" ? "🎯" : "✨";
 
-  const container = {
-    type: ComponentType.Container,
-    accent_color: type === "main" ? 0x5865F2 : 0x9B59B6,
-    components: [
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `# ${moduleIcon} ${moduleTitle} Modules\n\nBrowse through our ${moduleTitle.toLowerCase()} command categories and discover powerful features for your server.`
-          }
-        ],
-        accessory: {
-          type: ComponentType.Thumbnail,
-          media: { url: client?.user?.displayAvatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png" },
-          description: `${client?.user?.username || 'Bot'} Avatar`
-        }
-      },
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 📚 Available Categories\n\n${categoryList}`
-      },
-      {
-        type: ComponentType.Separator,
-        divider: false,
-        spacing: 1
-      },
-      {
-        type: ComponentType.TextDisplay,
-        content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
-      }
-    ]
-  };
+  const embed = new EmbedBuilder()
+    .setColor(type === "main" ? 0x5865F2 : 0x9B59B6)
+    .setTitle(`${moduleIcon} ${moduleTitle} Modules`)
+    .setDescription(`Browse through our ${moduleTitle.toLowerCase()} command categories and discover powerful features for your server.`)
+    .setThumbnail(client?.user?.displayAvatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png")
+    .addFields({ name: "📚 Available Categories", value: categoryList, inline: false })
+    .setFooter({ text: "Powered by Blackbit Studio" })
+    .setTimestamp();
 
-  return { components: [container], flags: MessageFlags.IsComponentsV2 };
+  return { embeds: [embed] };
 }
 
 function getCategoryEmbed(client, category, prefix) {
@@ -486,31 +340,13 @@ function getCategoryEmbed(client, category, prefix) {
   const categoryInfo = CommandCategory[category];
 
   if (commands.length === 0) {
-    const container = {
-      type: ComponentType.Container,
-      accent_color: 0xED4245,
-      components: [
-        {
-          type: ComponentType.Section,
-          components: [
-            {
-              type: ComponentType.TextDisplay,
-              content: `# ${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}\n\nThis category is currently empty. Check back later for new commands!`
-            }
-          ]
-        },
-        {
-          type: ComponentType.Separator,
-          divider: false,
-          spacing: 1
-        },
-        {
-          type: ComponentType.TextDisplay,
-          content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
-        }
-      ]
-    };
-    return { components: [container], flags: MessageFlags.IsComponentsV2 };
+    const embed = new EmbedBuilder()
+      .setColor(0xED4245)
+      .setTitle(`${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}`)
+      .setDescription("This category is currently empty. Check back later for new commands!")
+      .setFooter({ text: "Powered by Blackbit Studio" })
+      .setTimestamp();
+    return { embeds: [embed] };
   }
 
   const commandsList = commands.map(cmd => {
@@ -523,55 +359,19 @@ function getCategoryEmbed(client, category, prefix) {
     return `\`${cmd.name}\``;
   }).join(', ');
 
-  const container = {
-    type: ComponentType.Container,
-    accent_color: 0x5865F2,
-    components: [
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `# ${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}\n\n${categoryInfo?.description || 'Explore the commands in this category'}`
-          }
-        ],
-        accessory: {
-          type: ComponentType.Thumbnail,
-          media: { url: client?.user?.displayAvatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png" },
-          description: `${categoryInfo?.name} Category`
-        }
-      },
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 📝 Available Commands\n\n${commandsList}`
-      },
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 💡 Need Help?\n\nUse \`${prefix || '!'}help <command>\` to get detailed information about a specific command.`
-      },
-      {
-        type: ComponentType.Separator,
-        divider: false,
-        spacing: 1
-      },
-      {
-        type: ComponentType.TextDisplay,
-        content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
-      }
-    ]
-  };
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}`)
+    .setDescription(categoryInfo?.description || 'Explore the commands in this category')
+    .setThumbnail(client?.user?.displayAvatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png")
+    .addFields(
+      { name: "📝 Available Commands", value: commandsList, inline: false },
+      { name: "💡 Need Help?", value: `Use \`${prefix || '!'}help <command>\` to get detailed information about a specific command.`, inline: false }
+    )
+    .setFooter({ text: "Powered by Blackbit Studio" })
+    .setTimestamp();
 
-  return { components: [container], flags: MessageFlags.IsComponentsV2 };
+  return { embeds: [embed] };
 }
 
 function getBackButton() {

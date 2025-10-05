@@ -1,6 +1,6 @@
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, ComponentType } = require("discord.js");
-const { EMBED_COLORS, SUPPORT_SERVER, DASHBOARD } = require("@root/config");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
 const os = require("os");
 const { stripIndent } = require("common-tags");
@@ -46,113 +46,49 @@ module.exports = async (client) => {
     devList = `${founderMention}, ${devMentions}`;
   }
 
-  // Modern Container with Components V2
-  const container = {
-    type: ComponentType.Container,
-    accent_color: 0x5865F2,
-    components: [
-      // Header Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `# 📊 ${client.user.username} Statistics\n\nComprehensive statistics and system information about your bot.`
-          }
-        ],
-        accessory: {
-          type: ComponentType.Thumbnail,
-          media: { url: client.user.displayAvatarURL() },
-          description: `${client.user.username} Avatar`
-        }
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`📊 ${client.user.username} Statistics`)
+    .setDescription("Comprehensive statistics and system information about your bot.")
+    .setThumbnail(client.user.displayAvatarURL())
+    .addFields(
+      { 
+        name: "🌐 Bot Overview", 
+        value: stripIndent`
+          **Total Guilds:** \`${guilds}\`
+          **Total Users:** \`${users.toLocaleString()}\`
+          **Total Channels:** \`${channels}\`
+          **Websocket Ping:** \`${client.ws.ping}ms\`
+        `,
+        inline: false 
       },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
+      { 
+        name: "👑 Founder & Developers", 
+        value: devList,
+        inline: false 
       },
-      
-      // Bot Overview Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 🌐 Bot Overview\n\n` +
-          `**Total Guilds:** \`${guilds}\`\n` +
-          `**Total Users:** \`${users.toLocaleString()}\`\n` +
-          `**Total Channels:** \`${channels}\`\n` +
-          `**Websocket Ping:** \`${client.ws.ping}ms\``
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Team Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 👑 Founder & Developers\n\n${devList}`
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // System Information Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 💻 System Information\n\n` +
-          stripIndent`
+      { 
+        name: "💻 System Information", 
+        value: stripIndent`
           **Operating System:** ${platform} [${architecture}]
           **CPU Cores:** ${cores}
           **CPU Usage:** ${cpuUsage}
           **Node.js Version:** ${process.versions.node}
           **Bot Uptime:** ${timeformat(process.uptime())}
-          `
+        `,
+        inline: false 
       },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: true,
-        spacing: 2
-      },
-      
-      // Memory Information Section
-      {
-        type: ComponentType.TextDisplay,
-        content: `### 🔧 Memory Usage\n\n` +
-          stripIndent`
-          **Bot Memory Used:** ${botUsed}
-          **Bot Memory Available:** ${botAvailable}
-          **Bot Memory Usage:** ${botUsage}
-          
-          **System Memory Used:** ${overallUsed}
-          **System Memory Available:** ${overallAvailable}
-          **System Memory Usage:** ${overallUsage}
-          `
-      },
-      
-      // Separator
-      {
-        type: ComponentType.Separator,
-        divider: false,
-        spacing: 1
-      },
-      
-      // Footer
-      {
-        type: ComponentType.TextDisplay,
-        content: `*${client.user.username} • Powered by Discord.js* • <t:${Math.floor(Date.now() / 1000)}:R>`
+      { 
+        name: "🔧 Memory Usage", 
+        value: stripIndent`
+          **Bot:** ${botUsed} / ${botAvailable} (${botUsage})
+          **System:** ${overallUsed} / ${overallAvailable} (${overallUsage})
+        `,
+        inline: false 
       }
-    ]
-  };
+    )
+    .setFooter({ text: `${client.user.username} • Powered by Discord.js` })
+    .setTimestamp();
 
   let row1Components = [];
   let row2Components = [];
@@ -199,7 +135,7 @@ module.exports = async (client) => {
       .setStyle(ButtonStyle.Link)
   );
 
-  let components = [container];
+  let components = [];
   
   if (row1Components.length > 0) {
     components.push(new ActionRowBuilder().addComponents(row1Components));
@@ -208,5 +144,5 @@ module.exports = async (client) => {
     components.push(new ActionRowBuilder().addComponents(row2Components));
   }
 
-  return { components, flags: MessageFlags.IsComponentsV2 };
+  return { embeds: [embed], components };
 };
