@@ -83,23 +83,47 @@ async function ban(issuer, target, reason) {
   
   if (response === "BOT_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setDescription(`${EMOJIS.ERROR} **Error:** I do not have permission to ban **${targetUsername}**`)
+      .setColor("#2B2D31");
+    
+    if (issuer?.user) {
+      embed.setAuthor({ 
+        name: issuer.user.username,
+        iconURL: issuer.user.displayAvatarURL()
+      });
+    }
+    
+    embed.setDescription(`${EMOJIS.ERROR} | I do not have permission to ban **${targetUsername}**!`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "MEMBER_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setDescription(`${EMOJIS.ERROR} **Error:** You need to have a higher role than me to execute this command`)
+      .setColor("#2B2D31");
+    
+    if (issuer?.user) {
+      embed.setAuthor({ 
+        name: issuer.user.username,
+        iconURL: issuer.user.displayAvatarURL()
+      });
+    }
+    
+    embed.setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command.!`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setDescription(`${EMOJIS.ERROR} **Error:** Failed to ban **${targetUsername}**`)
+    .setColor("#2B2D31");
+  
+  if (issuer?.user) {
+    embed.setAuthor({ 
+      name: issuer.user.username,
+      iconURL: issuer.user.displayAvatarURL()
+    });
+  }
+  
+  embed.setDescription(`${EMOJIS.ERROR} | Failed to ban **${targetUsername}**!`)
     .setTimestamp();
   return { embeds: [embed] };
 }

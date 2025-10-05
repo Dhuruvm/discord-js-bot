@@ -97,16 +97,32 @@ async function timeout(issuer, target, ms, reason) {
   
   if (response === "BOT_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | I do not have permission to timeout **${target.user.username}**!`)
+      .setColor("#2B2D31");
+    
+    if (issuer?.user) {
+      embed.setAuthor({ 
+        name: issuer.user.username,
+        iconURL: issuer.user.displayAvatarURL()
+      });
+    }
+    
+    embed.setDescription(`${EMOJIS.ERROR} | I do not have permission to timeout **${target.user.username}**!`)
       .setTimestamp();
     return { embeds: [embed] };
   }
   
   if (response === "MEMBER_PERM") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command!`)
+      .setColor("#2B2D31");
+    
+    if (issuer?.user) {
+      embed.setAuthor({ 
+        name: issuer.user.username,
+        iconURL: issuer.user.displayAvatarURL()
+      });
+    }
+    
+    embed.setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command.!`)
       .setTimestamp();
     return { embeds: [embed] };
   }
