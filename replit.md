@@ -71,7 +71,10 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 - **Modern Embed System**: All bot responses utilize clean, professional Discord embeds with EmbedBuilder for consistent UI across all commands.
 - **ModernEmbed Helper Class**: Simplifies creation of professional embeds with standardized designs (success, error, warning, info messages) using Discord.js EmbedBuilder.
+- **Interactive Components**: Enhanced ModernEmbed system supports adding buttons, select menus, and action rows below embeds for modern, interactive user experiences following Discord's latest component specifications.
+- **ComponentBuilder Utility**: Pre-built component patterns for pagination, confirmation dialogs, navigation, links, filters, and settings provide consistent interactive UI across commands.
 - **Design Patterns**: Clean embeds without ASCII art decorations, using emoji headers, field-based layouts, color-coded responses (Green for success, Red for error, Yellow for warning, Blurple for info), and native Discord timestamps.
+- **Professional Component Usage**: Buttons and select menus are used strategically, not overused - typically 1-2 action rows per message with clear, concise labels following Discord's component design guidelines.
 - **No ASCII Decorations**: All decorative ASCII art (borders, boxes, separators like ╭╮╯╰) has been removed for a cleaner, modern appearance.
 - **Discord.js Version**: Updated to v14.22.1 for latest features and improvements.
 - **Profile Card Redesign**: `profile` command generates a premium-style Discord profile card image with dark theme, gradient banner, glowing avatar ring, status indicator, and activity display.
