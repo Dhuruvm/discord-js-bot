@@ -116,36 +116,20 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const prefixText = prefix || '?';
   
   const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
+    .setColor(0x2B2D31)
     .setAuthor({ 
       name: `${client?.user?.username || 'Bot'} Command Menu`,
       iconURL: client?.user?.displayAvatarURL()
     })
     .setDescription(
-      `╭━━━┳╮╱╱╭┳━━━┳╮╱╱╱╭━━━┳━━━┳━╮╭━┳━━━╮\n` +
-      `┃╭━╮┃┃╱╱┃┃╭━━┫┃╱╱╱┃╭━╮┃╭━╮┃┃╰╯┃┃╭━━╯\n` +
-      `┃┃╱┃┃┃╱╱┃┃╰━━┫┃╱╱╱┃┃╱╰┫┃╱┃┃╭╮╭╮┃╰━━╮\n` +
-      `┃╰━╯┃┃╱╭┫┃╭━━┫┃╱╭╮┃┃╱╭┫┃╱┃┃┃┃┃┃┃╭━━╯\n` +
-      `┃╭━╮┃╰━╯┃┃╰━━┫╰━╯┃┃╰━╯┃╰━╯┃┃┃┃┃┃╰━━╮\n` +
-      `╰╯╱╰┻━━━┻┻━━━┻━━━╯╰━━━┻━━━┻╯╰╯╰┻━━━╯\n\n` +
-      `**┊ ⋆ ┊ . ┊ ┊ ┊ ┊ ⋆ ┊ . ┊ ┊**\n\n` +
-      `╭━━━━━━━━━━━━━━━━━━━━━━━━╮\n` +
-      `│ 📖 **Command Information** │\n` +
-      `╰━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
-      `• **An asterisk (*) means the command has subcommands**\n` +
-      `• *View ${client?.user?.username || 'bot'} commands using the menu below*\n` +
-      `• *Or view the commands on our [**\` Documentation \`**](https://github.com/encrypment)*\n\n` +
-      `**┊ ⋆ ┊ . ┊ ┊ ┊ ┊ ⋆ ┊ . ┊ ┊**`
+      `• **an asterisk(*) means the command has subcommands**\n` +
+      `• *View ${client?.user?.username || 'bot'} commands using the menu below.*\n` +
+      `• *Or view the commands on our [**\` Docs \`**](https://github.com/encrypment)*`
     )
-    .setFooter({ text: "✨ Powered by Blackbit Studio ✨" })
-    .setTimestamp();
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   if (client?.user?.displayAvatarURL()) {
     embed.setThumbnail(client.user.displayAvatarURL());
-  }
-
-  if (guild?.iconURL()) {
-    embed.setImage(guild.iconURL({ size: 256 }));
   }
 
   const menuRow = new ActionRowBuilder().addComponents(
