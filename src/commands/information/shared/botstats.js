@@ -114,17 +114,19 @@ module.exports = async (client) => {
     .setFooter({ text: "Cybork • Powered by Discord.js", iconURL: client.user.displayAvatarURL() })
     .setTimestamp();
 
-  let components = [];
-  components.push(
+  let row1Components = [];
+  let row2Components = [];
+  
+  row1Components.push(
     new ButtonBuilder()
-      .setLabel("Invite Cybork")
+      .setLabel("Invite Bot")
       .setEmoji("🔗")
       .setURL(client.getInvite())
       .setStyle(ButtonStyle.Link)
   );
 
   if (SUPPORT_SERVER) {
-    components.push(
+    row1Components.push(
       new ButtonBuilder()
         .setLabel("Support Server")
         .setEmoji("💬")
@@ -134,7 +136,7 @@ module.exports = async (client) => {
   }
 
   if (DASHBOARD.enabled) {
-    components.push(
+    row1Components.push(
       new ButtonBuilder()
         .setLabel("Dashboard")
         .setEmoji("🌐")
@@ -143,7 +145,24 @@ module.exports = async (client) => {
     );
   }
 
-  let buttonsRow = new ActionRowBuilder().addComponents(components);
+  // Add vote/review buttons
+  row2Components.push(
+    new ButtonBuilder()
+      .setLabel("Vote for Bot")
+      .setEmoji("⭐")
+      .setURL("https://top.gg/")
+      .setStyle(ButtonStyle.Link),
+    new ButtonBuilder()
+      .setLabel("Documentation")
+      .setEmoji("📚")
+      .setURL("https://github.com")
+      .setStyle(ButtonStyle.Link)
+  );
 
-  return { embeds: [embed], components: [buttonsRow] };
+  let components = [new ActionRowBuilder().addComponents(row1Components)];
+  if (row2Components.length > 0) {
+    components.push(new ActionRowBuilder().addComponents(row2Components));
+  }
+
+  return { embeds: [embed], components };
 };

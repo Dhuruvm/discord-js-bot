@@ -199,7 +199,17 @@ const waiter = (msg, userId, prefix) => {
       case "main-module-btn": {
         const mainEmbed = getModuleEmbed(msg.client, "main", prefix, response.user.id);
         const backRow = getBackButton();
-        currentComponents = [backRow];
+        const linkRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setLabel(`Invite ${msg.client?.user?.username || 'Bot'}`)
+            .setStyle(ButtonStyle.Link)
+            .setURL(msg.client?.getInvite ? msg.client.getInvite() : "https://discord.com"),
+          new ButtonBuilder()
+            .setLabel("Support Server")
+            .setStyle(ButtonStyle.Link)
+            .setURL(SUPPORT_SERVER || "https://discord.com")
+        );
+        currentComponents = [backRow, linkRow];
         msg.editable && (await msg.edit({ embeds: [mainEmbed], components: currentComponents }));
         break;
       }
@@ -207,7 +217,17 @@ const waiter = (msg, userId, prefix) => {
       case "extra-module-btn": {
         const extraEmbed = getModuleEmbed(msg.client, "extra", prefix, response.user.id);
         const backRow = getBackButton();
-        currentComponents = [backRow];
+        const linkRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setLabel(`Invite ${msg.client?.user?.username || 'Bot'}`)
+            .setStyle(ButtonStyle.Link)
+            .setURL(msg.client?.getInvite ? msg.client.getInvite() : "https://discord.com"),
+          new ButtonBuilder()
+            .setLabel("Support Server")
+            .setStyle(ButtonStyle.Link)
+            .setURL(SUPPORT_SERVER || "https://discord.com")
+        );
+        currentComponents = [backRow, linkRow];
         msg.editable && (await msg.edit({ embeds: [extraEmbed], components: currentComponents }));
         break;
       }
@@ -249,7 +269,17 @@ const waiter = (msg, userId, prefix) => {
         const cat = response.values[0].toUpperCase();
         const categoryEmbed = getCategoryEmbed(msg.client, cat, prefix);
         const backRow = getBackButton();
-        currentComponents = [backRow];
+        const linkRow = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setLabel(`Invite ${msg.client?.user?.username || 'Bot'}`)
+            .setStyle(ButtonStyle.Link)
+            .setURL(msg.client?.getInvite ? msg.client.getInvite() : "https://discord.com"),
+          new ButtonBuilder()
+            .setLabel("Support Server")
+            .setStyle(ButtonStyle.Link)
+            .setURL(SUPPORT_SERVER || "https://discord.com")
+        );
+        currentComponents = [backRow, linkRow];
         msg.editable && (await msg.edit({ embeds: [categoryEmbed], components: currentComponents }));
         break;
       }
@@ -354,6 +384,7 @@ function getCategoryEmbed(client, category, prefix) {
     .setDescription(
       `╭───── **${CommandCategory[category]?.name}** ─────╮\n\n` +
       `${commandsList}\n\n` +
+      `💡 Use \`${prefix || '!'}help <command>\` for details\n\n` +
       `╰──────────────────────╯`
     )
     .setFooter({ 
