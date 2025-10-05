@@ -74,13 +74,13 @@ async function ban(issuer, target, reason) {
   
   if (response === "BOT_PERM") {
     return ModernEmbed.simpleError(
-      `You need to have a higher role than ${targetUsername} to execute this command.!`
+      `I don't have permission to ban ${targetUsername}. Please ensure I have a role higher than the target user.`
     );
   }
   
   if (response === "MEMBER_PERM") {
     return ModernEmbed.simpleError(
-      `You need to have a higher role than ${targetUsername} to execute this command.!`
+      `You need to have a higher role than ${targetUsername} to execute this command!`
     );
   }
   

@@ -1,5 +1,6 @@
 const { unTimeoutTarget } = require("@helpers/ModUtils");
 const { ApplicationCommandOptionType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 
 /**
  * @type {import("@structures/Command")}
@@ -53,10 +54,37 @@ module.exports = {
 };
 
 async function untimeout(issuer, target, reason) {
-  const response = await unTimeoutTarget(issuer, target, reason);
-  if (typeof response === "boolean") return `Timeout of ${target.user.username} is removed!`;
-  if (response === "BOT_PERM") return `I do not have permission to remove timeout of ${target.user.username}`;
-  else if (response === "MEMBER_PERM") return `You do not have permission to remove timeout of ${target.user.username}`;
-  else if (response === "NO_TIMEOUT") return `${target.user.username} is not timed out!`;
-  else return `Failed to remove timeout of ${target.user.username}`;
+  const response = await untimeoutTarget(issuer, target, reason);
+
+  const targetUsername = target.user?.username || target.username;
+
+  if (typeof response === "boolean") {
+    return ModernEmbed.success(
+      "Timeout Removed",
+      `Successfully removed timeout from **${targetUsername}**.\n**Reason:** ${reason || "No reason provided"}`,
+      `Removed by ${issuer.user.username}`
+    );
+  }
+
+  if (response === "BOT_PERM") {
+    return ModernEmbed.simpleError(
+      `I don't have permission to remove timeout from ${targetUsername}.`
+    );
+  }
+
+  if (response === "MEMBER_PERM") {
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command!`
+    );
+  }
+
+  if (response === "NO_TIMEOUT") {
+    return ModernEmbed.simpleError(
+      `**${targetUsername}** is not timed out!`
+    );
+  }
+
+  return ModernEmbed.simpleError(
+    `Failed to remove timeout from **${targetUsername}**. Please try again or contact an administrator.`
+  );
 }

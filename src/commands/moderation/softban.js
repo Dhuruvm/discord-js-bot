@@ -1,5 +1,6 @@
 const { softbanTarget } = require("@helpers/ModUtils");
 const { ApplicationCommandOptionType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 
 /**
  * @type {import("@structures/Command")}
@@ -54,8 +55,30 @@ module.exports = {
 
 async function softban(issuer, target, reason) {
   const response = await softbanTarget(issuer, target, reason);
-  if (typeof response === "boolean") return `${target.user.username} is soft-banned!`;
-  if (response === "BOT_PERM") return `I do not have permission to softban ${target.user.username}`;
-  else if (response === "MEMBER_PERM") return `You do not have permission to softban ${target.user.username}`;
-  else return `Failed to softban ${target.user.username}`;
+
+  const targetUsername = target.user?.username || target.username;
+
+  if (typeof response === "boolean") {
+    return ModernEmbed.success(
+      "Member Softbanned",
+      `**${targetUsername}** has been softbanned (banned and unbanned to clear messages).\n**Reason:** ${reason || "No reason provided"}`,
+      `Softbanned by ${issuer.user.username}`
+    );
+  }
+
+  if (response === "BOT_PERM") {
+    return ModernEmbed.simpleError(
+      `I don't have permission to softban ${targetUsername}. Please ensure I have a role higher than the target user.`
+    );
+  }
+
+  if (response === "MEMBER_PERM") {
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command!`
+    );
+  }
+
+  return ModernEmbed.simpleError(
+    `Failed to softban **${targetUsername}**. Please try again or contact an administrator.`
+  );
 }

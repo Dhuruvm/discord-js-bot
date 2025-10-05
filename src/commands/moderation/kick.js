@@ -75,7 +75,7 @@ async function kick(issuer, target, reason) {
   
   if (response === "MEMBER_PERM") {
     return ModernEmbed.simpleError(
-      `You need to have a higher role than ${targetUsername} to execute this command.!`
+      `You need to have a higher role than ${targetUsername} to execute this command!`
     );
   }
   

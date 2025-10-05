@@ -1,8 +1,7 @@
 const { timeoutTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
-const EMOJIS = require("@helpers/EmojiConstants");
+const { ApplicationCommandOptionType } = require("discord.js");
 const ems = require("enhanced-ms");
+const ModernEmbed = require("@helpers/ModernEmbed");
 
 /**
  * @type {import("@structures/Command")}
@@ -52,7 +51,7 @@ module.exports = {
     if (!ms) return message.safeReply("Please provide a valid duration. Example: 1d/1h/1m/1s");
 
     const reason = args.slice(2).join(" ").trim();
-    const response = await timeout(message.member, target, ms, reason);
+    const response = await timeout(message.member, target, reason, ms);
     await message.safeReply(response);
   },
 
@@ -67,77 +66,43 @@ module.exports = {
     const reason = interaction.options.getString("reason");
     const target = await interaction.guild.members.fetch(user.id);
 
-    const response = await timeout(interaction.member, target, ms, reason);
+    const response = await timeout(interaction.member, target, reason, ms);
     await interaction.followUp(response);
   },
 };
 
-async function timeout(issuer, target, ms, reason) {
-  if (isNaN(ms)) {
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(`${EMOJIS.ERROR} | Please provide a valid duration. Example: \`1d/1h/1m/1s\``)
-      .setTimestamp();
-    return { embeds: [embed] };
-  }
-  
+async function timeout(issuer, target, reason, ms) {
   const response = await timeoutTarget(issuer, target, ms, reason);
-  
+
+  const targetUsername = target.user?.username || target.username;
+
   if (typeof response === "boolean") {
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.SUCCESS)
-      .setDescription(`${EMOJIS.TIMEOUT} | **${target.user.username}** has been timed out!`)
-      .addFields(
-        { name: "Reason", value: reason || "No reason provided", inline: false },
-        { name: "Duration", value: `<t:${Math.round((Date.now() + ms) / 1000)}:R>`, inline: false }
-      )
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.success(
+      "Member Timed Out",
+      `**${targetUsername}** has been timed out.\n**Reason:** ${reason || "No reason provided"}\n**Duration:** <t:${Math.round((Date.now() + ms) / 1000)}:R>`,
+      `Timed out by ${issuer.user.username}`
+    );
   }
-  
+
   if (response === "BOT_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to timeout **${target.user.username}**`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.simpleError(
+      `I don't have permission to timeout ${targetUsername}. Please ensure I have a role higher than the target user.`
+    );
   }
-  
+
   if (response === "MEMBER_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command!`
+    );
   }
-  
+
   if (response === "ALREADY_TIMEOUT") {
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.WARNING)
-      .setDescription(`${EMOJIS.WARNING} | **${target.user.username}** is already timed out!`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.simpleError(
+      `**${targetUsername}** is already timed out!`
+    );
   }
-  
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.ERROR)
-    .setDescription(`${EMOJIS.ERROR} | Failed to timeout **${target.user.username}**`)
-    .setTimestamp();
-  return { embeds: [embed] };
+
+  return ModernEmbed.simpleError(
+    `Failed to timeout **${targetUsername}**. Please try again or contact an administrator.`
+  );
 }
