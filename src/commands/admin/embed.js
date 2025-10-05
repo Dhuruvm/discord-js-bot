@@ -47,6 +47,7 @@ module.exports = {
     if (!channel.canSendEmbeds()) {
       return message.reply("I don't have permission to send embeds in that channel");
     }
+    if (!message.member) return message.reply("Unable to fetch member information. Please try again.");
     message.reply(`Embed setup started in ${channel}`);
     await embedSetup(channel, message.member);
   },
