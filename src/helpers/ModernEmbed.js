@@ -7,7 +7,7 @@ const { EmbedBuilder } = require("discord.js");
 class ModernEmbed {
   constructor() {
     this.embed = new EmbedBuilder();
-    this.color = 0x5865F2; // Discord Blurple default
+    this.color = 0xFFFFFF; // White default
   }
 
   /**
@@ -116,7 +116,7 @@ class ModernEmbed {
    */
   static success(title, description, footer) {
     const embed = new ModernEmbed()
-      .setColor(0x57F287) // Green
+      .setColor(0xFFFFFF) // White
       .setHeader(`✅ ${title}`, description)
       .setTimestamp();
     
@@ -132,7 +132,7 @@ class ModernEmbed {
    */
   static error(title, description, footer) {
     const embed = new ModernEmbed()
-      .setColor(0xED4245) // Red
+      .setColor(0xFFFFFF) // White
       .setHeader(`❌ ${title}`, description)
       .setTimestamp();
     
@@ -148,7 +148,7 @@ class ModernEmbed {
    */
   static warning(title, description, footer) {
     const embed = new ModernEmbed()
-      .setColor(0xFEE75C) // Yellow
+      .setColor(0xFFFFFF) // White
       .setHeader(`⚠️ ${title}`, description)
       .setTimestamp();
     
@@ -164,7 +164,7 @@ class ModernEmbed {
    */
   static info(title, description, footer) {
     const embed = new ModernEmbed()
-      .setColor(0x5865F2) // Blurple
+      .setColor(0xFFFFFF) // White
       .setHeader(`ℹ️ ${title}`, description)
       .setTimestamp();
     
