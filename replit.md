@@ -24,6 +24,7 @@ Preferred communication style: Simple, everyday language.
 - **Schema Design**: Separate schemas for guild settings, user data, moderation logs, giveaways, reaction roles, etc.
 
 ### Feature Modules
+- **Bot Information**: Dedicated BOT category with ping, bot stats, uptime, invite links, and premium feature showcase.
 - **Music System**: Lavalink-based player with queue management and Spotify integration.
 - **Economy System**: Coin-based virtual economy with banking, daily rewards, and gambling.
 - **Moderation & Auto-Moderation**: Comprehensive mod actions (warn, kick, ban) and auto-moderation for spam, links, etc.
@@ -67,10 +68,12 @@ Preferred communication style: Simple, everyday language.
 ### Configuration Management
 - **Environment Variables**: Sensitive data via `.env`.
 - **Config File**: Central configuration for features, embed colors, cache sizes.
+- **Emoji Configuration**: Centralized emoji management via `emojis.json` with runtime reload capability.
 
 ### UI/UX Decisions
 - **Modern Embed System**: All bot responses utilize clean, professional Discord embeds with EmbedBuilder for consistent UI across all commands.
 - **ModernEmbed Helper Class**: Simplifies creation of professional embeds with standardized designs (success, error, warning, info messages) using Discord.js EmbedBuilder.
+- **Simple Message Formats**: Text-only success/error messages with dark theme (#2B2D31) using format: `✅ | message` or `❌ | message`.
 - **Interactive Components**: Enhanced ModernEmbed system supports adding buttons, select menus, and action rows below embeds for modern, interactive user experiences following Discord's latest component specifications.
 - **ComponentBuilder Utility**: Pre-built component patterns for pagination, confirmation dialogs, navigation, links, filters, and settings provide consistent interactive UI across commands.
 - **Design Patterns**: Clean embeds without ASCII art decorations, using emoji headers, field-based layouts, color-coded responses (Green for success, Red for error, Yellow for warning, Blurple for info), and native Discord timestamps.
@@ -78,7 +81,7 @@ Preferred communication style: Simple, everyday language.
 - **No ASCII Decorations**: All decorative ASCII art (borders, boxes, separators like ╭╮╯╰) has been removed for a cleaner, modern appearance.
 - **Discord.js Version**: Updated to v14.22.1 for latest features and improvements.
 - **Profile Card Redesign**: `profile` command generates a premium-style Discord profile card image with dark theme, gradient banner, glowing avatar ring, status indicator, and activity display.
-- **Custom Emoji Constants**: Consistent UI across commands using custom emoji constants.
+- **Centralized Emoji System**: All bot emojis managed through `emojis.json` config file with owner commands to add/remove/list/reload emojis at runtime.
 
 ## External Dependencies
 
