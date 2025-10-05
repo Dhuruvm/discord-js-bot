@@ -17,6 +17,11 @@ module.exports = {
     image: "https://wallpaperaccess.com/full/5680679.jpg",
     emoji: "🎨",
   },
+  BOT: {
+    name: "Bot",
+    image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/robot-icon.png",
+    emoji: "🤖",
+  },
   ECONOMY: {
     name: "Economy",
     enabled: config.ECONOMY.ENABLED,

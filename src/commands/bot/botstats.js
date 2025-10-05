@@ -16,7 +16,7 @@ module.exports = {
   cooldown: 5,
   command: {
     enabled: true,
-    aliases: ["botstats", "bi", "stats", "info"],
+    aliases: ["botstats", "bi", "info"],
   },
   slashCommand: {
     enabled: true,
