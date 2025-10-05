@@ -25,35 +25,57 @@ module.exports = async (client, message) => {
     // check for bot mentions
     if (message.content.includes(`${client.user.id}`)) {
       const embed = new EmbedBuilder()
-        .setColor("#5865F2")
+        .setColor("#FFFFFF")
         .setAuthor({ 
-          name: `Get Started with ${client.user.username}! Here are some quick actions to help you out!`,
+          name: `${client.user.username} • Quick Start Guide`,
           iconURL: client.user.displayAvatarURL()
         })
         .setDescription(
-          `Looking for commands? Here are some quick actions to help you out!\n\n` +
-          `**Need Assistance?**\n` +
-          `Check out \`${settings.prefix}help\` for a full list of commands or visit our Support Server to get help and stay updated.\n\n` +
-          `**Unlock More Power**\n` +
-          `Get advanced features, enhanced automod, priority security updates, 24/7 protection, and exclusive all-in-one tools with ${client.user.username} Premium. Perfect for keeping your community safe and secure!\n\n` +
-          `Developed with ❤️ by *Blackbit Studio*`
+          `╭───── **Welcome to ${client.user.username}** ─────╮\n\n` +
+          `👋 **Get Started**\n` +
+          `Use \`${settings.prefix}help\` to explore all available commands and features.\n\n` +
+          `💡 **Quick Actions**\n` +
+          `• View Commands: \`${settings.prefix}help\`\n` +
+          `• Get Support: Join our Support Server\n` +
+          `• Invite Bot: Add ${client.user.username} to your servers\n\n` +
+          `⭐ **Premium Features**\n` +
+          `Unlock advanced automod, priority updates, 24/7 protection, and exclusive tools with ${client.user.username} Premium.\n\n` +
+          `╰──────────────────────╯`
         )
+        .setThumbnail(client.user.displayAvatarURL())
+        .setFooter({ 
+          text: "Powered by Blackbit Studio",
+          iconURL: client.user.displayAvatarURL()
+        })
         .setTimestamp();
 
-      const row = new ActionRowBuilder().addComponents(
+      const row1 = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
-          .setLabel("Support")
+          .setLabel("Help Menu")
+          .setStyle(ButtonStyle.Primary)
+          .setCustomId("bot-help-menu")
+          .setEmoji("📋"),
+        new ButtonBuilder()
+          .setLabel("Support Server")
           .setStyle(ButtonStyle.Link)
           .setURL(SUPPORT_SERVER || "https://discord.gg/mvusstXJS")
-          .setEmoji("🔗"),
+          .setEmoji("💬")
+      );
+
+      const row2 = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setLabel(`Invite ${client.user.username}`)
           .setStyle(ButtonStyle.Link)
           .setURL(client.getInvite ? client.getInvite() : `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`)
-          .setEmoji("🔗")
+          .setEmoji("🔗"),
+        new ButtonBuilder()
+          .setLabel("Premium")
+          .setStyle(ButtonStyle.Secondary)
+          .setCustomId("bot-premium-info")
+          .setEmoji("⭐")
       );
 
-      message.channel.safeSend({ embeds: [embed], components: [row] });
+      message.channel.safeSend({ embeds: [embed], components: [row1, row2] });
     }
 
     // Check for no-prefix commands (for owners and whitelisted users only)

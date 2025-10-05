@@ -42,6 +42,40 @@ module.exports = async (client, interaction) => {
 
       case "SUGGEST_DELETE":
         return suggestionHandler.handleDeleteBtn(interaction);
+
+      case "bot-help-menu": {
+        const { getSettings } = require("@schemas/Guild");
+        const settings = await getSettings(interaction.guild);
+        const helpCommand = client.getCommand("help");
+        if (helpCommand) {
+          await interaction.deferReply({ ephemeral: true });
+          const response = await helpCommand.messageRun(
+            {
+              ...interaction,
+              channel: interaction.channel,
+              guild: interaction.guild,
+              author: interaction.user,
+              client: client
+            },
+            [],
+            { prefix: settings.prefix }
+          );
+          return interaction.editReply(response);
+        }
+        return interaction.reply({ content: "Help command not available", ephemeral: true });
+      }
+
+      case "bot-premium-info":
+        return interaction.reply({
+          content: `⭐ **${client.user.username} Premium**\n\n` +
+            `Unlock exclusive features:\n` +
+            `• Advanced AutoMod Protection\n` +
+            `• Priority Support & Updates\n` +
+            `• 24/7 Security Monitoring\n` +
+            `• Exclusive All-in-One Tools\n\n` +
+            `Contact our support server for more information!`,
+          ephemeral: true
+        });
     }
   }
 
