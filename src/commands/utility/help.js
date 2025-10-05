@@ -40,7 +40,7 @@ module.exports = {
 
     // !help
     if (!trigger) {
-      const response = await getHelpMenu({ ...message, author: message.author }, data.prefix);
+      const response = await getHelpMenu({ ...message }, data.prefix);
       const sentMsg = await message.channel.send(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
@@ -71,7 +71,7 @@ module.exports = {
     let cmdName = interaction.options.getString("command");
 
     if (!cmdName) {
-      const response = await getHelpMenu({ ...interaction, author: interaction.user });
+      const response = await getHelpMenu({ ...interaction });
       const sentMsg = await interaction.followUp(response);
       return waiter(sentMsg, interaction.user.id);
     }
@@ -222,7 +222,7 @@ const waiter = (msg, userId, prefix) => {
       }
 
       case "home-btn": {
-        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: msg.author || msg.interaction?.user }, prefix);
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild }, prefix);
         currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
