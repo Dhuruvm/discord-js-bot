@@ -20,7 +20,8 @@ class ComponentBuilder {
     row.addComponents(
       new ButtonBuilder()
         .setCustomId(previousId)
-        .setLabel('◀️ Previous')
+        .setLabel('Previous')
+        .setEmoji('◀️')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(currentPage <= 1)
     );
@@ -38,7 +39,8 @@ class ComponentBuilder {
     row.addComponents(
       new ButtonBuilder()
         .setCustomId(nextId)
-        .setLabel('Next ▶️')
+        .setLabel('Next')
+        .setEmoji('▶️')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(currentPage >= totalPages)
     );
@@ -57,17 +59,19 @@ class ComponentBuilder {
   static confirmation({ 
     confirmId = 'confirm', 
     cancelId = 'cancel',
-    confirmLabel = '✓ Confirm',
-    cancelLabel = '✕ Cancel'
+    confirmLabel = 'Confirm',
+    cancelLabel = 'Cancel'
   }) {
     return new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(confirmId)
         .setLabel(confirmLabel)
+        .setEmoji('✓')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(cancelId)
         .setLabel(cancelLabel)
+        .setEmoji('✕')
         .setStyle(ButtonStyle.Danger)
     );
   }
@@ -96,7 +100,8 @@ class ComponentBuilder {
       row.addComponents(
         new ButtonBuilder()
           .setCustomId(backId)
-          .setLabel('◀️ Back')
+          .setLabel('Back')
+          .setEmoji('◀️')
           .setStyle(ButtonStyle.Secondary)
       );
     }
@@ -105,7 +110,8 @@ class ComponentBuilder {
       row.addComponents(
         new ButtonBuilder()
           .setCustomId(homeId)
-          .setLabel('🏠 Home')
+          .setLabel('Home')
+          .setEmoji('🏠')
           .setStyle(ButtonStyle.Primary)
       );
     }
@@ -114,7 +120,8 @@ class ComponentBuilder {
       row.addComponents(
         new ButtonBuilder()
           .setCustomId(refreshId)
-          .setLabel('🔄 Refresh')
+          .setLabel('Refresh')
+          .setEmoji('🔄')
           .setStyle(ButtonStyle.Secondary)
       );
     }
@@ -136,7 +143,8 @@ class ComponentBuilder {
     if (invite) {
       row.addComponents(
         new ButtonBuilder()
-          .setLabel('🔗 Invite')
+          .setLabel('Invite')
+          .setEmoji('🔗')
           .setStyle(ButtonStyle.Link)
           .setURL(invite)
       );
@@ -145,7 +153,8 @@ class ComponentBuilder {
     if (support) {
       row.addComponents(
         new ButtonBuilder()
-          .setLabel('💬 Support')
+          .setLabel('Support')
+          .setEmoji('💬')
           .setStyle(ButtonStyle.Link)
           .setURL(support)
       );
@@ -154,7 +163,8 @@ class ComponentBuilder {
     if (docs) {
       row.addComponents(
         new ButtonBuilder()
-          .setLabel('📚 Docs')
+          .setLabel('Docs')
+          .setEmoji('📚')
           .setStyle(ButtonStyle.Link)
           .setURL(docs)
       );
@@ -163,7 +173,8 @@ class ComponentBuilder {
     if (website) {
       row.addComponents(
         new ButtonBuilder()
-          .setLabel('🌐 Website')
+          .setLabel('Website')
+          .setEmoji('🌐')
           .setStyle(ButtonStyle.Link)
           .setURL(website)
       );
@@ -295,20 +306,27 @@ class ComponentBuilder {
    */
   static disableAll(components) {
     return components.map(row => {
+      const rowJson = row.toJSON();
       const newRow = new ActionRowBuilder();
-      row.components.forEach(component => {
-        if (component.data.style === ButtonStyle.Link) {
-          newRow.addComponents(component);
-        } else if (component.data.type === 3) {
+      
+      rowJson.components.forEach(componentData => {
+        // Check if it's a link button (style 5 = Link)
+        if (componentData.type === 2 && componentData.style === 5) {
+          // Keep link buttons enabled
+          newRow.addComponents(ButtonBuilder.from(componentData));
+        } else if (componentData.type === 3) {
+          // String select menu
           newRow.addComponents(
-            StringSelectMenuBuilder.from(component.data).setDisabled(true)
+            StringSelectMenuBuilder.from(componentData).setDisabled(true)
           );
-        } else {
+        } else if (componentData.type === 2) {
+          // Regular button
           newRow.addComponents(
-            ButtonBuilder.from(component.data).setDisabled(true)
+            ButtonBuilder.from(componentData).setDisabled(true)
           );
         }
       });
+      
       return newRow;
     });
   }

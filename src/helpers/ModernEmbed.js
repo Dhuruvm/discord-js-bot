@@ -104,14 +104,25 @@ class ModernEmbed {
    * @param {boolean} options.disabled - Whether button is disabled
    */
   addButton({ customId, label, style = 'Secondary', emoji, url, disabled = false }) {
-    let lastRow = this.components[this.components.length - 1];
+    const buttonStyle = ButtonStyle[style] || ButtonStyle.Secondary;
     
-    if (!lastRow || lastRow.components.length >= 5 || lastRow.components.some(c => c.data.type === 3)) {
+    // Validate required fields
+    if (buttonStyle === ButtonStyle.Link && !url) {
+      throw new Error('Link buttons require a URL');
+    }
+    if (buttonStyle !== ButtonStyle.Link && !customId) {
+      throw new Error('Interactive buttons require a customId');
+    }
+
+    let lastRow = this.components[this.components.length - 1];
+    const lastRowJson = lastRow ? lastRow.toJSON() : null;
+    
+    // Check if we need a new row (max 5 buttons, or if last row has select menu)
+    if (!lastRow || lastRowJson?.components?.length >= 5 || lastRowJson?.components?.some(c => c.type === 3)) {
       lastRow = new ActionRowBuilder();
       this.components.push(lastRow);
     }
 
-    const buttonStyle = ButtonStyle[style] || ButtonStyle.Secondary;
     const button = new ButtonBuilder()
       .setStyle(buttonStyle)
       .setDisabled(disabled);
@@ -120,9 +131,9 @@ class ModernEmbed {
     if (emoji) button.setEmoji(emoji);
     
     if (buttonStyle === ButtonStyle.Link) {
-      if (url) button.setURL(url);
+      button.setURL(url);
     } else {
-      if (customId) button.setCustomId(customId);
+      button.setCustomId(customId);
     }
 
     lastRow.addComponents(button);
@@ -140,6 +151,10 @@ class ModernEmbed {
    * @param {boolean} options.disabled - Whether select is disabled
    */
   addSelectMenu({ customId, placeholder, options, minValues = 1, maxValues = 1, disabled = false }) {
+    if (!customId) {
+      throw new Error('Select menus require a customId');
+    }
+
     const selectMenu = new StringSelectMenuBuilder()
       .setCustomId(customId)
       .setPlaceholder(placeholder || 'Select an option')
@@ -167,7 +182,8 @@ class ModernEmbed {
           row.addComponents(
             new ButtonBuilder()
               .setCustomId(options.backId || 'back-btn')
-              .setLabel(options.backLabel || '◀️ Back')
+              .setLabel(options.backLabel || 'Back')
+              .setEmoji('◀️')
               .setStyle(ButtonStyle.Secondary)
           );
         }
@@ -175,7 +191,8 @@ class ModernEmbed {
           row.addComponents(
             new ButtonBuilder()
               .setCustomId(options.homeId || 'home-btn')
-              .setLabel(options.homeLabel || '🏠 Home')
+              .setLabel(options.homeLabel || 'Home')
+              .setEmoji('🏠')
               .setStyle(ButtonStyle.Primary)
           );
         }
@@ -183,7 +200,8 @@ class ModernEmbed {
           row.addComponents(
             new ButtonBuilder()
               .setCustomId(options.nextId || 'next-btn')
-              .setLabel(options.nextLabel || 'Next ▶️')
+              .setLabel(options.nextLabel || 'Next')
+              .setEmoji('▶️')
               .setStyle(ButtonStyle.Secondary)
           );
         }
@@ -193,11 +211,13 @@ class ModernEmbed {
         row.addComponents(
           new ButtonBuilder()
             .setCustomId(options.confirmId || 'confirm-btn')
-            .setLabel(options.confirmLabel || '✓ Confirm')
+            .setLabel(options.confirmLabel || 'Confirm')
+            .setEmoji('✓')
             .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
             .setCustomId(options.cancelId || 'cancel-btn')
-            .setLabel(options.cancelLabel || '✕ Cancel')
+            .setLabel(options.cancelLabel || 'Cancel')
+            .setEmoji('✕')
             .setStyle(ButtonStyle.Danger)
         );
         break;
@@ -206,7 +226,8 @@ class ModernEmbed {
         if (options.invite) {
           row.addComponents(
             new ButtonBuilder()
-              .setLabel('🔗 Invite Bot')
+              .setLabel('Invite Bot')
+              .setEmoji('🔗')
               .setStyle(ButtonStyle.Link)
               .setURL(options.invite)
           );
@@ -214,7 +235,8 @@ class ModernEmbed {
         if (options.support) {
           row.addComponents(
             new ButtonBuilder()
-              .setLabel('💬 Support')
+              .setLabel('Support')
+              .setEmoji('💬')
               .setStyle(ButtonStyle.Link)
               .setURL(options.support)
           );
@@ -222,7 +244,8 @@ class ModernEmbed {
         if (options.docs) {
           row.addComponents(
             new ButtonBuilder()
-              .setLabel('📚 Docs')
+              .setLabel('Docs')
+              .setEmoji('📚')
               .setStyle(ButtonStyle.Link)
               .setURL(options.docs)
           );
@@ -230,7 +253,8 @@ class ModernEmbed {
         if (options.website) {
           row.addComponents(
             new ButtonBuilder()
-              .setLabel('🌐 Website')
+              .setLabel('Website')
+              .setEmoji('🌐')
               .setStyle(ButtonStyle.Link)
               .setURL(options.website)
           );
@@ -238,7 +262,7 @@ class ModernEmbed {
         break;
     }
 
-    if (row.components.length > 0) {
+    if (row.toJSON().components.length > 0) {
       this.components.push(row);
     }
     return this;
