@@ -31,35 +31,95 @@ module.exports = async (client, message) => {
   if (PREFIX_COMMANDS.ENABLED) {
     // check for bot mentions
     if (message.content.includes(`${client.user.id}`)) {
-      // Create a simple embed response instead of Components V2
-      const embed = new EmbedBuilder()
-        .setColor(0x5865F2)
-        .setAuthor({ 
-          name: `${client.user.username} Quick Start Guide`,
-          iconURL: client.user.displayAvatarURL()
-        })
-        .setDescription(
-          `Welcome to **${client.user.username}**! Your all-in-one Discord companion for moderation, entertainment, and server management.`
-        )
-        .addFields(
+      // Components V2 Container
+      const container = {
+        type: ComponentType.Container,
+        accent_color: 0x5865F2,
+        components: [
+          // Header Section with Thumbnail
           {
-            name: '👋 Get Started',
-            value: `Use \`${settings.prefix}help\` to explore all available commands and features. Our intuitive command system makes server management effortless.`,
-            inline: false
+            type: ComponentType.Section,
+            components: [
+              {
+                type: ComponentType.TextDisplay,
+                content: `# ${client.user.username} Quick Start Guide\n\nWelcome to **${client.user.username}**! Your all-in-one Discord companion for moderation, entertainment, and server management.`
+              }
+            ],
+            accessory: {
+              type: ComponentType.Thumbnail,
+              media: { url: client.user.displayAvatarURL() },
+              description: `${client.user.username} Avatar`
+            }
           },
+          
+          // Separator
           {
-            name: '💡 Quick Actions',
-            value: `**Join Our Community**\nGet support, share feedback, and connect with other users in our Support Server.\n\n**Invite to Your Server**\nAdd ${client.user.username} to enhance your Discord servers with powerful features.`,
-            inline: false
+            type: ComponentType.Separator,
+            divider: true,
+            spacing: 2
           },
+          
+          // Get Started Section
           {
-            name: '⭐ Premium Features',
-            value: `Unlock **advanced auto-moderation**, priority support, 24/7 protection, exclusive commands, and enhanced customization options with ${client.user.username} Premium.`,
-            inline: false
+            type: ComponentType.Section,
+            components: [
+              {
+                type: ComponentType.TextDisplay,
+                content: `### 👋 Get Started\n\nUse \`${settings.prefix}help\` to explore all available commands and features. Our intuitive command system makes server management effortless.`
+              }
+            ]
+          },
+          
+          // Separator
+          {
+            type: ComponentType.Separator,
+            divider: true,
+            spacing: 2
+          },
+          
+          // Quick Actions Section
+          {
+            type: ComponentType.Section,
+            components: [
+              {
+                type: ComponentType.TextDisplay,
+                content: `### 💡 Quick Actions\n\n**Join Our Community**\nGet support, share feedback, and connect with other users in our Support Server.\n\n**Invite to Your Server**\nAdd ${client.user.username} to enhance your Discord servers with powerful features.`
+              }
+            ]
+          },
+          
+          // Separator
+          {
+            type: ComponentType.Separator,
+            divider: true,
+            spacing: 2
+          },
+          
+          // Premium Section
+          {
+            type: ComponentType.Section,
+            components: [
+              {
+                type: ComponentType.TextDisplay,
+                content: `### ⭐ Premium Features\n\nUnlock **advanced auto-moderation**, priority support, 24/7 protection, exclusive commands, and enhanced customization options with ${client.user.username} Premium.`
+              }
+            ]
+          },
+          
+          // Separator
+          {
+            type: ComponentType.Separator,
+            divider: false,
+            spacing: 1
+          },
+          
+          // Footer
+          {
+            type: ComponentType.TextDisplay,
+            content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
           }
-        )
-        .setFooter({ text: `Powered by Blackbit Studio` })
-        .setTimestamp();
+        ]
+      };
 
       // Link buttons row
       const linkRow = new ActionRowBuilder()
@@ -73,17 +133,12 @@ module.exports = async (client, message) => {
             .setLabel("Support Server")
             .setStyle(ButtonStyle.Link)
             .setURL(SUPPORT_SERVER)
-            .setEmoji("💬"),
-          new ButtonBuilder()
-            .setLabel("Help Command")
-            .setStyle(ButtonStyle.Primary)
-            .setCustomId("bot-help-menu")
-            .setEmoji("📚")
+            .setEmoji("💬")
         );
 
       return message.reply({ 
-        embeds: [embed],
-        components: [linkRow]
+        components: [container, linkRow],
+        flags: MessageFlags.IsComponentsV2
       });
     }
 
