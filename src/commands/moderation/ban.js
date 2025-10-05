@@ -1,6 +1,6 @@
 const { banTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
+const { ApplicationCommandOptionType, MessageFlags, ComponentType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
@@ -66,65 +66,66 @@ async function ban(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setAuthor({ name: "Member Banned", iconURL: targetUser.displayAvatarURL() })
-      .setDescription(
-        `╭───── **Moderation Action** ─────╮\n\n` +
-        `👤 **User:** ${targetUsername}\n` +
-        `🔨 **Action:** Banned\n` +
-        `📝 **Reason:** ${reason || "No reason provided"}\n\n` +
-        `╰────────────────────────╯`
-      )
-      .setThumbnail(targetUser.displayAvatarURL())
-      .setFooter({ text: `Banned by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
-      .setTimestamp();
-    return { embeds: [embed] };
+    const container = {
+      type: ComponentType.Container,
+      accent_color: 0xED4245,
+      components: [
+        {
+          type: ComponentType.Section,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: `# 🔨 Member Banned\n\nUser has been permanently banned from the server.`
+            }
+          ],
+          accessory: {
+            type: ComponentType.Thumbnail,
+            media: { url: targetUser.displayAvatarURL() },
+            description: `${targetUsername} Avatar`
+          }
+        },
+        {
+          type: ComponentType.Separator,
+          divider: true,
+          spacing: 2
+        },
+        {
+          type: ComponentType.TextDisplay,
+          content: `### 📋 Ban Details\n\n**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`
+        },
+        {
+          type: ComponentType.Separator,
+          divider: false,
+          spacing: 1
+        },
+        {
+          type: ComponentType.TextDisplay,
+          content: `*Banned by ${issuer.user.username}* • <t:${Math.floor(Date.now() / 1000)}:R>`
+        }
+      ]
+    };
+    return { components: [container], flags: MessageFlags.IsComponentsV2 };
   }
   
   if (response === "BOT_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you're missing the **ban members** permission`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.error(
+      "Missing Permissions",
+      `You're missing the **Ban Members** permission. Please contact a server administrator.`,
+      `Requested by ${issuer.user.username}`
+    );
   }
   
   if (response === "MEMBER_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.error(
+      "Insufficient Permissions",
+      `You need to have a higher role than **${targetUsername}** to execute this command.`,
+      `Requested by ${issuer.user.username}`
+    );
   }
   
-  const embed = new EmbedBuilder()
-    .setColor("#2B2D31");
-  
-  if (issuer?.user) {
-    embed.setAuthor({ 
-      name: issuer.user.username,
-      iconURL: issuer.user.displayAvatarURL()
-    });
-  }
-  
-  embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** failed to ban **${targetUsername}**`)
-    .setTimestamp();
-  return { embeds: [embed] };
+  return ModernEmbed.error(
+    "Action Failed",
+    `Failed to ban **${targetUsername}**. Please try again or contact an administrator.`,
+    `Requested by ${issuer.user.username}`
+  );
 }

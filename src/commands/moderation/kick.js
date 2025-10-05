@@ -1,6 +1,6 @@
 const { kickTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
+const { ApplicationCommandOptionType, MessageFlags, ComponentType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
@@ -61,65 +61,66 @@ async function kick(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setAuthor({ name: "Member Kicked", iconURL: targetUser.displayAvatarURL() })
-      .setDescription(
-        `╭───── **Moderation Action** ─────╮\n\n` +
-        `👤 **User:** ${targetUsername}\n` +
-        `⚠️ **Action:** Kicked\n` +
-        `📝 **Reason:** ${reason || "No reason provided"}\n\n` +
-        `╰────────────────────────╯`
-      )
-      .setThumbnail(targetUser.displayAvatarURL())
-      .setFooter({ text: `Kicked by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
-      .setTimestamp();
-    return { embeds: [embed] };
+    const container = {
+      type: ComponentType.Container,
+      accent_color: 0x57F287,
+      components: [
+        {
+          type: ComponentType.Section,
+          components: [
+            {
+              type: ComponentType.TextDisplay,
+              content: `# ✅ Member Kicked\n\nSuccessfully removed member from the server.`
+            }
+          ],
+          accessory: {
+            type: ComponentType.Thumbnail,
+            media: { url: targetUser.displayAvatarURL() },
+            description: `${targetUsername} Avatar`
+          }
+        },
+        {
+          type: ComponentType.Separator,
+          divider: true,
+          spacing: 2
+        },
+        {
+          type: ComponentType.TextDisplay,
+          content: `### 📋 Action Details\n\n**User:** ${targetUsername}\n**Action:** Kicked from server\n**Reason:** ${reason || "No reason provided"}`
+        },
+        {
+          type: ComponentType.Separator,
+          divider: false,
+          spacing: 1
+        },
+        {
+          type: ComponentType.TextDisplay,
+          content: `*Kicked by ${issuer.user.username}* • <t:${Math.floor(Date.now() / 1000)}:R>`
+        }
+      ]
+    };
+    return { components: [container], flags: MessageFlags.IsComponentsV2 };
   }
   
   if (response === "BOT_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to kick **${targetUsername}**`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.error(
+      "Permission Denied",
+      `I do not have permission to kick **${targetUsername}**. Please ensure I have the proper role hierarchy.`,
+      `Requested by ${issuer.user.username}`
+    );
   }
   
   if (response === "MEMBER_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.error(
+      "Insufficient Permissions",
+      `You need to have a higher role than **${targetUsername}** to execute this command.`,
+      `Requested by ${issuer.user.username}`
+    );
   }
   
-  const embed = new EmbedBuilder()
-    .setColor("#2B2D31");
-  
-  if (issuer?.user) {
-    embed.setAuthor({ 
-      name: issuer.user.username,
-      iconURL: issuer.user.displayAvatarURL()
-    });
-  }
-  
-  embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** failed to kick **${targetUsername}**`)
-    .setTimestamp();
-  return { embeds: [embed] };
+  return ModernEmbed.error(
+    "Action Failed",
+    `Failed to kick **${targetUsername}**. Please try again or contact an administrator.`,
+    `Requested by ${issuer.user.username}`
+  );
 }
