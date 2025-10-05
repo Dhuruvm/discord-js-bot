@@ -35,7 +35,6 @@ module.exports = async (client, message) => {
           `👋 **Get Started**\n` +
           `Use \`${settings.prefix}help\` to explore all available commands and features.\n\n` +
           `💡 **Quick Actions**\n` +
-          `• View Commands: \`${settings.prefix}help\`\n` +
           `• Get Support: Join our Support Server\n` +
           `• Invite Bot: Add ${client.user.username} to your servers\n\n` +
           `⭐ **Premium Features**\n` +
@@ -48,39 +47,46 @@ module.exports = async (client, message) => {
         })
         .setTimestamp();
 
-      const row1 = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("Help Menu")
-          .setStyle(ButtonStyle.Primary)
-          .setCustomId("bot-help-menu")
-          .setEmoji("📋"),
-        new ButtonBuilder()
-          .setLabel("Support Server")
-          .setStyle(ButtonStyle.Link)
-          .setURL(SUPPORT_SERVER || "https://discord.gg/mvusstXJS")
-          .setEmoji("💬")
-      );
+      // Action buttons in container
+      const actionRow = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId("bot-help-menu")
+            .setLabel("Help Menu")
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji("📚"),
+          new ButtonBuilder()
+            .setCustomId("bot-premium-info")
+            .setLabel("Premium")
+            .setStyle(ButtonStyle.Success)
+            .setEmoji("⭐")
+        );
 
-      const row2 = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel(`Invite ${client.user.username}`)
-          .setStyle(ButtonStyle.Link)
-          .setURL(client.getInvite ? client.getInvite() : `https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands`)
-          .setEmoji("🔗"),
-        new ButtonBuilder()
-          .setLabel("Premium")
-          .setStyle(ButtonStyle.Secondary)
-          .setCustomId("bot-premium-info")
-          .setEmoji("⭐")
-      );
+      // Link buttons in container
+      const linkRow = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setLabel("Invite Bot")
+            .setStyle(ButtonStyle.Link)
+            .setURL(client.getInvite())
+            .setEmoji("🔗"),
+          new ButtonBuilder()
+            .setLabel("Support Server")
+            .setStyle(ButtonStyle.Link)
+            .setURL(SUPPORT_SERVER)
+            .setEmoji("💬")
+        );
 
-      message.channel.safeSend({ embeds: [embed], components: [row1, row2] });
+      return message.reply({ 
+        embeds: [embed], 
+        components: [actionRow, linkRow]
+      });
     }
 
     // Check for no-prefix commands (for owners and whitelisted users only)
     const isOwner = OWNER_IDS.includes(message.author.id);
     const isWhitelisted = settings.developers && settings.developers.includes(message.author.id);
-    
+
     if ((isOwner || isWhitelisted) && message.content && !message.content.startsWith(settings.prefix)) {
       const invoke = message.content.split(/\s+/)[0];
       const cmd = client.getCommand(invoke);

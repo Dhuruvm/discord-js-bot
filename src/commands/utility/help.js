@@ -131,7 +131,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     })
     .setTimestamp();
 
-  const buttonRow1 = new ActionRowBuilder().addComponents(
+  // Navigation buttons container
+  const navigationRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("main-module-btn")
       .setLabel("Main Module")
@@ -139,16 +140,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     new ButtonBuilder()
       .setCustomId("extra-module-btn")
       .setLabel("Extra Module")
-      .setStyle(ButtonStyle.Primary)
-  );
-
-  const buttonRow2 = new ActionRowBuilder().addComponents(
+      .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId("search-command-btn")
       .setLabel("Search Command")
       .setStyle(ButtonStyle.Secondary)
   );
 
+  // Category selector container
   const menuRow = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId("help-menu")
@@ -165,7 +164,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       )
   );
 
-  const buttonRow3 = new ActionRowBuilder().addComponents(
+  // Links container
+  const linksRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel(`Invite ${client?.user?.username || 'Bot'}`)
       .setStyle(ButtonStyle.Link)
@@ -178,7 +178,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
 
   return {
     embeds: [embed],
-    components: [buttonRow1, buttonRow2, menuRow, buttonRow3],
+    components: [navigationRow, menuRow, linksRow],
   };
 }
 

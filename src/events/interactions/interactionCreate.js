@@ -65,17 +65,44 @@ module.exports = async (client, interaction) => {
         return interaction.reply({ content: "Help command not available", ephemeral: true });
       }
 
-      case "bot-premium-info":
-        return interaction.reply({
-          content: `⭐ **${client.user.username} Premium**\n\n` +
-            `Unlock exclusive features:\n` +
+      case "bot-premium-info": {
+        const premiumEmbed = new EmbedBuilder()
+          .setColor("#FFD700")
+          .setTitle("⭐ Premium Features")
+          .setDescription(
+            `Unlock exclusive features with **${client.user.username} Premium**\n\n` +
+            `✨ **Benefits:**\n` +
             `• Advanced AutoMod Protection\n` +
             `• Priority Support & Updates\n` +
             `• 24/7 Security Monitoring\n` +
-            `• Exclusive All-in-One Tools\n\n` +
-            `Contact our support server for more information!`,
+            `• Exclusive All-in-One Tools\n` +
+            `• Custom Branding Options\n\n` +
+            `Contact our support server for more information!`
+          )
+          .setThumbnail(client.user.displayAvatarURL())
+          .setFooter({ text: "Powered by Blackbit Studio" })
+          .setTimestamp();
+
+        const premiumRow = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setLabel("Get Premium")
+              .setStyle(ButtonStyle.Link)
+              .setURL(SUPPORT_SERVER)
+              .setEmoji("⭐"),
+            new ButtonBuilder()
+              .setLabel("Learn More")
+              .setStyle(ButtonStyle.Link)
+              .setURL(SUPPORT_SERVER)
+              .setEmoji("📖")
+          );
+
+        return interaction.reply({
+          embeds: [premiumEmbed],
+          components: [premiumRow],
           ephemeral: true
         });
+      }
     }
   }
 
