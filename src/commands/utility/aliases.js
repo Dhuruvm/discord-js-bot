@@ -1,4 +1,5 @@
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
+const { PREFIX_COMMANDS } = require("@root/config");
 
 module.exports = {
   name: "aliases",
@@ -31,37 +32,51 @@ module.exports = {
       return message.safeReply("No command found with that name.");
     }
 
-    const embed = getAliasesEmbed(cmd, data.prefix);
+    const embed = getAliasesEmbed(cmd, data.prefix, false);
     return message.safeReply({ embeds: [embed] });
   },
 
-  async interactionRun(interaction) {
+  async interactionRun(interaction, data) {
     const cmdName = interaction.options.getString("command").toLowerCase();
-    const cmd = interaction.client.slashCommands.get(cmdName) || interaction.client.getCommand(cmdName);
+    const slashCmd = interaction.client.slashCommands.get(cmdName);
+    const prefixCmd = interaction.client.getCommand(cmdName);
 
-    if (!cmd) {
+    if (!slashCmd && !prefixCmd) {
       return interaction.followUp("No command found with that name.");
     }
 
-    const embed = getAliasesEmbed(cmd, "/");
+    const prefix = data?.settings?.prefix || PREFIX_COMMANDS.DEFAULT_PREFIX;
+    const embed = getAliasesEmbed(slashCmd || prefixCmd, prefix, !!slashCmd);
     return interaction.followUp({ embeds: [embed] });
   },
 };
 
-function getAliasesEmbed(cmd, prefix) {
+function getAliasesEmbed(cmd, prefix, isSlashContext) {
   const aliases = cmd.command?.aliases || [];
   
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
-    .setTitle(`${cmd.name} Command Aliases`)
-    .setDescription(
-      `**Command:** \`${prefix}${cmd.name}\`\n\n` +
+    .setTitle(`${cmd.name} Command Information`);
+
+  if (isSlashContext) {
+    embed.setDescription(
+      `**Command:** \`/${cmd.name}\`\n\n` +
+      `**Aliases:** Slash commands do not support aliases.\n\n` +
+      `**Description:** ${cmd.description || 'No description available'}\n\n` +
+      `**Category:** ${cmd.category || 'NONE'}\n\n` +
+      `💡 **Tip:** To use command aliases, use the prefix form: \`${prefix}${cmd.name}\``
+    )
+    .setFooter({ text: "Aliases are only available with prefix commands." });
+  } else {
+    embed.setDescription(
+      `**Prefix Command:** \`${prefix}${cmd.name}\`\n\n` +
       `**Aliases:** ${aliases.length > 0 ? aliases.map(a => `\`${prefix}${a}\``).join(', ') : 'No aliases available'}\n\n` +
       `**Description:** ${cmd.description || 'No description available'}\n\n` +
       `**Category:** ${cmd.category || 'NONE'}`
     )
-    .setTimestamp()
-    .setFooter({ text: "Use the command name or any of its aliases" });
+    .setFooter({ text: "Note: Aliases only work with prefix commands, not slash commands." });
+  }
 
+  embed.setTimestamp();
   return embed;
 }

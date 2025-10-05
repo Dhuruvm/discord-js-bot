@@ -13,6 +13,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["awayfromkeyboard", "away"],
     usage: "[reason]",
     minArgsCount: 0,
   },

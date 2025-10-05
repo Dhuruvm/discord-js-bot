@@ -14,6 +14,7 @@ module.exports = {
   cooldown: 5,
   command: {
     enabled: true,
+    aliases: ["pokemon", "poke"],
     usage: "<pokemon>",
     minArgsCount: 1,
   },

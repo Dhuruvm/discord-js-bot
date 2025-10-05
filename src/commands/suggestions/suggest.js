@@ -19,7 +19,7 @@ module.exports = {
   cooldown: 20,
   command: {
     enabled: true,
-    aliases: ["suggestion", "idea"],
+    aliases: ["idea", "sug"],
     usage: "<suggestion>",
     minArgsCount: 1,
   },

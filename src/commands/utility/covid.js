@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["coronavirus", "covid19"],
     usage: "<country>",
     minArgsCount: 1,
   },

@@ -15,6 +15,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["temp", "forecast"],
     usage: "<place>",
     minArgsCount: 1,
   },

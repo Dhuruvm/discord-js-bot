@@ -14,6 +14,7 @@ module.exports = {
   botPermissions: ["EmbedLinks", "AttachFiles"],
   command: {
     enabled: true,
+    aliases: ["proxy", "proxylist"],
     usage: "[type]",
     minArgsCount: 1,
   },

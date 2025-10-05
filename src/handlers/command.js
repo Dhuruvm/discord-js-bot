@@ -166,12 +166,18 @@ module.exports = {
       cmd.command.subcommands.forEach((sub) => {
         desc += `\`${prefix}${invoke || cmd.name} ${sub.trigger}\`\n❯ ${sub.description}\n\n`;
       });
+      if (cmd.command.aliases && cmd.command.aliases.length > 0) {
+        desc += `**Aliases:** ${cmd.command.aliases.map(a => `\`${a}\``).join(", ")}\n`;
+      }
       if (cmd.cooldown) {
         desc += `**Cooldown:** ${timeformat(cmd.cooldown)}`;
       }
     } else {
       desc += `\`\`\`css\n${prefix}${invoke || cmd.name} ${cmd.command.usage}\`\`\``;
       if (cmd.description !== "") desc += `\n**Help:** ${cmd.description}`;
+      if (cmd.command.aliases && cmd.command.aliases.length > 0) {
+        desc += `\n**Aliases:** ${cmd.command.aliases.map(a => `\`${a}\``).join(", ")}`;
+      }
       if (cmd.cooldown) desc += `\n**Cooldown:** ${timeformat(cmd.cooldown)}`;
     }
 

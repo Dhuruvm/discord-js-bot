@@ -11,6 +11,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
+    aliases: ["dev", "devmode"],
     usage: "<add|remove|list> [user]",
     minArgsCount: 1,
   },
