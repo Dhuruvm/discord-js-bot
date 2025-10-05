@@ -325,6 +325,18 @@ class ModernEmbed {
   }
 
   /**
+   * Create a simple error message (text-only style)
+   * @param {string} message - Error message
+   */
+  static simpleError(message) {
+    const embed = new ModernEmbed()
+      .setColor(0x2B2D31)
+      .setDescription(`❌ | ${message}`);
+    
+    return embed.toMessage();
+  }
+
+  /**
    * Create a warning embed
    * @param {string} title - Warning title
    * @param {string} description - Warning message

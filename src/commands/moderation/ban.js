@@ -65,48 +65,26 @@ async function ban(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const embed = new ModernEmbed()
-      .setColor(0xFFFFFF)
-      .setHeader("🔨 Member Banned", `User has been permanently banned from the server.`)
-      .setThumbnail(targetUser.displayAvatarURL())
-      .addField("📋 Ban Details", `**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`, false)
-      .setFooter(`Banned by ${issuer.user.username}`)
-      .setTimestamp()
-      .addButton({
-        customId: 'view-modlogs',
-        label: 'View Mod Logs',
-        style: 'Secondary',
-        emoji: '📜'
-      })
-      .addButton({
-        customId: 'appeal-info',
-        label: 'Appeal Info',
-        style: 'Secondary',
-        emoji: 'ℹ️'
-      });
-    
-    return embed.toMessage();
+    return ModernEmbed.success(
+      "Member Banned",
+      `**${targetUsername}** has been permanently banned from the server.\n**Reason:** ${reason || "No reason provided"}`,
+      `Banned by ${issuer.user.username}`
+    );
   }
   
   if (response === "BOT_PERM") {
-    return ModernEmbed.error(
-      "Bot Missing Permissions",
-      `I don't have permission to ban **${targetUsername}**. Please ensure I have the **Ban Members** permission and a role higher than the target user.`,
-      `Requested by ${issuer.user.username}`
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command.!`
     );
   }
   
   if (response === "MEMBER_PERM") {
-    return ModernEmbed.error(
-      "Insufficient Permissions",
-      `You need to have a higher role than **${targetUsername}** to execute this command.`,
-      `Requested by ${issuer.user.username}`
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command.!`
     );
   }
   
-  return ModernEmbed.error(
-    "Action Failed",
-    `Failed to ban **${targetUsername}**. Please try again or contact an administrator.`,
-    `Requested by ${issuer.user.username}`
+  return ModernEmbed.simpleError(
+    `Failed to ban ${targetUsername}. Please try again or contact an administrator.`
   );
 }
