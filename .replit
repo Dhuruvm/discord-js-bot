@@ -1,9 +1,9 @@
 entrypoint = "bot.js"
 run = ["sh", "-c", "npm install && node bot.js"]
-modules = ["web", "nix", "nodejs-20"]
+modules = ["nodejs-20"]
 
 [nix]
-channel = "stable-25_05"
+channel = "stable-22_11"
 
 [workflows]
 runButton = "Project"
