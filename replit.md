@@ -8,15 +8,26 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
+**October 5, 2025 - Discord Components V2 Integration (Modern UI Overhaul)**
+- Completely modernized bot mention handler using Discord's new Components V2 system
+- Replaced old embed design with professional Container component with Discord Blurple accent bar
+- Implemented Section components with Text Display for organized content layout
+- Added Separator components with dividers for clean spacing (removed manual --- and ___ decorations)
+- Integrated Thumbnail accessory showing bot avatar in header section
+- Positioned Help Menu and Premium buttons as section accessories for better UX
+- Used native markdown headers (# and ###) in Text Display for professional typography
+- Added MessageFlags.IsComponentsV2 to enable the new component system
+- Improved visual hierarchy with proper spacing and dividers
+- Enhanced readability with structured sections: Header, Get Started, Quick Actions, Premium Features, Footer
+- Bot mention response now uses cutting-edge Discord UI components for a premium experience
+
 **October 5, 2025 - Discord.js v14 Embed Components & Button Integration**
 - Implemented Discord.js v14 ActionRow and Button components for modern UI/UX
-- Updated bot mention handler to display a rich embed with Support and Invite buttons (matching Xieron bot style)
 - Redesigned moderation error embeds with dark theme (#2B2D31) and user profile icons
 - Error messages now show the issuer's profile icon on the left side for better context
 - Added optional chaining guards to prevent crashes when issuer data is unavailable
 - Fixed canvas native module rebuild issue for profile card command
 - All moderation commands (ban, kick, warn, timeout) now use cleaner error format with emoji indicators
-- Bot now displays professional welcome embed when mentioned with quick action buttons
 
 **October 4, 2025 - Profile Card Complete Redesign**
 - Completely rewrote profile card generator to match premium Discord profile design
