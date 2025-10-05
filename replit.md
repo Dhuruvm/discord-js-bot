@@ -69,10 +69,11 @@ Preferred communication style: Simple, everyday language.
 - **Config File**: Central configuration for features, embed colors, cache sizes.
 
 ### UI/UX Decisions
-- **Modern Embed System (Components V2)**: All bot responses utilize Discord's Components V2 for a professional and consistent UI.
-- **ModernEmbed Helper Class**: Simplifies creation of Components V2 embeds with standardized designs (success, error, warning, info messages).
-- **Design Patterns**: Employs Headers (using `# Title`), Sections (using `### Header`), Separators for visual spacing, Footers with optional timestamps, and accent colors for different message types (Green for success, Red for error, Yellow for warning, Blurple for info).
-- **Component Structure**: Embeds follow a clear hierarchy: Container, Header Section (with optional thumbnail), Separator, Content Sections, Separators, and Footer.
+- **Modern Embed System**: All bot responses utilize clean, professional Discord embeds with EmbedBuilder for consistent UI across all commands.
+- **ModernEmbed Helper Class**: Simplifies creation of professional embeds with standardized designs (success, error, warning, info messages) using Discord.js EmbedBuilder.
+- **Design Patterns**: Clean embeds without ASCII art decorations, using emoji headers, field-based layouts, color-coded responses (Green for success, Red for error, Yellow for warning, Blurple for info), and native Discord timestamps.
+- **No ASCII Decorations**: All decorative ASCII art (borders, boxes, separators like ╭╮╯╰) has been removed for a cleaner, modern appearance.
+- **Discord.js Version**: Updated to v14.22.1 for latest features and improvements.
 - **Profile Card Redesign**: `profile` command generates a premium-style Discord profile card image with dark theme, gradient banner, glowing avatar ring, status indicator, and activity display.
 - **Custom Emoji Constants**: Consistent UI across commands using custom emoji constants.
 
