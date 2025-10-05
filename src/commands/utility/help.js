@@ -116,7 +116,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     if (k === 'OWNER' && !isOwner) continue;
 
     const mapping = categoryMapping[k] || { emoji: v.emoji, name: v.name };
-    const categoryLine = `${mapping.emoji} : ${mapping.name}`;
+    const categoryLine = `${mapping.emoji} : **${mapping.name}**`;
 
     if (mainKeys.includes(k)) {
       mainCategories.push(categoryLine);
