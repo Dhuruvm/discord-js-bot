@@ -341,7 +341,7 @@ function getCategoryEmbed(client, category, prefix) {
 
   if (commands.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0xED4245)
+      .setColor(0xFFFFFF)
       .setTitle(`${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}`)
       .setDescription("This category is currently empty. Check back later for new commands!")
       .setFooter({ text: "Powered by Blackbit Studio" })
@@ -353,14 +353,14 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `\`${cmd.name} ${trigger}\``;
-      }).join(', ');
+        return `• \`${cmd.name} ${trigger}\``;
+      }).join('\n');
     }
-    return `\`${cmd.name}\``;
-  }).join(', ');
+    return `• \`${cmd.name}\``;
+  }).join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
+    .setColor(0xFFFFFF)
     .setTitle(`${categoryInfo?.emoji || '📦'} ${categoryInfo?.name || 'Category'}`)
     .setDescription(categoryInfo?.description || 'Explore the commands in this category')
     .setThumbnail(client?.user?.displayAvatarURL() || "https://cdn.discordapp.com/embed/avatars/0.png")
