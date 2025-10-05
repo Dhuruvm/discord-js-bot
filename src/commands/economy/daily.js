@@ -1,6 +1,6 @@
-const { EmbedBuilder } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 const { getUser } = require("@schemas/User");
-const { EMBED_COLORS, ECONOMY } = require("@root/config.js");
+const { ECONOMY } = require("@root/config.js");
 const { diffHours, getRemainingTime } = require("@helpers/Utils");
 
 /**
@@ -39,7 +39,11 @@ async function daily(user) {
     const difference = diffHours(new Date(), lastUpdated);
     if (difference < 24) {
       const nextUsage = lastUpdated.setHours(lastUpdated.getHours() + 24);
-      return `You can again run this command in \`${getRemainingTime(nextUsage)}\``;
+      return ModernEmbed.warning(
+        "Daily Cooldown",
+        `You've already claimed your daily reward! Come back in \`${getRemainingTime(nextUsage)}\` to claim again.`,
+        `⏰ Keep your streak alive by coming back daily!`
+      );
     }
     streak = userDb.daily.streak || streak;
     if (difference < 48) streak += 1;
@@ -51,17 +55,27 @@ async function daily(user) {
   userDb.daily.timestamp = new Date();
   await userDb.save();
 
-  const embed = new EmbedBuilder()
-    .setColor(0x57F287)
-    .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-    .setTitle("💰 Daily Reward Claimed!")
-    .addFields(
-      { name: "💵 Received", value: `\`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\``, inline: true },
-      { name: "🔥 Streak", value: `\`${streak} day${streak !== 1 ? 's' : ''}\``, inline: true },
-      { name: "💳 Balance", value: `\`${userDb.coins}${ECONOMY.CURRENCY}\``, inline: true }
-    )
-    .setFooter({ text: "Come back tomorrow for another reward!" })
-    .setTimestamp();
+  const embed = new ModernEmbed()
+    .setColor(0xFFFFFF)
+    .setHeader("💰 Daily Reward Claimed!", `Successfully claimed your daily bonus!`)
+    .setThumbnail(user.displayAvatarURL())
+    .addField("💵 Received", `\`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\``, true)
+    .addField("🔥 Streak", `\`${streak} day${streak !== 1 ? 's' : ''}\``, true)
+    .addField("💳 New Balance", `\`${userDb.coins}${ECONOMY.CURRENCY}\``, true)
+    .setFooter(`Come back tomorrow for another reward!`)
+    .setTimestamp()
+    .addButton({
+      customId: 'view-balance',
+      label: 'View Balance',
+      style: 'Primary',
+      emoji: '💰'
+    })
+    .addButton({
+      customId: 'view-leaderboard',
+      label: 'Leaderboard',
+      style: 'Secondary',
+      emoji: '🏆'
+    });
 
-  return { embeds: [embed] };
+  return embed.toMessage();
 }

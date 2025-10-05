@@ -1,7 +1,6 @@
 const { banTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, MessageFlags, ComponentType } = require("discord.js");
+const { ApplicationCommandOptionType } = require("discord.js");
 const ModernEmbed = require("@helpers/ModernEmbed");
-const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -47,7 +46,7 @@ module.exports = {
 
   async interactionRun(interaction) {
     const target = interaction.options.getUser("user");
-    const reason = interaction.options.getString("reason");
+    const reason = interaction.options.getString("reason") || "No reason provided";
 
     const response = await ban(interaction.member, target, reason);
     await interaction.followUp(response);
@@ -67,10 +66,25 @@ async function ban(issuer, target, reason) {
   
   if (typeof response === "boolean") {
     const embed = new ModernEmbed()
-      .setColor(0xED4245)
-      .setHeader("🔨 Member Banned", "User has been permanently banned from the server.", targetUser.displayAvatarURL(), `${targetUsername} Avatar`)
-      .addSection("📋 Ban Details", `**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`)
-      .setFooter(`Banned by ${issuer.user.username}`);
+      .setColor(0xFFFFFF)
+      .setHeader("🔨 Member Banned", `User has been permanently banned from the server.`)
+      .setThumbnail(targetUser.displayAvatarURL())
+      .addField("📋 Ban Details", `**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`, false)
+      .setFooter(`Banned by ${issuer.user.username}`)
+      .setTimestamp()
+      .addButton({
+        customId: 'view-modlogs',
+        label: 'View Mod Logs',
+        style: 'Secondary',
+        emoji: '📜'
+      })
+      .addButton({
+        customId: 'appeal-info',
+        label: 'Appeal Info',
+        style: 'Secondary',
+        emoji: 'ℹ️'
+      });
+    
     return embed.toMessage();
   }
   
