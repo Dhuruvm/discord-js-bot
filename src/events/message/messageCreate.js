@@ -27,11 +27,11 @@ module.exports = async (client, message) => {
       const embed = new EmbedBuilder()
         .setColor("#FFFFFF")
         .setAuthor({ 
-          name: `${client.user.username} • Quick Start Guide`,
+          name: `🐛 ${client.user.username} Quick Start Guide`,
           iconURL: client.user.displayAvatarURL()
         })
         .setDescription(
-          `╭───── **Welcome to ${client.user.username}** ─────╮\n\n` +
+          `**Welcome to ${client.user.username}**\n\n` +
           `👋 **Get Started**\n` +
           `Use \`${settings.prefix}help\` to explore all available commands and features.\n\n` +
           `💡 **Quick Actions**\n` +
@@ -39,8 +39,7 @@ module.exports = async (client, message) => {
           `• Get Support: Join our Support Server\n` +
           `• Invite Bot: Add ${client.user.username} to your servers\n\n` +
           `⭐ **Premium Features**\n` +
-          `Unlock advanced automod, priority updates, 24/7 protection, and exclusive tools with ${client.user.username} Premium.\n\n` +
-          `╰──────────────────────╯`
+          `Unlock advanced automod, priority updates, 24/7 protection, and exclusive tools with ${client.user.username} Premium.`
         )
         .setThumbnail(client.user.displayAvatarURL())
         .setFooter({ 
