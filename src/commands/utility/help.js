@@ -105,10 +105,11 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     'IMAGE': { emoji: '📸', name: 'Media' },
     'INVITE': { emoji: '🎤', name: 'VCRoles' },
     'FUN': { emoji: '✨', name: 'Fun' },
+    'BOT': { emoji: '🤖', name: 'Bot' },
     'INFORMATION': { emoji: '🤖', name: 'Bot' },
   };
 
-  const mainKeys = ['ADMIN', 'AUTOMOD', 'MUSIC', 'MODERATION', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL'];
+  const mainKeys = ['ADMIN', 'AUTOMOD', 'MUSIC', 'MODERATION', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL', 'BOT'];
 
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
