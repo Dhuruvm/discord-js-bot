@@ -1,249 +1,174 @@
-const { MessageFlags, ComponentType, ButtonStyle } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 
 /**
- * Modern Embed Builder using Discord Components V2
- * Creates professional, visually appealing embeds with sections and separators
+ * Modern Embed Helper - Creates clean, professional Discord embeds
+ * Compatible with Discord.js 14.14+ using EmbedBuilder
  */
 class ModernEmbed {
   constructor() {
-    this.accentColor = 0x5865F2; // Default Discord Blurple
-    this.componentsList = [];
-    this.hasSeparator = false;
+    this.embed = new EmbedBuilder();
+    this.color = 0x5865F2; // Discord Blurple default
   }
 
   /**
-   * Set the accent color for the container
-   * @param {number|string} color - Hex color as number (0x5865F2) or string ("#5865F2")
+   * Set embed color
+   * @param {number} color - Hex color code
    */
   setColor(color) {
-    if (typeof color === 'string') {
-      this.accentColor = parseInt(color.replace('#', '0x'));
-    } else {
-      this.accentColor = color;
-    }
+    this.color = color;
+    this.embed.setColor(color);
     return this;
   }
 
   /**
-   * Add a header section with optional thumbnail
-   * @param {string} title - The title text (supports markdown)
-   * @param {string} description - The description text
-   * @param {string} [thumbnailUrl] - Optional thumbnail URL
-   * @param {string} [thumbnailDescription] - Optional thumbnail description
+   * Set main title and description
+   * @param {string} title - Main title with emoji
+   * @param {string} description - Main description text
    */
-  setHeader(title, description, thumbnailUrl = null, thumbnailDescription = null) {
-    const section = {
-      type: ComponentType.Section,
-      components: [
-        {
-          type: ComponentType.TextDisplay,
-          content: `# ${title}\n\n${description}`
-        }
-      ]
-    };
-
-    if (thumbnailUrl) {
-      section.accessory = {
-        type: ComponentType.Thumbnail,
-        media: { url: thumbnailUrl },
-        description: thumbnailDescription || title
-      };
+  setHeader(title, description) {
+    this.embed.setTitle(title);
+    if (description) {
+      this.embed.setDescription(description);
     }
-
-    this.componentsList.push(section);
-    this.hasSeparator = false;
     return this;
   }
 
   /**
-   * Add a text section with header
-   * @param {string} header - Section header (will be prefixed with ###)
-   * @param {string} content - Section content
-   * @param {object} [accessory] - Optional button or other accessory
+   * Set thumbnail image
+   * @param {string} url - Image URL
    */
-  addSection(header, content, accessory = null) {
-    if (this.hasSeparator === false && this.componentsList.length > 0) {
-      this.addSeparator();
-    }
-
-    const section = {
-      type: ComponentType.Section,
-      components: [
-        {
-          type: ComponentType.TextDisplay,
-          content: `### ${header}\n\n${content}`
-        }
-      ]
-    };
-
-    if (accessory) {
-      section.accessory = accessory;
-    }
-
-    this.componentsList.push(section);
-    this.hasSeparator = false;
+  setThumbnail(url) {
+    this.embed.setThumbnail(url);
     return this;
   }
 
   /**
-   * Add a simple text field without a section wrapper
-   * @param {string} content - Text content (supports markdown)
+   * Set main image
+   * @param {string} url - Image URL
    */
-  addField(content) {
-    if (this.hasSeparator === false && this.componentsList.length > 0) {
-      this.addSeparator();
-    }
-
-    this.componentsList.push({
-      type: ComponentType.TextDisplay,
-      content: content
-    });
-    this.hasSeparator = false;
+  setImage(url) {
+    this.embed.setImage(url);
     return this;
   }
 
   /**
-   * Add a separator/divider
-   * @param {boolean} [divider=true] - Whether to show a visual divider line
-   * @param {number} [spacing=2] - Spacing amount (1-3)
+   * Add a field section
+   * @param {string} name - Field name/header
+   * @param {string} value - Field content
+   * @param {boolean} inline - Whether to display inline
    */
-  addSeparator(divider = true, spacing = 2) {
-    if (this.componentsList.length > 0) {
-      this.componentsList.push({
-        type: ComponentType.Separator,
-        divider: divider,
-        spacing: spacing
-      });
-      this.hasSeparator = true;
-    }
+  addField(name, value, inline = false) {
+    this.embed.addFields({ name, value, inline });
     return this;
   }
 
   /**
-   * Add a footer
+   * Set footer text with optional icon
    * @param {string} text - Footer text
-   * @param {boolean} [includeTimestamp=true] - Whether to include timestamp
+   * @param {string} iconURL - Optional icon URL
    */
-  setFooter(text, includeTimestamp = true) {
-    // Add separator before footer if needed
-    if (this.hasSeparator === false && this.componentsList.length > 0) {
-      this.addSeparator(false, 1);
-    }
-
-    const timestamp = includeTimestamp ? ` • <t:${Math.floor(Date.now() / 1000)}:R>` : '';
-    this.componentsList.push({
-      type: ComponentType.TextDisplay,
-      content: `*${text}*${timestamp}`
-    });
+  setFooter(text, iconURL) {
+    this.embed.setFooter({ text, iconURL });
     return this;
   }
 
   /**
-   * Build the final container
-   * @returns {object} Container object ready to use with Components V2
+   * Set timestamp to current time or specific time
+   * @param {Date} date - Optional date object
+   */
+  setTimestamp(date) {
+    this.embed.setTimestamp(date || new Date());
+    return this;
+  }
+
+  /**
+   * Set author section
+   * @param {string} name - Author name
+   * @param {string} iconURL - Author icon URL
+   * @param {string} url - Author URL
+   */
+  setAuthor(name, iconURL, url) {
+    this.embed.setAuthor({ name, iconURL, url });
+    return this;
+  }
+
+  /**
+   * Build and return the embed
    */
   build() {
-    return {
-      type: ComponentType.Container,
-      accent_color: this.accentColor,
-      components: this.componentsList
-    };
+    return this.embed;
   }
 
   /**
-   * Build and return as a message payload
-   * @param {Array} [additionalComponents=[]] - Additional action rows (buttons, selects)
-   * @returns {object} Complete message payload with Components V2 flag
+   * Return as message payload
    */
-  toMessage(additionalComponents = []) {
-    const container = this.build();
-    return {
-      components: [container, ...additionalComponents],
-      flags: MessageFlags.IsComponentsV2
-    };
+  toMessage() {
+    return { embeds: [this.embed] };
   }
 
+  // Static quick methods for common embed types
+
   /**
-   * Create a quick success embed
-   * @param {string} title - Title text
-   * @param {string} description - Description text
-   * @param {string} [footer] - Optional footer text
-   * @returns {object} Complete message payload
+   * Create a success embed
+   * @param {string} title - Success title
+   * @param {string} description - Success message
+   * @param {string} footer - Optional footer text
    */
-  static success(title, description, footer = null) {
+  static success(title, description, footer) {
     const embed = new ModernEmbed()
       .setColor(0x57F287) // Green
-      .setHeader(`✅ ${title}`, description);
-
-    if (footer) {
-      embed.setFooter(footer);
-    } else {
-      embed.setFooter('Success');
-    }
-
+      .setHeader(`✅ ${title}`, description)
+      .setTimestamp();
+    
+    if (footer) embed.setFooter(footer);
     return embed.toMessage();
   }
 
   /**
-   * Create a quick error embed
-   * @param {string} title - Title text
-   * @param {string} description - Description text
-   * @param {string} [footer] - Optional footer text
-   * @returns {object} Complete message payload
+   * Create an error embed
+   * @param {string} title - Error title
+   * @param {string} description - Error message
+   * @param {string} footer - Optional footer text
    */
-  static error(title, description, footer = null) {
+  static error(title, description, footer) {
     const embed = new ModernEmbed()
       .setColor(0xED4245) // Red
-      .setHeader(`❌ ${title}`, description);
-
-    if (footer) {
-      embed.setFooter(footer);
-    } else {
-      embed.setFooter('Error');
-    }
-
+      .setHeader(`❌ ${title}`, description)
+      .setTimestamp();
+    
+    if (footer) embed.setFooter(footer);
     return embed.toMessage();
   }
 
   /**
-   * Create a quick warning embed
-   * @param {string} title - Title text
-   * @param {string} description - Description text
-   * @param {string} [footer] - Optional footer text
-   * @returns {object} Complete message payload
+   * Create a warning embed
+   * @param {string} title - Warning title
+   * @param {string} description - Warning message
+   * @param {string} footer - Optional footer text
    */
-  static warning(title, description, footer = null) {
+  static warning(title, description, footer) {
     const embed = new ModernEmbed()
       .setColor(0xFEE75C) // Yellow
-      .setHeader(`⚠️ ${title}`, description);
-
-    if (footer) {
-      embed.setFooter(footer);
-    } else {
-      embed.setFooter('Warning');
-    }
-
+      .setHeader(`⚠️ ${title}`, description)
+      .setTimestamp();
+    
+    if (footer) embed.setFooter(footer);
     return embed.toMessage();
   }
 
   /**
-   * Create a quick info embed
-   * @param {string} title - Title text
-   * @param {string} description - Description text
-   * @param {string} [footer] - Optional footer text
-   * @returns {object} Complete message payload
+   * Create an info embed
+   * @param {string} title - Info title
+   * @param {string} description - Info message
+   * @param {string} footer - Optional footer text
    */
-  static info(title, description, footer = null) {
+  static info(title, description, footer) {
     const embed = new ModernEmbed()
       .setColor(0x5865F2) // Blurple
-      .setHeader(`ℹ️ ${title}`, description);
-
-    if (footer) {
-      embed.setFooter(footer);
-    } else {
-      embed.setFooter('Information');
-    }
-
+      .setHeader(`ℹ️ ${title}`, description)
+      .setTimestamp();
+    
+    if (footer) embed.setFooter(footer);
     return embed.toMessage();
   }
 }
