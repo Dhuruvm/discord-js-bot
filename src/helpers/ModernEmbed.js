@@ -1,4 +1,21 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, ButtonStyle } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
+
+// Load emojis from config
+let EMOJIS = {};
+try {
+  const emojisPath = path.join(__dirname, "../../emojis.json");
+  EMOJIS = JSON.parse(fs.readFileSync(emojisPath, "utf-8"));
+} catch (error) {
+  console.error("Failed to load emojis.json:", error);
+  EMOJIS = {
+    success: "✅",
+    error: "❌",
+    warning: "⚠️",
+    info: "ℹ️"
+  };
+}
 
 /**
  * Modern Embed Helper - Creates clean, professional Discord embeds with interactive components
@@ -298,7 +315,7 @@ class ModernEmbed {
   static success(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`✅ ${title}`, description)
+      .setHeader(`${EMOJIS.success || "✅"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);
@@ -316,7 +333,7 @@ class ModernEmbed {
   static error(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`❌ ${title}`, description)
+      .setHeader(`${EMOJIS.error || "❌"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);
@@ -331,9 +348,45 @@ class ModernEmbed {
   static simpleError(message) {
     const embed = new ModernEmbed()
       .setColor(0x2B2D31)
-      .setDescription(`❌ | ${message}`);
+      .setDescription(`${EMOJIS.error || "❌"} | ${message}`);
     
     return embed.toMessage();
+  }
+
+  /**
+   * Create a simple success message (text-only style)
+   * @param {string} message - Success message
+   */
+  static simpleSuccess(message) {
+    const embed = new ModernEmbed()
+      .setColor(0x2B2D31)
+      .setDescription(`${EMOJIS.success || "✅"} | ${message}`);
+    
+    return embed.toMessage();
+  }
+
+  /**
+   * Get emoji from config
+   * @param {string} name - Emoji name from config
+   * @returns {string} Emoji or default
+   */
+  static getEmoji(name) {
+    return EMOJIS[name] || "";
+  }
+
+  /**
+   * Reload emojis from config
+   */
+  static reloadEmojis() {
+    try {
+      const emojisPath = path.join(__dirname, "../../emojis.json");
+      delete require.cache[require.resolve(emojisPath)];
+      EMOJIS = JSON.parse(fs.readFileSync(emojisPath, "utf-8"));
+      return true;
+    } catch (error) {
+      console.error("Failed to reload emojis.json:", error);
+      return false;
+    }
   }
 
   /**
@@ -346,7 +399,7 @@ class ModernEmbed {
   static warning(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`⚠️ ${title}`, description)
+      .setHeader(`${EMOJIS.warning || "⚠️"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);
@@ -364,7 +417,7 @@ class ModernEmbed {
   static info(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`ℹ️ ${title}`, description)
+      .setHeader(`${EMOJIS.info || "ℹ️"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);

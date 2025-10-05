@@ -147,8 +147,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     )
     .setFooter({ text: "Powered by Blackbit Studio" });
 
-  if (guild?.iconURL()) {
-    embed.setThumbnail(guild.iconURL());
+  if (client?.user?.displayAvatarURL()) {
+    embed.setThumbnail(client.user.displayAvatarURL());
   }
 
   const buttonRow1 = new ActionRowBuilder().addComponents(
@@ -159,10 +159,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     new ButtonBuilder()
       .setCustomId("extra-module-btn")
       .setLabel("Extra Module")
-      .setStyle(ButtonStyle.Primary)
-  );
-
-  const buttonRow2 = new ActionRowBuilder().addComponents(
+      .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId("search-command-btn")
       .setLabel("Search Command")
@@ -190,7 +187,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
 
   return {
     embeds: [embed],
-    components: [buttonRow1, buttonRow2, menuRow]
+    components: [buttonRow1, menuRow]
   };
 }
 
