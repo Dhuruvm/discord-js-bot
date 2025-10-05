@@ -43,9 +43,9 @@ module.exports = {
       }
     }
 
-    // Owner commands
+    // Owner commands - silently ignore for non-owners
     if (cmd.category === "OWNER" && !OWNER_IDS.includes(message.author.id)) {
-      return message.safeReply("This command is only accessible to bot owners");
+      return;
     }
 
     // check user permissions
@@ -105,12 +105,9 @@ module.exports = {
       }
     }
 
-    // Owner commands
+    // Owner commands - silently ignore for non-owners
     if (cmd.category === "OWNER" && !OWNER_IDS.includes(interaction.user.id)) {
-      return interaction.reply({
-        content: `This command is only accessible to bot owners`,
-        ephemeral: true,
-      });
+      return;
     }
 
     // user permissions

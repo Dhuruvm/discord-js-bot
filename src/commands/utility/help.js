@@ -1,5 +1,5 @@
 const { CommandCategory, BotClient } = require("@src/structures");
-const { SUPPORT_SERVER } = require("@root/config.js");
+const { SUPPORT_SERVER, OWNER_IDS } = require("@root/config.js");
 const {
   EmbedBuilder,
   ActionRowBuilder,
@@ -89,9 +89,12 @@ module.exports = {
 async function getHelpMenu({ client, guild, author, user }, prefix) {
   const mainCategories = [];
   const extraCategories = [];
+  const displayUser = author || user;
+  const isOwner = OWNER_IDS.includes(displayUser?.id);
 
   for (const [k, v] of Object.entries(CommandCategory)) {
     if (v.enabled === false) continue;
+    if (k === 'OWNER' && !isOwner) continue;
 
     const categoryLine = `${v.emoji} : ${v.name}`;
 
@@ -108,7 +111,6 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const prefixText = prefix || '!';
   const description = `**• Prefix is ${prefixText}**\n**• ${prefixText}help <command | module> for more information.**\n\n${mainSection}${extraSection}`;
 
-  const displayUser = author || user;
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
@@ -146,7 +148,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       .setPlaceholder("Choose a menu for commands.")
       .addOptions(
         Object.entries(CommandCategory)
-          .filter(([k, v]) => v.enabled !== false)
+          .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
           .map(([k, v]) => ({
             label: v.name,
             value: k,
@@ -188,7 +190,7 @@ const waiter = (msg, userId, prefix) => {
 
     switch (response.customId) {
       case "main-module-btn": {
-        const mainEmbed = getModuleEmbed(msg.client, "main", prefix);
+        const mainEmbed = getModuleEmbed(msg.client, "main", prefix, response.user.id);
         const backRow = getBackButton();
         currentComponents = [backRow];
         msg.editable && (await msg.edit({ embeds: [mainEmbed], components: currentComponents }));
@@ -196,7 +198,7 @@ const waiter = (msg, userId, prefix) => {
       }
 
       case "extra-module-btn": {
-        const extraEmbed = getModuleEmbed(msg.client, "extra", prefix);
+        const extraEmbed = getModuleEmbed(msg.client, "extra", prefix, response.user.id);
         const backRow = getBackButton();
         currentComponents = [backRow];
         msg.editable && (await msg.edit({ embeds: [extraEmbed], components: currentComponents }));
@@ -265,13 +267,15 @@ const waiter = (msg, userId, prefix) => {
   });
 };
 
-function getModuleEmbed(client, type, prefix) {
+function getModuleEmbed(client, type, prefix, userId) {
+  const isOwner = OWNER_IDS.includes(userId);
   const mainCategories = ['ADMIN', 'MODERATION', 'MUSIC', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL'];
   const categories = type === "main" ? mainCategories : 
-    Object.keys(CommandCategory).filter(k => !mainCategories.includes(k) && CommandCategory[k].enabled !== false);
+    Object.keys(CommandCategory).filter(k => !mainCategories.includes(k) && CommandCategory[k].enabled !== false && (k !== 'OWNER' || isOwner));
 
   const categoryList = categories
     .filter(k => CommandCategory[k])
+    .filter(k => k !== 'OWNER' || isOwner)
     .map(k => `${CommandCategory[k].emoji} : ${CommandCategory[k].name}`)
     .join('\n');
 
