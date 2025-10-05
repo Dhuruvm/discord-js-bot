@@ -106,7 +106,7 @@ async function timeout(issuer, target, ms, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | I do not have permission to timeout **${target.user.username}**!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to timeout **${target.user.username}**`)
       .setTimestamp();
     return { embeds: [embed] };
   }
@@ -122,7 +122,7 @@ async function timeout(issuer, target, ms, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command.!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
       .setTimestamp();
     return { embeds: [embed] };
   }

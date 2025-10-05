@@ -87,7 +87,7 @@ async function kick(issuer, target, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | I do not have permission to kick **${targetUsername}**!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to kick **${targetUsername}**`)
       .setTimestamp();
     return { embeds: [embed] };
   }
@@ -103,7 +103,7 @@ async function kick(issuer, target, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command.!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
       .setTimestamp();
     return { embeds: [embed] };
   }
@@ -118,7 +118,7 @@ async function kick(issuer, target, reason) {
     });
   }
   
-  embed.setDescription(`${EMOJIS.ERROR} | Failed to kick **${targetUsername}**!`)
+  embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** failed to kick **${targetUsername}**`)
     .setTimestamp();
   return { embeds: [embed] };
 }

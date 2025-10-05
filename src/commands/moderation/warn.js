@@ -86,7 +86,7 @@ async function warn(issuer, target, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | I do not have permission to warn **${targetUsername}**!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to warn **${targetUsername}**`)
       .setTimestamp();
     return { embeds: [embed] };
   }
@@ -102,7 +102,7 @@ async function warn(issuer, target, reason) {
       });
     }
     
-    embed.setDescription(`${EMOJIS.ERROR} | You need to have a higher role than me to execute this command.!`)
+    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
       .setTimestamp();
     return { embeds: [embed] };
   }
@@ -117,7 +117,7 @@ async function warn(issuer, target, reason) {
     });
   }
   
-  embed.setDescription(`${EMOJIS.ERROR} | Failed to warn **${targetUsername}**!`)
+  embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** failed to warn **${targetUsername}**`)
     .setTimestamp();
   return { embeds: [embed] };
 }
