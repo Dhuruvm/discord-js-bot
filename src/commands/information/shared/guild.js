@@ -63,25 +63,32 @@ module.exports = async (guild) => {
     [GuildVerificationLevel.VeryHigh]: "🔒"
   }[guild.verificationLevel] || "📋";
 
+  // Build header section conditionally
+  const headerSection = {
+    type: ComponentType.Section,
+    components: [
+      {
+        type: ComponentType.TextDisplay,
+        content: `# 🏰 ${name}\n\nComprehensive server information and statistics.`
+      }
+    ]
+  };
+  
+  // Only add accessory if guild has an icon
+  if (guild.iconURL()) {
+    headerSection.accessory = {
+      type: ComponentType.Thumbnail,
+      media: { url: guild.iconURL() },
+      description: `${name} Server Icon`
+    };
+  }
+
   const container = {
     type: ComponentType.Container,
     accent_color: 0x5865F2,
     components: [
       // Header Section
-      {
-        type: ComponentType.Section,
-        components: [
-          {
-            type: ComponentType.TextDisplay,
-            content: `# 🏰 ${name}\n\nComprehensive server information and statistics.`
-          }
-        ],
-        accessory: guild.iconURL() ? {
-          type: ComponentType.Thumbnail,
-          media: { url: guild.iconURL() },
-          description: `${name} Server Icon`
-        } : undefined
-      },
+      headerSection,
       
       // Separator
       {

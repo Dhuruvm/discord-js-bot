@@ -8,7 +8,20 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
-**October 5, 2025 - Discord Components V2 Integration (Modern UI Overhaul)**
+**October 5, 2025 - Components V2 Migration (Information Commands)**
+- Converted help command to Container-based Components V2 system with interactive navigation
+- Converted botinfo/botstats command to modern Container layout with system metrics
+- Converted userinfo command to Components V2 with member role color accent
+- Converted serverinfo/guildinfo command to professional Container format
+- All information commands now use Section components with Text Display for organized content
+- Replaced all manual decorations (---, ___, ╭╯, code blocks) with native Separator components
+- Implemented proper spacing hierarchy with dividers for visual clarity
+- Added Thumbnail accessories to display avatars and server icons in headers
+- Used Discord timestamps (<t:unix:F>) for dynamic time displays
+- Applied Discord Blurple (#5865F2) accent color across all Containers for brand consistency
+- All commands now return MessageFlags.IsComponentsV2 for proper rendering
+
+**October 5, 2025 - Discord Components V2 Integration (Bot Mention Handler)**
 - Completely modernized bot mention handler using Discord's new Components V2 system
 - Replaced old embed design with professional Container component with Discord Blurple accent bar
 - Implemented Section components with Text Display for organized content layout
