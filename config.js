@@ -138,6 +138,11 @@ module.exports = {
 
   // Command Categories
   COMMAND_CATEGORIES: {
+    BOT: {
+      name: "Bot",
+      image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/64/robot-icon.png",
+      emoji: "🤖",
+    },
     FUN: {
       name: "Fun",
       image: "https://icons.iconarchive.com/icons/flameia/aqua-smiles/64/make-fun-icon.png",
