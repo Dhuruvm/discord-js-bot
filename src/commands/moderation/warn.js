@@ -61,16 +61,13 @@ async function warn(issuer, target, reason) {
   
   if (typeof response === "boolean") {
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setAuthor({ name: "Member Warned", iconURL: targetUser.displayAvatarURL() })
-      .setDescription(
-        `╭───── **Moderation Action** ─────╮\n\n` +
-        `👤 **User:** ${targetUsername}\n` +
-        `⚠️ **Action:** Warned\n` +
-        `📝 **Reason:** ${reason || "No reason provided"}\n\n` +
-        `╰────────────────────────╯`
-      )
+      .setColor(0xFEE75C)
+      .setTitle("⚠️ Member Warned")
       .setThumbnail(targetUser.displayAvatarURL())
+      .addFields(
+        { name: "👤 User", value: targetUsername, inline: true },
+        { name: "📝 Reason", value: reason || "No reason provided", inline: false }
+      )
       .setFooter({ text: `Warned by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
       .setTimestamp();
     return { embeds: [embed] };

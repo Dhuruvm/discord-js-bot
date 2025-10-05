@@ -68,16 +68,15 @@ async function beg(user) {
   const randomUser = users[Math.floor(Math.random() * users.length)];
   
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setAuthor({ name: `${user.username}`, iconURL: user.displayAvatarURL() })
-    .setDescription(
-      `╭───── **Begging** ─────╮\n\n` +
-      `🎁 **${randomUser}** donated you\n` +
-      `💰 **Amount:** \`${amount}${ECONOMY.CURRENCY}\`\n` +
-      `💳 **Balance:** \`${userDb.coins}${ECONOMY.CURRENCY}\`\n\n` +
-      `╰──────────────────╯`
+    .setColor(0x5865F2)
+    .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
+    .setTitle("🎁 Donation Received!")
+    .setDescription(`**${randomUser}** donated you some coins!`)
+    .addFields(
+      { name: "💰 Amount", value: `\`${amount}${ECONOMY.CURRENCY}\``, inline: true },
+      { name: "💳 Balance", value: `\`${userDb.coins}${ECONOMY.CURRENCY}\``, inline: true }
     )
-    .setFooter({ text: "Better than nothing!", iconURL: user.displayAvatarURL() })
+    .setFooter({ text: "Better than nothing!" })
     .setTimestamp();
 
   return { embeds: [embed] };

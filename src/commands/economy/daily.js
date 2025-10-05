@@ -52,16 +52,15 @@ async function daily(user) {
   await userDb.save();
 
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(0x57F287)
     .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-    .setDescription(
-      `╭───── **Daily Reward** ─────╮\n\n` +
-      `💰 **Received:** \`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\`\n` +
-      `🔥 **Streak:** \`${streak} day${streak !== 1 ? 's' : ''}\`\n` +
-      `💳 **Balance:** \`${userDb.coins}${ECONOMY.CURRENCY}\`\n\n` +
-      `╰─────────────────────╯`
+    .setTitle("💰 Daily Reward Claimed!")
+    .addFields(
+      { name: "💵 Received", value: `\`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\``, inline: true },
+      { name: "🔥 Streak", value: `\`${streak} day${streak !== 1 ? 's' : ''}\``, inline: true },
+      { name: "💳 Balance", value: `\`${userDb.coins}${ECONOMY.CURRENCY}\``, inline: true }
     )
-    .setFooter({ text: "Come back tomorrow for another reward!", iconURL: user.displayAvatarURL() })
+    .setFooter({ text: "Come back tomorrow for another reward!" })
     .setTimestamp();
 
   return { embeds: [embed] };

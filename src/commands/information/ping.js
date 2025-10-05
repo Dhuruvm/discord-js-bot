@@ -20,23 +20,16 @@ module.exports = {
 
   async messageRun(message, args) {
     const ping = Math.floor(message.client.ws.ping);
+    const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
+    
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setAuthor({ 
-        name: "🏓 Pong!",
-        iconURL: message.client.user.displayAvatarURL()
-      })
-      .setDescription(
-        `╭─────────────────╮\n` +
-        `│  **Websocket Latency**  │\n` +
-        `╰─────────────────╯\n\n` +
-        `\`\`\`fix\n${ping}ms\`\`\`\n` +
-        `**Status:** ${ping < 100 ? '**Excellent** 🟢' : ping < 200 ? '**Good** 🟡' : '**Poor** 🔴'}`
+      .setColor(ping < 100 ? 0x57F287 : ping < 200 ? 0xFEE75C : 0xED4245)
+      .setTitle("🏓 Pong!")
+      .addFields(
+        { name: "📡 Websocket Latency", value: `\`${ping}ms\``, inline: true },
+        { name: "📊 Status", value: status, inline: true }
       )
-      .setFooter({ 
-        text: `Cybork Ping${message.guild ? ` • ${message.guild.name}` : ''}`,
-        iconURL: message.client.user.displayAvatarURL()
-      })
+      .setFooter({ text: message.guild ? message.guild.name : 'Direct Message' })
       .setTimestamp();
     
     await message.safeReply({ embeds: [embed] });
@@ -44,23 +37,16 @@ module.exports = {
 
   async interactionRun(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
+    const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
+    
     const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.BOT_EMBED)
-      .setAuthor({ 
-        name: "🏓 Pong!",
-        iconURL: interaction.client.user.displayAvatarURL()
-      })
-      .setDescription(
-        `╭─────────────────╮\n` +
-        `│  **Websocket Latency**  │\n` +
-        `╰─────────────────╯\n\n` +
-        `\`\`\`fix\n${ping}ms\`\`\`\n` +
-        `**Status:** ${ping < 100 ? '**Excellent** 🟢' : ping < 200 ? '**Good** 🟡' : '**Poor** 🔴'}`
+      .setColor(ping < 100 ? 0x57F287 : ping < 200 ? 0xFEE75C : 0xED4245)
+      .setTitle("🏓 Pong!")
+      .addFields(
+        { name: "📡 Websocket Latency", value: `\`${ping}ms\``, inline: true },
+        { name: "📊 Status", value: status, inline: true }
       )
-      .setFooter({ 
-        text: `Cybork Ping${interaction.guild ? ` • ${interaction.guild.name}` : ''}`,
-        iconURL: interaction.client.user.displayAvatarURL()
-      })
+      .setFooter({ text: interaction.guild ? interaction.guild.name : 'Direct Message' })
       .setTimestamp();
     
     await interaction.followUp({ embeds: [embed] });
