@@ -1,10 +1,10 @@
 const { commandHandler, automodHandler, statsHandler } = require("@src/handlers");
 const { PREFIX_COMMANDS, OWNER_IDS, SUPPORT_SERVER } = require("@root/config");
 const { getSettings } = require("@schemas/Guild");
-const { 
-  EmbedBuilder, 
-  ActionRowBuilder, 
-  ButtonBuilder, 
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
   ButtonStyle,
   MessageFlags,
   ComponentType
@@ -31,115 +31,44 @@ module.exports = async (client, message) => {
   if (PREFIX_COMMANDS.ENABLED) {
     // check for bot mentions
     if (message.content.includes(`${client.user.id}`)) {
-      // Components V2 Container
-      const container = {
-        type: ComponentType.Container,
-        accent_color: 0x5865F2,
-        components: [
-          // Header Section with Thumbnail
+      const { EmbedBuilder } = require("discord.js");
+      const { SUPPORT_SERVER } = require("@root/config");
+
+      const introEmbed = new EmbedBuilder()
+        .setColor(0xFFFFFF)
+        .setAuthor({
+          name: `${client.user.username} - Your Server Assistant`,
+          iconURL: client.user.displayAvatarURL()
+        })
+        .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
+        .setDescription(
+          `👋 **Hello! I'm ${client.user.username}**\n\n` +
+          `I'm a powerful multipurpose Discord bot designed to help manage and enhance your server with a wide range of features!\n\n` +
+          `**🎯 Key Features:**\n` +
+          `• **Moderation** - Keep your server safe and organized\n` +
+          `• **Music** - High-quality music playback\n` +
+          `• **Economy** - Fun currency and ranking system\n` +
+          `• **Leveling** - Track user activity and engagement\n` +
+          `• **Giveaways** - Host exciting giveaways\n` +
+          `• **Tickets** - Professional support system\n` +
+          `• **And much more!**`
+        )
+        .addFields(
           {
-            type: ComponentType.Section,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `# ${client.user.username} Quick Start Guide\n\nWelcome to **${client.user.username}**! Your all-in-one Discord companion for moderation, entertainment, and server management.`
-              }
-            ],
-            accessory: {
-              type: ComponentType.Thumbnail,
-              media: { url: client.user.displayAvatarURL() },
-              description: `${client.user.username} Avatar`
-            }
+            name: "📝 Getting Started",
+            value: `My prefix is: \`${settings.prefix}\`\nUse \`${settings.prefix}help\` to see all commands`,
+            inline: true
           },
-          
-          // Separator
           {
-            type: ComponentType.Separator,
-            divider: true,
-            spacing: 2
-          },
-          
-          // Get Started Section
-          {
-            type: ComponentType.Section,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `### 👋 Get Started\n\nUse \`${settings.prefix}help\` to explore all available commands and features. Our intuitive command system makes server management effortless.`
-              }
-            ]
-          },
-          
-          // Separator
-          {
-            type: ComponentType.Separator,
-            divider: true,
-            spacing: 2
-          },
-          
-          // Quick Actions Section
-          {
-            type: ComponentType.Section,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `### 💡 Quick Actions\n\n**Join Our Community**\nGet support, share feedback, and connect with other users in our Support Server.\n\n**Invite to Your Server**\nAdd ${client.user.username} to enhance your Discord servers with powerful features.`
-              }
-            ]
-          },
-          
-          // Separator
-          {
-            type: ComponentType.Separator,
-            divider: true,
-            spacing: 2
-          },
-          
-          // Premium Section
-          {
-            type: ComponentType.Section,
-            components: [
-              {
-                type: ComponentType.TextDisplay,
-                content: `### ⭐ Premium Features\n\nUnlock **advanced auto-moderation**, priority support, 24/7 protection, exclusive commands, and enhanced customization options with ${client.user.username} Premium.`
-              }
-            ]
-          },
-          
-          // Separator
-          {
-            type: ComponentType.Separator,
-            divider: false,
-            spacing: 1
-          },
-          
-          // Footer
-          {
-            type: ComponentType.TextDisplay,
-            content: `*Powered by Blackbit Studio* • <t:${Math.floor(Date.now() / 1000)}:R>`
+            name: "🔗 Quick Links",
+            value: `[Invite Me](${client.getInvite()})${SUPPORT_SERVER ? ` • [Support Server](${SUPPORT_SERVER})` : ''}`,
+            inline: true
           }
-        ]
-      };
+        )
+        .setFooter({ text: "Powered by Blackbit Studio" })
+        .setTimestamp();
 
-      // Link buttons row
-      const linkRow = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setLabel("Invite Bot")
-            .setStyle(ButtonStyle.Link)
-            .setURL(client.getInvite())
-            .setEmoji("🔗"),
-          new ButtonBuilder()
-            .setLabel("Support Server")
-            .setStyle(ButtonStyle.Link)
-            .setURL(SUPPORT_SERVER)
-            .setEmoji("💬")
-        );
-
-      return message.reply({ 
-        components: [container, linkRow],
-        flags: MessageFlags.IsComponentsV2
-      });
+      return message.channel.send({ embeds: [introEmbed] });
     }
 
     // Check for no-prefix commands (for owners and whitelisted users only)

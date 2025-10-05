@@ -97,7 +97,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     if (v.enabled === false) continue;
     if (k === 'OWNER' && !isOwner) continue;
 
-    const categoryLine = `${v.emoji} ${v.name}`;
+    const categoryLine = `${v.emoji} **${v.name}**`;
 
     if (['ADMIN', 'MODERATION', 'MUSIC', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL'].includes(k)) {
       mainCategories.push(categoryLine);
@@ -109,7 +109,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const prefixText = prefix || '!';
   
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
+    .setColor(0xFFFFFF)
     .setTitle(`📚 ${client?.user?.username || 'Bot'} Help Menu`)
     .setDescription("Explore all available commands and features. Use the menu below to navigate through different command categories.")
     .addFields(
@@ -120,12 +120,17 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       },
       { 
         name: "🎯 Main Modules", 
-        value: mainCategories.join(' • '),
+        value: mainCategories.join('\n'),
+        inline: false 
+      },
+      { 
+        name: "\u200b", 
+        value: "\u200b",
         inline: false 
       },
       { 
         name: "✨ Extra Modules", 
-        value: extraCategories.join(' • '),
+        value: extraCategories.join('\n'),
         inline: false 
       }
     )
