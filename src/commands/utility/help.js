@@ -113,8 +113,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: `${displayUser ? displayUser.username : client.user.username} • Help Menu`,
-      iconURL: displayUser ? displayUser.displayAvatarURL() : client.user.displayAvatarURL()
+      name: `${displayUser ? displayUser.username : client?.user?.username || 'Bot'} • Help Menu`,
+      iconURL: displayUser ? displayUser.displayAvatarURL() : client?.user?.displayAvatarURL() || null
     })
     .setDescription(
       `╭───── **Help Menu** ─────╮\n\n` +
@@ -126,7 +126,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     .setThumbnail(guild ? guild.iconURL() : null)
     .setFooter({ 
       text: "Powered by Blackbit Studio",
-      iconURL: client.user.displayAvatarURL()
+      iconURL: client?.user?.displayAvatarURL() || null
     })
     .setTimestamp();
 
@@ -166,9 +166,9 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
 
   const buttonRow3 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setLabel(`Invite ${client.user.username}`)
+      .setLabel(`Invite ${client?.user?.username || 'Bot'}`)
       .setStyle(ButtonStyle.Link)
-      .setURL(client.getInvite ? client.getInvite() : "https://discord.com"),
+      .setURL(client?.getInvite ? client.getInvite() : "https://discord.com"),
     new ButtonBuilder()
       .setLabel("Support Server")
       .setStyle(ButtonStyle.Link)
@@ -215,8 +215,8 @@ const waiter = (msg, userId, prefix) => {
         const searchEmbed = new EmbedBuilder()
           .setColor("#FFFFFF")
           .setAuthor({
-            name: `${msg.client.user.username} • Search Commands`,
-            iconURL: msg.client.user.displayAvatarURL()
+            name: `${msg.client?.user?.username || 'Bot'} • Search Commands`,
+            iconURL: msg.client?.user?.displayAvatarURL() || null
           })
           .setDescription(
             `╭───── **Command Search** ─────╮\n\n` +
@@ -227,7 +227,7 @@ const waiter = (msg, userId, prefix) => {
           )
           .setFooter({ 
             text: "Powered by Blackbit Studio",
-            iconURL: msg.client.user.displayAvatarURL()
+            iconURL: msg.client?.user?.displayAvatarURL() || null
           })
           .setTimestamp();
 
@@ -295,8 +295,8 @@ function getModuleEmbed(client, type, prefix, userId) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({
-      name: `${client.user.username} • ${type.charAt(0).toUpperCase() + type.slice(1)} Modules`,
-      iconURL: client.user.displayAvatarURL()
+      name: `${client?.user?.username || 'Bot'} • ${type.charAt(0).toUpperCase() + type.slice(1)} Modules`,
+      iconURL: client?.user?.displayAvatarURL() || null
     })
     .setDescription(
       `╭───── **${type.charAt(0).toUpperCase() + type.slice(1)} Module** ─────╮\n\n` +
@@ -305,7 +305,7 @@ function getModuleEmbed(client, type, prefix, userId) {
     )
     .setFooter({ 
       text: "Powered by Blackbit Studio",
-      iconURL: client.user.displayAvatarURL()
+      iconURL: client?.user?.displayAvatarURL() || null
     })
     .setTimestamp();
 
@@ -319,8 +319,8 @@ function getCategoryEmbed(client, category, prefix) {
     return new EmbedBuilder()
       .setColor("#FFFFFF")
       .setAuthor({ 
-        name: `${client.user.username} • ${CommandCategory[category]?.name}`,
-        iconURL: client.user.displayAvatarURL()
+        name: `${client?.user?.username || 'Bot'} • ${CommandCategory[category]?.name}`,
+        iconURL: client?.user?.displayAvatarURL() || null
       })
       .setDescription(
         `╭───── **${CommandCategory[category]?.name}** ─────╮\n\n` +
@@ -329,7 +329,7 @@ function getCategoryEmbed(client, category, prefix) {
       )
       .setFooter({ 
         text: "Powered by Blackbit Studio",
-        iconURL: client.user.displayAvatarURL()
+        iconURL: client?.user?.displayAvatarURL() || null
       })
       .setTimestamp();
   }
@@ -347,8 +347,8 @@ function getCategoryEmbed(client, category, prefix) {
   const embed = new EmbedBuilder()
     .setColor("#FFFFFF")
     .setAuthor({ 
-      name: `${client.user.username} • ${CommandCategory[category]?.name}`,
-      iconURL: client.user.displayAvatarURL()
+      name: `${client?.user?.username || 'Bot'} • ${CommandCategory[category]?.name}`,
+      iconURL: client?.user?.displayAvatarURL() || null
     })
     .setDescription(
       `╭───── **${CommandCategory[category]?.name}** ─────╮\n\n` +
@@ -357,7 +357,7 @@ function getCategoryEmbed(client, category, prefix) {
     )
     .setFooter({ 
       text: "Powered by Blackbit Studio",
-      iconURL: client.user.displayAvatarURL()
+      iconURL: client?.user?.displayAvatarURL() || null
     })
     .setTimestamp();
 
