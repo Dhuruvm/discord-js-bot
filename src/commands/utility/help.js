@@ -42,7 +42,7 @@ module.exports = {
     if (!trigger) {
       const response = await getHelpMenu({ ...message, author: message.author }, data.prefix);
       const sentMsg = await message.channel.send(response);
-      return waiter(sentMsg, message.author.id, data.prefix, message.author);
+      return waiter(sentMsg, message.author.id, data.prefix);
     }
 
     // check if command
@@ -73,7 +73,7 @@ module.exports = {
     if (!cmdName) {
       const response = await getHelpMenu({ ...interaction, author: interaction.user });
       const sentMsg = await interaction.followUp(response);
-      return waiter(sentMsg, interaction.user.id, null, interaction.user);
+      return waiter(sentMsg, interaction.user.id);
     }
 
     const cmd = interaction.client.slashCommands.get(cmdName);
@@ -172,7 +172,7 @@ async function getHelpMenu({ client, guild, author }, prefix) {
   };
 }
 
-const waiter = (msg, userId, prefix, originalAuthor) => {
+const waiter = (msg, userId, prefix) => {
   const collector = msg.channel.createMessageComponentCollector({
     filter: (reactor) => reactor.user.id === userId && msg.id === reactor.message.id,
     idle: IDLE_TIMEOUT * 1000,
@@ -222,7 +222,7 @@ const waiter = (msg, userId, prefix, originalAuthor) => {
       }
 
       case "home-btn": {
-        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: originalAuthor }, prefix);
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: msg.author || msg.interaction?.user }, prefix);
         currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
