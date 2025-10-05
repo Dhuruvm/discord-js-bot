@@ -2,6 +2,8 @@ const { AttachmentBuilder, ApplicationCommandOptionType, EmbedBuilder } = requir
 const { createCanvas, loadImage } = require("canvas");
 const { EMBED_COLORS } = require("@root/config");
 const EMOJIS = require("@helpers/EmojiConstants");
+const { getUser } = require("@schemas/User");
+const { getBanner } = require("@helpers/BannerStore");
 
 module.exports = {
   name: "profile",
@@ -33,8 +35,9 @@ module.exports = {
       
       const user = message.mentions.users.first() || message.author;
       const member = await message.guild.members.fetch(user.id).catch(() => null);
+      const userDb = await getUser(user);
       
-      const buffer = await generateProfileCard(user, member);
+      const buffer = await generateProfileCard(user, member, userDb);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
       await message.safeReply({ files: [attachment] });
@@ -54,8 +57,9 @@ module.exports = {
     try {
       const user = interaction.options.getUser("user") || interaction.user;
       const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+      const userDb = await getUser(user);
       
-      const buffer = await generateProfileCard(user, member);
+      const buffer = await generateProfileCard(user, member, userDb);
       const attachment = new AttachmentBuilder(buffer, { name: "profile.png" });
       
       await interaction.followUp({ files: [attachment] });
@@ -70,7 +74,7 @@ module.exports = {
   },
 };
 
-async function generateProfileCard(user, member) {
+async function generateProfileCard(user, member, userDb) {
   const width = 600;
   const height = 900;
   const canvas = createCanvas(width, height);
@@ -86,27 +90,25 @@ async function generateProfileCard(user, member) {
   roundRect(ctx, 15, 15, width - 30, height - 30, cornerRadius);
   ctx.fill();
 
-  // Draw gradient banner with wave effect
+  // Get user's custom banner
+  const bannerKey = userDb?.profile?.banner || "gradient_blue";
+  const bannerConfig = getBanner(bannerKey);
   const bannerHeight = 280;
-  const gradient = ctx.createRadialGradient(width / 2, bannerHeight / 2, 0, width / 2, bannerHeight / 2, width / 2);
-  gradient.addColorStop(0, "#3B5998");
-  gradient.addColorStop(0.5, "#1E3A8A");
-  gradient.addColorStop(1, "#1E1F22");
-  
+
+  // Draw custom banner
   ctx.save();
   ctx.beginPath();
   roundRect(ctx, 15, 15, width - 30, bannerHeight, cornerRadius, true, false);
   ctx.clip();
-  ctx.fillStyle = gradient;
-  ctx.fillRect(15, 15, width - 30, bannerHeight);
-  
-  // Add wave overlay effect
-  const waveGradient = ctx.createRadialGradient(width / 2, 100, 50, width / 2, 100, 250);
-  waveGradient.addColorStop(0, "rgba(59, 130, 246, 0.6)");
-  waveGradient.addColorStop(0.5, "rgba(37, 99, 235, 0.3)");
-  waveGradient.addColorStop(1, "rgba(30, 64, 175, 0)");
-  ctx.fillStyle = waveGradient;
-  ctx.fillRect(15, 15, width - 30, bannerHeight);
+
+  if (bannerConfig.type === "gradient") {
+    drawGradientBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig.colors);
+  } else if (bannerConfig.type === "pattern") {
+    drawPatternBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig);
+  } else if (bannerConfig.type === "special") {
+    drawSpecialBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig);
+  }
+
   ctx.restore();
 
   // Avatar settings
@@ -219,9 +221,10 @@ async function generateProfileCard(user, member) {
     ctx.textAlign = "center";
   }
 
-  // Bio section
-  let bioText = null;
-  if (member) {
+  // Bio section - use custom bio or fallback to roles
+  let bioText = userDb?.profile?.bio;
+  
+  if (!bioText && member) {
     const roles = member.roles.cache
       .filter((r) => r.id !== member.guild.id)
       .sort((a, b) => b.position - a.position)
@@ -281,4 +284,152 @@ function roundRect(ctx, x, y, width, height, radius, fill = true, stroke = false
   
   if (fill) ctx.fill();
   if (stroke) ctx.stroke();
+}
+
+function drawGradientBanner(ctx, x, y, width, height, colors) {
+  const gradient = ctx.createRadialGradient(
+    x + width / 2,
+    y + height / 2,
+    0,
+    x + width / 2,
+    y + height / 2,
+    width / 2
+  );
+
+  if (colors.length === 3) {
+    gradient.addColorStop(0, colors[0]);
+    gradient.addColorStop(0.5, colors[1]);
+    gradient.addColorStop(1, colors[2]);
+  } else if (colors.length === 4) {
+    gradient.addColorStop(0, colors[0]);
+    gradient.addColorStop(0.33, colors[1]);
+    gradient.addColorStop(0.66, colors[2]);
+    gradient.addColorStop(1, colors[3]);
+  } else {
+    for (let i = 0; i < colors.length; i++) {
+      gradient.addColorStop(i / (colors.length - 1), colors[i]);
+    }
+  }
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(x, y, width, height);
+
+  const waveGradient = ctx.createRadialGradient(
+    x + width / 2,
+    y + height / 3,
+    50,
+    x + width / 2,
+    y + height / 3,
+    250
+  );
+  waveGradient.addColorStop(0, `${colors[0]}AA`);
+  waveGradient.addColorStop(0.5, `${colors[1] || colors[0]}55`);
+  waveGradient.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = waveGradient;
+  ctx.fillRect(x, y, width, height);
+}
+
+function drawPatternBanner(ctx, x, y, width, height, config) {
+  const baseGradient = ctx.createLinearGradient(x, y, x, y + height);
+  baseGradient.addColorStop(0, config.baseColors[0]);
+  baseGradient.addColorStop(1, config.baseColors[1]);
+  ctx.fillStyle = baseGradient;
+  ctx.fillRect(x, y, width, height);
+
+  ctx.globalAlpha = 0.3;
+
+  if (config.name.includes("Stars")) {
+    for (let i = 0; i < 50; i++) {
+      const starX = x + Math.random() * width;
+      const starY = y + Math.random() * height;
+      const starSize = Math.random() * 3 + 1;
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(starX, starY, starSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (config.name.includes("Waves")) {
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 3;
+    
+    for (let wave = 0; wave < 5; wave++) {
+      ctx.beginPath();
+      for (let i = 0; i <= width; i += 10) {
+        const waveY = y + height / 2 + Math.sin((i + wave * 50) / 30) * 30 + wave * 20;
+        if (i === 0) {
+          ctx.moveTo(x + i, waveY);
+        } else {
+          ctx.lineTo(x + i, waveY);
+        }
+      }
+      ctx.stroke();
+    }
+  } else if (config.name.includes("Hexagons")) {
+    const hexSize = 30;
+    for (let row = 0; row < height / hexSize + 2; row++) {
+      for (let col = 0; col < width / hexSize + 2; col++) {
+        const hexX = x + col * hexSize * 1.5;
+        const hexY = y + row * hexSize * Math.sqrt(3) + (col % 2) * hexSize * Math.sqrt(3) / 2;
+        
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
+        drawHexagon(ctx, hexX, hexY, hexSize / 2);
+      }
+    }
+  }
+
+  ctx.globalAlpha = 1;
+}
+
+function drawSpecialBanner(ctx, x, y, width, height, config) {
+  if (config.name.includes("Holographic")) {
+    for (let i = 0; i < 4; i++) {
+      const gradient = ctx.createLinearGradient(
+        x + (i * width) / 4,
+        y,
+        x + ((i + 1) * width) / 4,
+        y + height
+      );
+      gradient.addColorStop(0, config.colors[i % config.colors.length]);
+      gradient.addColorStop(1, config.colors[(i + 1) % config.colors.length]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x + (i * width) / 4, y, width / 4, height);
+    }
+  } else if (config.name.includes("Neon")) {
+    const gradient = ctx.createRadialGradient(
+      x + width / 2,
+      y + height / 2,
+      0,
+      x + width / 2,
+      y + height / 2,
+      width / 2
+    );
+    gradient.addColorStop(0, config.colors[0]);
+    gradient.addColorStop(0.5, config.colors[1]);
+    gradient.addColorStop(1, config.colors[2] || config.colors[0]);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, width, height);
+
+    ctx.shadowColor = config.colors[0];
+    ctx.shadowBlur = 50;
+    ctx.fillRect(x, y, width, height);
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawHexagon(ctx, x, y, radius) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i;
+    const hx = x + radius * Math.cos(angle);
+    const hy = y + radius * Math.sin(angle);
+    if (i === 0) {
+      ctx.moveTo(hx, hy);
+    } else {
+      ctx.lineTo(hx, hy);
+    }
+  }
+  ctx.closePath();
+  ctx.stroke();
 }

@@ -21,6 +21,11 @@ const Schema = new mongoose.Schema(
       streak: { type: Number, default: 0 },
       timestamp: Date,
     },
+    profile: {
+      bio: { type: String, default: null, maxlength: 200 },
+      banner: { type: String, default: "gradient_blue" },
+      bannerColor: { type: String, default: null },
+    },
   },
   {
     timestamps: {
@@ -61,6 +66,25 @@ module.exports = {
 
     cache.add(user.id, userDb);
     return userDb;
+  },
+
+  /**
+   * Update cache after saving user data
+   * @param {string} userId
+   * @param {object} userDb
+   */
+  updateCache: (userId, userDb) => {
+    cache.add(userId, userDb);
+  },
+
+  /**
+   * Clear cache for a user
+   * @param {string} userId
+   */
+  clearCache: (userId) => {
+    if (cache.contains(userId)) {
+      cache.remove(userId);
+    }
   },
 
   getReputationLb: async (limit = 10) => {
