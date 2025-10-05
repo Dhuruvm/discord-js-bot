@@ -222,7 +222,9 @@ const waiter = (msg, userId, prefix) => {
       }
 
       case "home-btn": {
-        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: msg.author || msg.interaction?.user }, prefix);
+        // Get author from either message or interaction
+        const author = msg.author || (msg.interaction && msg.interaction.user);
+        const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, author: author }, prefix);
         currentComponents = homeResponse.components;
         msg.editable && (await msg.edit(homeResponse));
         break;
