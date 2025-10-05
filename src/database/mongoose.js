@@ -5,7 +5,7 @@ mongoose.set("strictQuery", true);
 
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const RECONNECT_DELAY = 5000;
+const BASE_RECONNECT_DELAY = 5000;
 
 async function attemptReconnect() {
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
@@ -14,6 +14,7 @@ async function attemptReconnect() {
   }
 
   reconnectAttempts++;
+  const delay = BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts - 1);
   warn(`Mongoose: Attempting to reconnect... (Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
 
   try {
@@ -27,7 +28,9 @@ async function attemptReconnect() {
     reconnectAttempts = 0;
   } catch (err) {
     error(`Mongoose: Reconnection attempt ${reconnectAttempts} failed`, err);
-    setTimeout(attemptReconnect, RECONNECT_DELAY * reconnectAttempts);
+    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+      setTimeout(attemptReconnect, delay);
+    }
   }
 }
 
@@ -64,8 +67,8 @@ module.exports = {
 
       return mongoose.connection;
     } catch (err) {
-      error("Mongoose: Failed to connect to database", err);
-      process.exit(1);
+      error("Mongoose: Initial connection failed, starting reconnect attempts", err);
+      attemptReconnect();
     }
   },
 

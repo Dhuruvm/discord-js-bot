@@ -39,7 +39,7 @@ module.exports = {
     const match = await message.client.resolveUsers(args[0], true);
     const target = match[0];
     if (!target) return message.safeReply(`No user found matching ${args[0]}`);
-    const reason = message.content.split(args[0])[1].trim();
+    const reason = message.content.split(args[0])[1]?.trim() || "No reason provided";
     const response = await ban(message.member, target, reason);
     await message.safeReply(response);
   },
