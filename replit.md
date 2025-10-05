@@ -8,6 +8,17 @@ The bot is designed as a production-ready, feature-rich solution with optional w
 
 ## Recent Changes
 
+**October 5, 2025 - Modern Embed System & Components V2 Enhancement**
+- Created ModernEmbed helper class (`src/helpers/ModernEmbed.js`) for standardized Components V2 embeds
+- Implemented modern Container-based design with Section components and Separators
+- Updated moderation commands (kick, ban) to use new modern embed system
+- Added quick helper methods: `ModernEmbed.success()`, `ModernEmbed.error()`, `ModernEmbed.warning()`, `ModernEmbed.info()`
+- All modern embeds support accent colors, thumbnails, headers, sections, and footers
+- Consistent visual design matching Discord's official style guidelines
+- Error messages now use professional red-themed containers with clear messaging
+- Success messages use green-themed containers with confirmation details
+- All modern embeds return Components V2 flag for proper rendering
+
 **October 5, 2025 - Components V2 Migration (Information Commands)**
 - Converted help command to Container-based Components V2 system with interactive navigation
 - Converted botinfo/botstats command to modern Container layout with system metrics
@@ -281,3 +292,61 @@ To enable the web dashboard:
 - Bot prefix: `!` (configurable per server)
 - Slash commands: Disabled by default (enable in `config.js` under `INTERACTIONS.SLASH`)
 - Music system: Disabled by default (requires Lavalink server setup)
+
+## Modern Embed System (Components V2)
+
+### Overview
+The bot uses Discord's Components V2 system for all embed messages, providing a modern, professional appearance with native Discord UI elements.
+
+### ModernEmbed Helper Class
+Located at `src/helpers/ModernEmbed.js`, this utility class simplifies creating Components V2 embeds:
+
+**Basic Usage:**
+```javascript
+const ModernEmbed = require("@helpers/ModernEmbed");
+
+// Quick error message
+const errorMsg = ModernEmbed.error("Title", "Description", "Footer text");
+await message.reply(errorMsg);
+
+// Quick success message
+const successMsg = ModernEmbed.success("Action Complete", "Details here");
+await interaction.followUp(successMsg);
+
+// Custom embed
+const embed = new ModernEmbed()
+  .setColor(0x5865F2)
+  .setHeader("Title", "Description", thumbnailUrl, thumbnailDesc)
+  .addSection("Section Header", "Section content")
+  .addField("Simple text field")
+  .setFooter("Footer text", true) // true includes timestamp
+  .toMessage();
+```
+
+### Design Patterns
+- **Headers**: Use `# Title` for main headings, thumbnails for visual context
+- **Sections**: Use `### Header` for section titles, structured content below
+- **Separators**: Automatic spacing between sections with optional divider lines
+- **Footers**: Italicized text with optional Discord timestamps
+- **Accent Colors**: 
+  - Success: `0x57F287` (Green)
+  - Error: `0xED4245` (Red)
+  - Warning: `0xFEE75C` (Yellow)
+  - Info: `0x5865F2` (Blurple)
+
+### Component Structure
+All modern embeds follow this hierarchy:
+1. **Container** (with accent_color)
+2. **Header Section** (with optional thumbnail accessory)
+3. **Separator** (divider: true, spacing: 2)
+4. **Content Sections** (repeatable)
+5. **Separators** (between sections)
+6. **Footer** (divider: false, spacing: 1)
+
+### Migration Guide
+When updating old embeds to Components V2:
+1. Replace `EmbedBuilder` imports with `ModernEmbed` and `ComponentType`
+2. Use `ModernEmbed.error()`, `.success()`, etc. for simple messages
+3. Build complex embeds with the builder pattern
+4. Always include `MessageFlags.IsComponentsV2` in response
+5. Remove manual decorative elements (╭╯, ---, etc.) - use Separators instead

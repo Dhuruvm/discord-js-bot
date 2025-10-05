@@ -61,51 +61,18 @@ async function kick(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const container = {
-      type: ComponentType.Container,
-      accent_color: 0x57F287,
-      components: [
-        {
-          type: ComponentType.Section,
-          components: [
-            {
-              type: ComponentType.TextDisplay,
-              content: `# ✅ Member Kicked\n\nSuccessfully removed member from the server.`
-            }
-          ],
-          accessory: {
-            type: ComponentType.Thumbnail,
-            media: { url: targetUser.displayAvatarURL() },
-            description: `${targetUsername} Avatar`
-          }
-        },
-        {
-          type: ComponentType.Separator,
-          divider: true,
-          spacing: 2
-        },
-        {
-          type: ComponentType.TextDisplay,
-          content: `### 📋 Action Details\n\n**User:** ${targetUsername}\n**Action:** Kicked from server\n**Reason:** ${reason || "No reason provided"}`
-        },
-        {
-          type: ComponentType.Separator,
-          divider: false,
-          spacing: 1
-        },
-        {
-          type: ComponentType.TextDisplay,
-          content: `*Kicked by ${issuer.user.username}* • <t:${Math.floor(Date.now() / 1000)}:R>`
-        }
-      ]
-    };
-    return { components: [container], flags: MessageFlags.IsComponentsV2 };
+    const embed = new ModernEmbed()
+      .setColor(0x57F287)
+      .setHeader("✅ Member Kicked", "Successfully removed member from the server.", targetUser.displayAvatarURL(), `${targetUsername} Avatar`)
+      .addSection("📋 Action Details", `**User:** ${targetUsername}\n**Action:** Kicked from server\n**Reason:** ${reason || "No reason provided"}`)
+      .setFooter(`Kicked by ${issuer.user.username}`);
+    return embed.toMessage();
   }
   
   if (response === "BOT_PERM") {
     return ModernEmbed.error(
-      "Permission Denied",
-      `I do not have permission to kick **${targetUsername}**. Please ensure I have the proper role hierarchy.`,
+      "Bot Missing Permissions",
+      `I don't have permission to kick **${targetUsername}**. Please ensure I have the **Kick Members** permission and a role higher than the target user.`,
       `Requested by ${issuer.user.username}`
     );
   }

@@ -66,51 +66,18 @@ async function ban(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const container = {
-      type: ComponentType.Container,
-      accent_color: 0xED4245,
-      components: [
-        {
-          type: ComponentType.Section,
-          components: [
-            {
-              type: ComponentType.TextDisplay,
-              content: `# 🔨 Member Banned\n\nUser has been permanently banned from the server.`
-            }
-          ],
-          accessory: {
-            type: ComponentType.Thumbnail,
-            media: { url: targetUser.displayAvatarURL() },
-            description: `${targetUsername} Avatar`
-          }
-        },
-        {
-          type: ComponentType.Separator,
-          divider: true,
-          spacing: 2
-        },
-        {
-          type: ComponentType.TextDisplay,
-          content: `### 📋 Ban Details\n\n**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`
-        },
-        {
-          type: ComponentType.Separator,
-          divider: false,
-          spacing: 1
-        },
-        {
-          type: ComponentType.TextDisplay,
-          content: `*Banned by ${issuer.user.username}* • <t:${Math.floor(Date.now() / 1000)}:R>`
-        }
-      ]
-    };
-    return { components: [container], flags: MessageFlags.IsComponentsV2 };
+    const embed = new ModernEmbed()
+      .setColor(0xED4245)
+      .setHeader("🔨 Member Banned", "User has been permanently banned from the server.", targetUser.displayAvatarURL(), `${targetUsername} Avatar`)
+      .addSection("📋 Ban Details", `**User:** ${targetUsername}\n**Action:** Permanently banned\n**Reason:** ${reason || "No reason provided"}`)
+      .setFooter(`Banned by ${issuer.user.username}`);
+    return embed.toMessage();
   }
   
   if (response === "BOT_PERM") {
     return ModernEmbed.error(
-      "Missing Permissions",
-      `You're missing the **Ban Members** permission. Please contact a server administrator.`,
+      "Bot Missing Permissions",
+      `I don't have permission to ban **${targetUsername}**. Please ensure I have the **Ban Members** permission and a role higher than the target user.`,
       `Requested by ${issuer.user.username}`
     );
   }
