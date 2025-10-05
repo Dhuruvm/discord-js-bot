@@ -1,7 +1,6 @@
 const { kickTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, MessageFlags, ComponentType } = require("discord.js");
+const { ApplicationCommandOptionType } = require("discord.js");
 const ModernEmbed = require("@helpers/ModernEmbed");
-const EMOJIS = require("@helpers/EmojiConstants");
 
 /**
  * @type {import("@structures/Command")}
@@ -46,7 +45,7 @@ module.exports = {
 
   async interactionRun(interaction) {
     const user = interaction.options.getUser("user");
-    const reason = interaction.options.getString("reason");
+    const reason = interaction.options.getString("reason") || "No reason provided";
     const target = await interaction.guild.members.fetch(user.id);
 
     const response = await kick(interaction.member, target, reason);
@@ -61,33 +60,26 @@ async function kick(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const embed = new ModernEmbed()
-      .setColor(0x57F287)
-      .setHeader("✅ Member Kicked", "Successfully removed member from the server.", targetUser.displayAvatarURL(), `${targetUsername} Avatar`)
-      .addSection("📋 Action Details", `**User:** ${targetUsername}\n**Action:** Kicked from server\n**Reason:** ${reason || "No reason provided"}`)
-      .setFooter(`Kicked by ${issuer.user.username}`);
-    return embed.toMessage();
+    return ModernEmbed.success(
+      "Member Kicked",
+      `**${targetUsername}** has been kicked from the server.\n**Reason:** ${reason || "No reason provided"}`,
+      `Kicked by ${issuer.user.username}`
+    );
   }
   
   if (response === "BOT_PERM") {
-    return ModernEmbed.error(
-      "Bot Missing Permissions",
-      `I don't have permission to kick **${targetUsername}**. Please ensure I have the **Kick Members** permission and a role higher than the target user.`,
-      `Requested by ${issuer.user.username}`
+    return ModernEmbed.simpleError(
+      `I don't have permission to kick ${targetUsername}. Please ensure I have the Kick Members permission and a role higher than the target user.`
     );
   }
   
   if (response === "MEMBER_PERM") {
-    return ModernEmbed.error(
-      "Insufficient Permissions",
-      `You need to have a higher role than **${targetUsername}** to execute this command.`,
-      `Requested by ${issuer.user.username}`
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than ${targetUsername} to execute this command.!`
     );
   }
   
-  return ModernEmbed.error(
-    "Action Failed",
-    `Failed to kick **${targetUsername}**. Please try again or contact an administrator.`,
-    `Requested by ${issuer.user.username}`
+  return ModernEmbed.simpleError(
+    `Failed to kick ${targetUsername}. Please try again or contact an administrator.`
   );
 }

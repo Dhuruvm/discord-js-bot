@@ -1,7 +1,6 @@
 const { warnTarget } = require("@helpers/ModUtils");
-const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
-const EMOJIS = require("@helpers/EmojiConstants");
+const { ApplicationCommandOptionType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
 
 /**
  * @type {import("@structures/Command")}
@@ -45,7 +44,7 @@ module.exports = {
 
   async interactionRun(interaction) {
     const user = interaction.options.getUser("user");
-    const reason = interaction.options.getString("reason");
+    const reason = interaction.options.getString("reason") || "No reason provided";
     const target = await interaction.guild.members.fetch(user.id);
 
     const response = await warn(interaction.member, target, reason);
@@ -60,62 +59,26 @@ async function warn(issuer, target, reason) {
   const targetUsername = targetUser.username || target.username;
   
   if (typeof response === "boolean") {
-    const embed = new EmbedBuilder()
-      .setColor(0xFEE75C)
-      .setTitle("⚠️ Member Warned")
-      .setThumbnail(targetUser.displayAvatarURL())
-      .addFields(
-        { name: "👤 User", value: targetUsername, inline: true },
-        { name: "📝 Reason", value: reason || "No reason provided", inline: false }
-      )
-      .setFooter({ text: `Warned by ${issuer.user.username}`, iconURL: issuer.user.displayAvatarURL() })
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.warning(
+      "Member Warned",
+      `**${targetUsername}** has been warned.\n**Reason:** ${reason || "No reason provided"}`,
+      `Warned by ${issuer.user.username}`
+    );
   }
   
   if (response === "BOT_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** I do not have permission to warn **${targetUsername}**`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.simpleError(
+      `I do not have permission to warn ${targetUsername}.`
+    );
   }
   
   if (response === "MEMBER_PERM") {
-    const embed = new EmbedBuilder()
-      .setColor("#2B2D31");
-    
-    if (issuer?.user) {
-      embed.setAuthor({ 
-        name: issuer.user.username,
-        iconURL: issuer.user.displayAvatarURL()
-      });
-    }
-    
-    embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** you need to have a higher role than me to execute this command`)
-      .setTimestamp();
-    return { embeds: [embed] };
+    return ModernEmbed.simpleError(
+      `You need to have a higher role than me to execute this command.!`
+    );
   }
   
-  const embed = new EmbedBuilder()
-    .setColor("#2B2D31");
-  
-  if (issuer?.user) {
-    embed.setAuthor({ 
-      name: issuer.user.username,
-      iconURL: issuer.user.displayAvatarURL()
-    });
-  }
-  
-  embed.setDescription(`<:deny:1396492414327197856> **${issuer.user.username}:** failed to warn **${targetUsername}**`)
-    .setTimestamp();
-  return { embeds: [embed] };
+  return ModernEmbed.simpleError(
+    `Failed to warn ${targetUsername}.`
+  );
 }
