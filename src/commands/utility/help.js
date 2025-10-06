@@ -127,7 +127,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       `• *Or view the commands on our [**\` Docs \`**](https://github.com/encrypment)*`
     )
     .addFields(
-      { name: 'Need Extra Help?', value: `• Visit our **Support Server** on how to get started\n• Developer: **[encrypt | nasa](https://discord.com/users/${OWNER_IDS[0]})**`, inline: false }
+      { name: 'Need Extra Help?', value: `• Visit our **Support Server** on how to get started\n• Developer: **[Falooda](https://discord.com/users/${OWNER_IDS[0]})**`, inline: false }
     )
     .setFooter({ text: "Powered by Blackbit Studio" });
 
