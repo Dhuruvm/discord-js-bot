@@ -23,6 +23,14 @@ module.exports.launch = async (client) => {
 
   const db = await mongoose.initializeMongoose();
 
+  // Load configuration from api.json
+  const apiConfig = require("../api.json");
+  Object.keys(apiConfig).forEach(key => {
+    if (!process.env[key]) {
+      process.env[key] = apiConfig[key];
+    }
+  });
+
   /* App configuration */
   app
     .use(express.json()) // For post methods

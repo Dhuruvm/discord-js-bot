@@ -1,4 +1,10 @@
-require("dotenv").config();
+// Load configuration from api.json
+const config = require("./api.json");
+// Set environment variables from api.json
+Object.keys(config).forEach(key => {
+  process.env[key] = config[key];
+});
+
 require("module-alias/register");
 
 // register extenders

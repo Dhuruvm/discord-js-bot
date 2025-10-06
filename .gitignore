@@ -4,6 +4,7 @@ node_modules/
 *.log
 *.tar.gz
 .env
+api.json
 
 npm-debug.log*
 yarn-debug.log*
