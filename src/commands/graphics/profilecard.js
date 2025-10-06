@@ -1,9 +1,10 @@
 const { AttachmentBuilder, ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
 const { createCanvas, loadImage } = require("canvas");
 const { EMBED_COLORS } = require("@root/config");
-const EMOJIS = require("@helpers/EmojiConstants");
+const ModernEmbed = require("@helpers/ModernEmbed");
 const { getUser } = require("@schemas/User");
 const { getBanner } = require("@helpers/BannerStore");
+const emojis = require("@root/emojis.json");
 
 module.exports = {
   name: "profile",
@@ -43,11 +44,7 @@ module.exports = {
       await message.safeReply({ files: [attachment] });
     } catch (error) {
       message.client.logger.error("Error generating profile card:", error);
-      const errorEmbed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.BOT_EMBED)
-        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
-        .setTimestamp();
-      await message.safeReply({ embeds: [errorEmbed] });
+      await message.safeReply(ModernEmbed.simpleError("Failed to generate profile card. Please try again later."));
     }
   },
 
@@ -65,81 +62,117 @@ module.exports = {
       await interaction.followUp({ files: [attachment] });
     } catch (error) {
       interaction.client.logger.error("Error generating profile card:", error);
-      const errorEmbed = new EmbedBuilder()
-        .setColor(EMBED_COLORS.BOT_EMBED)
-        .setDescription(`${EMOJIS.ERROR} | Failed to generate profile card.`)
-        .setTimestamp();
-      await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+      await interaction.followUp(ModernEmbed.simpleError("Failed to generate profile card. Please try again later."));
     }
   },
 };
 
 async function generateProfileCard(user, member, userDb) {
-  const width = 600;
-  const height = 900;
+  const width = 800;
+  const height = 1000;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext("2d");
 
-  // Background color (Discord dark theme)
-  ctx.fillStyle = "#2B2D31";
+  // Get user's accent color or use default
+  const accentColor = userDb?.profile?.accentColor || "#5865F2";
+  const theme = userDb?.profile?.theme || "dark";
+  
+  // Background
+  const bgColor = theme === "dark" ? "#0F0F0F" : "#FFFFFF";
+  ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
 
-  // Draw rounded rectangle background
+  // Main card container
+  const cardX = 30;
+  const cardY = 30;
+  const cardWidth = width - 60;
+  const cardHeight = height - 60;
   const cornerRadius = 20;
-  ctx.fillStyle = "#1E1F22";
-  roundRect(ctx, 15, 15, width - 30, height - 30, cornerRadius);
-  ctx.fill();
 
-  // Get user's custom banner
-  const bannerKey = userDb?.profile?.banner || "gradient_blue";
-  const bannerConfig = getBanner(bannerKey);
-  const bannerHeight = 280;
-
-  // Draw custom banner
+  // Card background with subtle gradient
   ctx.save();
   ctx.beginPath();
-  roundRect(ctx, 15, 15, width - 30, bannerHeight, cornerRadius, true, false);
+  roundRect(ctx, cardX, cardY, cardWidth, cardHeight, cornerRadius);
+  ctx.clip();
+  
+  const cardBg = theme === "dark" ? "#1A1A1A" : "#F5F5F5";
+  ctx.fillStyle = cardBg;
+  ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+  ctx.restore();
+
+  // Banner section
+  const bannerHeight = 280;
+  ctx.save();
+  ctx.beginPath();
+  roundRect(ctx, cardX, cardY, cardWidth, bannerHeight, cornerRadius, true, false);
   ctx.clip();
 
-  if (bannerConfig.type === "gradient") {
-    drawGradientBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig.colors);
-  } else if (bannerConfig.type === "pattern") {
-    drawPatternBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig);
-  } else if (bannerConfig.type === "special") {
-    drawSpecialBanner(ctx, 15, 15, width - 30, bannerHeight, bannerConfig);
+  // Try to load Discord banner first
+  let bannerLoaded = false;
+  try {
+    const bannerURL = user.bannerURL({ size: 1024, extension: "png" });
+    if (bannerURL) {
+      const bannerImg = await loadImage(bannerURL);
+      ctx.drawImage(bannerImg, cardX, cardY, cardWidth, bannerHeight);
+      bannerLoaded = true;
+    }
+  } catch (error) {
+    // Banner loading failed, will use fallback
   }
+
+  // Fallback to custom banner if no Discord banner
+  if (!bannerLoaded) {
+    const bannerKey = userDb?.profile?.banner || "gradient_blue";
+    const bannerConfig = getBanner(bannerKey);
+    
+    if (bannerConfig.type === "gradient") {
+      drawModernGradient(ctx, cardX, cardY, cardWidth, bannerHeight, bannerConfig.colors, accentColor);
+    } else if (bannerConfig.type === "pattern") {
+      drawPatternBanner(ctx, cardX, cardY, cardWidth, bannerHeight, bannerConfig);
+    } else if (bannerConfig.type === "special") {
+      drawSpecialBanner(ctx, cardX, cardY, cardWidth, bannerHeight, bannerConfig);
+    } else {
+      // Default modern gradient
+      drawModernGradient(ctx, cardX, cardY, cardWidth, bannerHeight, [accentColor, "#8B5CF6", "#EC4899"], accentColor);
+    }
+  }
+
+  // Banner overlay gradient for depth
+  const overlayGradient = ctx.createLinearGradient(cardX, cardY + bannerHeight - 100, cardX, cardY + bannerHeight);
+  overlayGradient.addColorStop(0, "rgba(0,0,0,0)");
+  overlayGradient.addColorStop(1, cardBg);
+  ctx.fillStyle = overlayGradient;
+  ctx.fillRect(cardX, cardY, cardWidth, bannerHeight);
 
   ctx.restore();
 
   // Avatar settings
-  const avatarSize = 180;
+  const avatarSize = 160;
   const avatarX = width / 2;
-  const avatarY = bannerHeight - 30;
+  const avatarY = cardY + bannerHeight - 50;
 
-  // Draw glowing ring around avatar
-  const glowRingSize = avatarSize + 20;
-  
-  // Outer glow
+  // Modern avatar glow effect
   ctx.save();
-  ctx.shadowColor = "#06B6D4";
-  ctx.shadowBlur = 30;
+  ctx.shadowColor = hexToRGBA(accentColor, 0.6);
+  ctx.shadowBlur = 40;
+  
+  // Outer ring
   ctx.beginPath();
-  ctx.arc(avatarX, avatarY, glowRingSize / 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "#06B6D4";
-  ctx.lineWidth = 8;
+  ctx.arc(avatarX, avatarY, avatarSize / 2 + 8, 0, Math.PI * 2);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 6;
   ctx.stroke();
   ctx.restore();
 
-  // Inner ring
+  // Avatar background
   ctx.beginPath();
-  ctx.arc(avatarX, avatarY, glowRingSize / 2, 0, Math.PI * 2);
-  ctx.strokeStyle = "#06B6D4";
-  ctx.lineWidth = 6;
-  ctx.stroke();
+  ctx.arc(avatarX, avatarY, avatarSize / 2 + 4, 0, Math.PI * 2);
+  ctx.fillStyle = cardBg;
+  ctx.fill();
 
   // Draw avatar
   try {
-    const avatar = await loadImage(user.displayAvatarURL({ size: 256, extension: "png" }));
+    const avatar = await loadImage(user.displayAvatarURL({ size: 512, extension: "png" }));
     
     ctx.save();
     ctx.beginPath();
@@ -149,10 +182,10 @@ async function generateProfileCard(user, member, userDb) {
     ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
     ctx.restore();
   } catch (error) {
-    // Avatar loading failed, will continue without avatar
+    // Avatar loading failed
   }
 
-  // Get status
+  // Status indicator
   const status = member?.presence?.status || "offline";
   const statusColors = {
     online: "#23A559",
@@ -161,67 +194,43 @@ async function generateProfileCard(user, member, userDb) {
     offline: "#80848E",
   };
 
-  // Username with status dot
-  const usernameY = avatarY + avatarSize / 2 + 80;
-  ctx.fillStyle = "#FFFFFF";
-  ctx.font = "bold 52px Arial, sans-serif";
+  const statusSize = 36;
+  const statusX = avatarX + avatarSize / 2 - statusSize / 2;
+  const statusY = avatarY + avatarSize / 2 - statusSize / 2;
+
+  // Status background
+  ctx.beginPath();
+  ctx.arc(statusX, statusY, statusSize / 2 + 2, 0, Math.PI * 2);
+  ctx.fillStyle = cardBg;
+  ctx.fill();
+
+  // Status indicator
+  ctx.beginPath();
+  ctx.arc(statusX, statusY, statusSize / 2, 0, Math.PI * 2);
+  ctx.fillStyle = statusColors[status];
+  ctx.fill();
+
+  // Username section
+  const textColor = theme === "dark" ? "#FFFFFF" : "#000000";
+  const secondaryColor = theme === "dark" ? "#B5BAC1" : "#6B7280";
+  
+  const usernameY = avatarY + avatarSize / 2 + 90;
+  
+  // Username with modern font
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 56px 'Segoe UI', Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(user.username, avatarX, usernameY);
 
-  // Status dot next to username
-  const statusDotX = avatarX + ctx.measureText(user.username).width / 2 + 25;
-  const statusDotY = usernameY - 32;
-  ctx.beginPath();
-  ctx.arc(statusDotX, statusDotY, 12, 0, Math.PI * 2);
-  ctx.fillStyle = statusColors[status] || statusColors.offline;
-  ctx.fill();
-
-  // Discriminator or tag
-  const displayTag = user.discriminator !== "0" ? `${user.username}#${user.discriminator}` : `${user.username}#1234`;
-  ctx.fillStyle = "#B5BAC1";
-  ctx.font = "28px Arial, sans-serif";
-  ctx.fillText(displayTag, avatarX, usernameY + 45);
-
-  // Activity/Status
-  let activityText = null;
-  let activityEmoji = null;
-  
-  if (member?.presence?.activities && member.presence.activities.length > 0) {
-    const activity = member.presence.activities[0];
-    
-    if (activity.type === 0) { // Playing
-      activityEmoji = "🎮";
-      activityText = `Playing ${activity.name}`;
-    } else if (activity.type === 2) { // Listening
-      activityEmoji = "🎵";
-      activityText = `Listening to ${activity.name}`;
-    } else if (activity.type === 3) { // Watching
-      activityEmoji = "📺";
-      activityText = `Watching ${activity.name}`;
-    } else if (activity.type === 4) { // Custom
-      activityEmoji = activity.emoji?.name || "💭";
-      activityText = activity.state || activity.name;
-    } else if (activity.type === 5) { // Competing
-      activityEmoji = "🏆";
-      activityText = `Competing in ${activity.name}`;
-    }
+  // Global name or tag
+  const globalName = user.globalName || user.username;
+  if (globalName !== user.username) {
+    ctx.fillStyle = secondaryColor;
+    ctx.font = "32px 'Segoe UI', Arial, sans-serif";
+    ctx.fillText(`@${user.username}`, avatarX, usernameY + 48);
   }
 
-  if (activityText) {
-    const activityY = usernameY + 110;
-    
-    // Draw emoji and activity
-    ctx.font = "32px Arial, sans-serif";
-    ctx.fillText(activityEmoji, avatarX - 150, activityY);
-    
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "26px Arial, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(activityText, avatarX - 100, activityY);
-    ctx.textAlign = "center";
-  }
-
-  // Bio section - use custom bio or fallback to roles
+  // Bio section with modern styling
   let bioText = userDb?.profile?.bio;
   
   if (!bioText && member) {
@@ -232,7 +241,7 @@ async function generateProfileCard(user, member, userDb) {
       .slice(0, 3);
     
     if (roles.length > 0) {
-      bioText = roles.join(" | ");
+      bioText = roles.join(" • ");
     }
   }
 
@@ -240,31 +249,67 @@ async function generateProfileCard(user, member, userDb) {
     bioText = "Discord User";
   }
 
-  // Draw bio text
-  const bioY = activityText ? usernameY + 200 : usernameY + 130;
-  ctx.fillStyle = "#B5BAC1";
-  ctx.font = "24px Arial, sans-serif";
-  
-  // Word wrap bio text
-  const maxWidth = width - 100;
-  const words = bioText.split(" ");
-  let line = "";
-  let lineY = bioY;
-  const lineHeight = 35;
+  // Bio container
+  const bioY = globalName !== user.username ? usernameY + 130 : usernameY + 90;
+  const bioBoxY = bioY - 30;
+  const bioBoxHeight = 120;
 
-  for (let i = 0; i < words.length; i++) {
-    const testLine = line + words[i] + " ";
-    const metrics = ctx.measureText(testLine);
+  // Semi-transparent bio background
+  ctx.fillStyle = theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)";
+  roundRect(ctx, cardX + 40, bioBoxY, cardWidth - 80, bioBoxHeight, 12);
+  ctx.fill();
+
+  // Bio text with word wrap
+  ctx.fillStyle = secondaryColor;
+  ctx.font = "28px 'Segoe UI', Arial, sans-serif";
+  ctx.textAlign = "center";
+  
+  const maxWidth = cardWidth - 120;
+  wrapText(ctx, bioText, avatarX, bioY + 20, maxWidth, 40);
+
+  // Activity section if available
+  if (member?.presence?.activities && member.presence.activities.length > 0) {
+    const activity = member.presence.activities[0];
+    const activityY = bioBoxY + bioBoxHeight + 60;
+
+    // Activity container
+    ctx.fillStyle = theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)";
+    roundRect(ctx, cardX + 40, activityY, cardWidth - 80, 90, 12);
+    ctx.fill();
+
+    // Accent bar on left
+    ctx.fillStyle = accentColor;
+    ctx.fillRect(cardX + 40, activityY, 6, 90);
+
+    // Activity text
+    ctx.textAlign = "left";
+    ctx.fillStyle = textColor;
+    ctx.font = "bold 26px 'Segoe UI', Arial, sans-serif";
     
-    if (metrics.width > maxWidth && i > 0) {
-      ctx.fillText(line.trim(), avatarX, lineY);
-      line = words[i] + " ";
-      lineY += lineHeight;
-    } else {
-      line = testLine;
-    }
+    let activityLabel = "Activity";
+    if (activity.type === 0) activityLabel = "Playing";
+    else if (activity.type === 2) activityLabel = "Listening to";
+    else if (activity.type === 3) activityLabel = "Watching";
+    else if (activity.type === 5) activityLabel = "Competing in";
+    
+    ctx.fillText(activityLabel, cardX + 70, activityY + 35);
+    
+    ctx.fillStyle = secondaryColor;
+    ctx.font = "24px 'Segoe UI', Arial, sans-serif";
+    const activityName = activity.name || activity.state || "Unknown";
+    ctx.fillText(activityName.slice(0, 50), cardX + 70, activityY + 65);
   }
-  ctx.fillText(line.trim(), avatarX, lineY);
+
+  // Footer with accent line
+  const footerY = cardY + cardHeight - 40;
+  ctx.fillStyle = hexToRGBA(accentColor, 0.3);
+  ctx.fillRect(cardX + 40, footerY, cardWidth - 80, 2);
+
+  // Subtle watermark
+  ctx.fillStyle = hexToRGBA(secondaryColor, 0.5);
+  ctx.font = "20px 'Segoe UI', Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Powered by Cybork", avatarX, footerY + 25);
 
   return canvas.toBuffer("image/png");
 }
@@ -286,47 +331,32 @@ function roundRect(ctx, x, y, width, height, radius, fill = true, stroke = false
   if (stroke) ctx.stroke();
 }
 
-function drawGradientBanner(ctx, x, y, width, height, colors) {
-  const gradient = ctx.createRadialGradient(
-    x + width / 2,
-    y + height / 2,
-    0,
-    x + width / 2,
-    y + height / 2,
-    width / 2
-  );
-
-  if (colors.length === 3) {
-    gradient.addColorStop(0, colors[0]);
-    gradient.addColorStop(0.5, colors[1]);
-    gradient.addColorStop(1, colors[2]);
-  } else if (colors.length === 4) {
-    gradient.addColorStop(0, colors[0]);
-    gradient.addColorStop(0.33, colors[1]);
-    gradient.addColorStop(0.66, colors[2]);
-    gradient.addColorStop(1, colors[3]);
+function drawModernGradient(ctx, x, y, width, height, colors, accentColor) {
+  // Modern mesh gradient effect
+  const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+  
+  if (colors && colors.length > 0) {
+    colors.forEach((color, i) => {
+      gradient.addColorStop(i / (colors.length - 1), color);
+    });
   } else {
-    for (let i = 0; i < colors.length; i++) {
-      gradient.addColorStop(i / (colors.length - 1), colors[i]);
-    }
+    gradient.addColorStop(0, accentColor || "#5865F2");
+    gradient.addColorStop(0.5, "#8B5CF6");
+    gradient.addColorStop(1, "#EC4899");
   }
 
   ctx.fillStyle = gradient;
   ctx.fillRect(x, y, width, height);
 
-  const waveGradient = ctx.createRadialGradient(
-    x + width / 2,
-    y + height / 3,
-    50,
-    x + width / 2,
-    y + height / 3,
-    250
-  );
-  waveGradient.addColorStop(0, `${colors[0]}AA`);
-  waveGradient.addColorStop(0.5, `${colors[1] || colors[0]}55`);
-  waveGradient.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = waveGradient;
-  ctx.fillRect(x, y, width, height);
+  // Add noise/texture overlay for depth
+  ctx.globalAlpha = 0.05;
+  for (let i = 0; i < 1000; i++) {
+    const noiseX = x + Math.random() * width;
+    const noiseY = y + Math.random() * height;
+    ctx.fillStyle = Math.random() > 0.5 ? "#FFFFFF" : "#000000";
+    ctx.fillRect(noiseX, noiseY, 1, 1);
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawPatternBanner(ctx, x, y, width, height, config) {
@@ -336,46 +366,18 @@ function drawPatternBanner(ctx, x, y, width, height, config) {
   ctx.fillStyle = baseGradient;
   ctx.fillRect(x, y, width, height);
 
-  ctx.globalAlpha = 0.3;
+  ctx.globalAlpha = 0.15;
 
   if (config.name.includes("Stars")) {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 80; i++) {
       const starX = x + Math.random() * width;
       const starY = y + Math.random() * height;
-      const starSize = Math.random() * 3 + 1;
+      const starSize = Math.random() * 2.5 + 0.5;
 
       ctx.fillStyle = "#FFFFFF";
       ctx.beginPath();
       ctx.arc(starX, starY, starSize, 0, Math.PI * 2);
       ctx.fill();
-    }
-  } else if (config.name.includes("Waves")) {
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 3;
-    
-    for (let wave = 0; wave < 5; wave++) {
-      ctx.beginPath();
-      for (let i = 0; i <= width; i += 10) {
-        const waveY = y + height / 2 + Math.sin((i + wave * 50) / 30) * 30 + wave * 20;
-        if (i === 0) {
-          ctx.moveTo(x + i, waveY);
-        } else {
-          ctx.lineTo(x + i, waveY);
-        }
-      }
-      ctx.stroke();
-    }
-  } else if (config.name.includes("Hexagons")) {
-    const hexSize = 30;
-    for (let row = 0; row < height / hexSize + 2; row++) {
-      for (let col = 0; col < width / hexSize + 2; col++) {
-        const hexX = x + col * hexSize * 1.5;
-        const hexY = y + row * hexSize * Math.sqrt(3) + (col % 2) * hexSize * Math.sqrt(3) / 2;
-        
-        ctx.strokeStyle = "#FFFFFF";
-        ctx.lineWidth = 2;
-        drawHexagon(ctx, hexX, hexY, hexSize / 2);
-      }
     }
   }
 
@@ -383,53 +385,39 @@ function drawPatternBanner(ctx, x, y, width, height, config) {
 }
 
 function drawSpecialBanner(ctx, x, y, width, height, config) {
-  if (config.name.includes("Holographic")) {
-    for (let i = 0; i < 4; i++) {
-      const gradient = ctx.createLinearGradient(
-        x + (i * width) / 4,
-        y,
-        x + ((i + 1) * width) / 4,
-        y + height
-      );
-      gradient.addColorStop(0, config.colors[i % config.colors.length]);
-      gradient.addColorStop(1, config.colors[(i + 1) % config.colors.length]);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(x + (i * width) / 4, y, width / 4, height);
-    }
-  } else if (config.name.includes("Neon")) {
-    const gradient = ctx.createRadialGradient(
-      x + width / 2,
-      y + height / 2,
-      0,
-      x + width / 2,
-      y + height / 2,
-      width / 2
-    );
-    gradient.addColorStop(0, config.colors[0]);
-    gradient.addColorStop(0.5, config.colors[1]);
-    gradient.addColorStop(1, config.colors[2] || config.colors[0]);
+  if (config.name.includes("Holographic") || config.name.includes("Neon")) {
+    const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+    config.colors.forEach((color, i) => {
+      gradient.addColorStop(i / (config.colors.length - 1), color);
+    });
     ctx.fillStyle = gradient;
     ctx.fillRect(x, y, width, height);
-
-    ctx.shadowColor = config.colors[0];
-    ctx.shadowBlur = 50;
-    ctx.fillRect(x, y, width, height);
-    ctx.shadowBlur = 0;
   }
 }
 
-function drawHexagon(ctx, x, y, radius) {
-  ctx.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i;
-    const hx = x + radius * Math.cos(angle);
-    const hy = y + radius * Math.sin(angle);
-    if (i === 0) {
-      ctx.moveTo(hx, hy);
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let currentY = y;
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = line + words[i] + " ";
+    const metrics = ctx.measureText(testLine);
+    
+    if (metrics.width > maxWidth && i > 0) {
+      ctx.fillText(line.trim(), x, currentY);
+      line = words[i] + " ";
+      currentY += lineHeight;
     } else {
-      ctx.lineTo(hx, hy);
+      line = testLine;
     }
   }
-  ctx.closePath();
-  ctx.stroke();
+  ctx.fillText(line.trim(), x, currentY);
+}
+
+function hexToRGBA(hex, alpha = 1) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

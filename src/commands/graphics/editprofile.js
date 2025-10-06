@@ -50,6 +50,36 @@ module.exports = {
         type: ApplicationCommandOptionType.Subcommand,
       },
       {
+        name: "color",
+        description: "Set your profile accent color",
+        type: ApplicationCommandOptionType.Subcommand,
+        options: [
+          {
+            name: "hex",
+            description: "Hex color code (e.g., #5865F2)",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+          },
+        ],
+      },
+      {
+        name: "theme",
+        description: "Set your profile theme",
+        type: ApplicationCommandOptionType.Subcommand,
+        options: [
+          {
+            name: "style",
+            description: "Choose a theme",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+            choices: [
+              { name: "Dark", value: "dark" },
+              { name: "Light", value: "light" },
+            ],
+          },
+        ],
+      },
+      {
         name: "view",
         description: "View your current profile customization",
         type: ApplicationCommandOptionType.Subcommand,
@@ -63,7 +93,7 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    const sub = args[0].toLowerCase();
+    const sub = args[0]?.toLowerCase();
     const userDb = await getUser(message.author);
 
     if (sub === "bio") {
@@ -74,6 +104,14 @@ module.exports = {
       return handleBannerMenu(message, userDb);
     }
 
+    if (sub === "color" || sub === "colour") {
+      return handleColorMessage(message, args[1], userDb);
+    }
+
+    if (sub === "theme") {
+      return handleThemeMessage(message, args[1], userDb);
+    }
+
     if (sub === "view") {
       return showProfileSettings(message, userDb);
     }
@@ -82,7 +120,7 @@ module.exports = {
       return handleReset(message, userDb);
     }
 
-    return message.safeReply("Usage: `!editprofile <bio|banner|view|reset>`");
+    return message.safeReply("Usage: `!editprofile <bio|banner|color|theme|view|reset>`");
   },
 
   async interactionRun(interaction) {
@@ -96,6 +134,16 @@ module.exports = {
 
     if (sub === "banner") {
       return handleBannerMenu(interaction, userDb);
+    }
+
+    if (sub === "color") {
+      const hexColor = interaction.options.getString("hex");
+      return handleColorInteraction(interaction, hexColor, userDb);
+    }
+
+    if (sub === "theme") {
+      const themeStyle = interaction.options.getString("style");
+      return handleThemeInteraction(interaction, themeStyle, userDb);
     }
 
     if (sub === "view") {
@@ -338,14 +386,18 @@ async function showProfileSettings(source, userDb) {
   const bio = userDb.profile?.bio || "*No bio set*";
   const bannerKey = userDb.profile?.banner || "gradient_blue";
   const banner = getBanner(bannerKey);
+  const accentColor = userDb.profile?.accentColor || "#5865F2";
+  const theme = userDb.profile?.theme || "dark";
 
   const embed = new EmbedBuilder()
     .setTitle("⚙️ Your Profile Settings")
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(accentColor)
     .addFields(
       { name: "Bio", value: bio },
       { name: "Current Banner", value: `${banner.name} (${banner.description})` },
-      { name: "Coins", value: `${userDb.coins || 0} coins` }
+      { name: "Accent Color", value: accentColor, inline: true },
+      { name: "Theme", value: theme === "dark" ? "🌙 Dark" : "☀️ Light", inline: true },
+      { name: "Coins", value: `${userDb.coins || 0} coins`, inline: true }
     )
     .setTimestamp();
 
@@ -356,6 +408,91 @@ async function showProfileSettings(source, userDb) {
   }
 }
 
+async function handleColorMessage(message, hexColor, userDb) {
+  if (!hexColor) {
+    return message.safeReply("Please provide a hex color. Example: `!editprofile color #5865F2`");
+  }
+
+  if (!hexColor.startsWith("#")) {
+    hexColor = "#" + hexColor;
+  }
+
+  if (!/^#[0-9A-F]{6}$/i.test(hexColor)) {
+    return message.safeReply("Invalid hex color! Please use format: #RRGGBB (e.g., #5865F2)");
+  }
+
+  if (!userDb.profile) userDb.profile = {};
+  userDb.profile.accentColor = hexColor;
+  await userDb.save();
+  updateCache(message.author.id, userDb);
+
+  const embed = new EmbedBuilder()
+    .setColor(hexColor)
+    .setDescription(`${EMOJIS.SUCCESS} | Accent color updated successfully!\n\n**New Color:** ${hexColor}`)
+    .setTimestamp();
+
+  return message.safeReply({ embeds: [embed] });
+}
+
+async function handleColorInteraction(interaction, hexColor, userDb) {
+  if (!hexColor.startsWith("#")) {
+    hexColor = "#" + hexColor;
+  }
+
+  if (!/^#[0-9A-F]{6}$/i.test(hexColor)) {
+    return interaction.followUp({
+      content: "Invalid hex color! Please use format: #RRGGBB (e.g., #5865F2)",
+      ephemeral: true,
+    });
+  }
+
+  if (!userDb.profile) userDb.profile = {};
+  userDb.profile.accentColor = hexColor;
+  await userDb.save();
+  updateCache(interaction.user.id, userDb);
+
+  const embed = new EmbedBuilder()
+    .setColor(hexColor)
+    .setDescription(`${EMOJIS.SUCCESS} | Accent color updated successfully!\n\n**New Color:** ${hexColor}`)
+    .setTimestamp();
+
+  return interaction.followUp({ embeds: [embed] });
+}
+
+async function handleThemeMessage(message, themeStyle, userDb) {
+  if (!themeStyle || !["dark", "light"].includes(themeStyle.toLowerCase())) {
+    return message.safeReply("Please specify a valid theme: `dark` or `light`");
+  }
+
+  themeStyle = themeStyle.toLowerCase();
+  
+  if (!userDb.profile) userDb.profile = {};
+  userDb.profile.theme = themeStyle;
+  await userDb.save();
+  updateCache(message.author.id, userDb);
+
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.SUCCESS)
+    .setDescription(`${EMOJIS.SUCCESS} | Profile theme updated to **${themeStyle}** mode!`)
+    .setTimestamp();
+
+  return message.safeReply({ embeds: [embed] });
+}
+
+async function handleThemeInteraction(interaction, themeStyle, userDb) {
+  if (!userDb.profile) userDb.profile = {};
+  userDb.profile.theme = themeStyle;
+  await userDb.save();
+  updateCache(interaction.user.id, userDb);
+
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.SUCCESS)
+    .setDescription(`${EMOJIS.SUCCESS} | Profile theme updated to **${themeStyle}** mode!`)
+    .setTimestamp();
+
+  return interaction.followUp({ embeds: [embed] });
+}
+
 async function handleReset(source, userDb) {
   const isInteraction = source.constructor.name === "ChatInputCommandInteraction";
   const userId = isInteraction ? source.user.id : source.author.id;
@@ -363,6 +500,8 @@ async function handleReset(source, userDb) {
   if (!userDb.profile) userDb.profile = {};
   userDb.profile.bio = null;
   userDb.profile.banner = "gradient_blue";
+  userDb.profile.accentColor = null;
+  userDb.profile.theme = "dark";
   await userDb.save();
   
   // Update cache after reset
