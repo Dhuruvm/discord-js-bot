@@ -73,21 +73,25 @@ module.exports.checkAFK = function(message) {
   
   if (afkUsers.has(userId)) {
     afkUsers.delete(userId);
+    
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.SUCCESS)
+      .setDescription(`**Welcome back, ${message.author.username}!** Your **AFK** status has been removed.`)
+      .setTimestamp();
+    
+    message.channel.send({ embeds: [embed] });
   }
 
   message.mentions.users.forEach(user => {
     if (afkUsers.has(user.id)) {
       const afkData = afkUsers.get(user.id);
-      const timeAgo = Math.floor((Date.now() - afkData.timestamp) / 1000);
       
       const embed = new EmbedBuilder()
         .setColor(EMBED_COLORS.WARNING)
-        .setDescription(`**${user.username}** is currently **AFK**!\n\n**Reason:** ${afkData.reason}\n**Time:** <t:${Math.floor(afkData.timestamp / 1000)}:R>`)
+        .setDescription(`**${user.username}** is AFK - <t:${Math.floor(afkData.timestamp / 1000)}:R>`)
         .setTimestamp();
       
-      message.channel.send({ embeds: [embed] }).then(msg => {
-        setTimeout(() => msg.delete().catch(() => {}), 8000);
-      });
+      message.channel.send({ embeds: [embed] });
     }
   });
 };
