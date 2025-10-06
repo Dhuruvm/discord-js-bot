@@ -23,7 +23,7 @@ module.exports = {
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
     const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
+      .setColor(0xFFFFFF)
       .setAuthor({ 
         name: "🏓 Pong!",
         iconURL: message.client.user.displayAvatarURL()
@@ -43,7 +43,7 @@ module.exports = {
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
     const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
+      .setColor(0xFFFFFF)
       .setAuthor({ 
         name: "🏓 Pong!",
         iconURL: interaction.client.user.displayAvatarURL()

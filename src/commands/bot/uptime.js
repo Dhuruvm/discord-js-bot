@@ -23,7 +23,7 @@ module.exports = {
   async messageRun(message, args) {
     const client = message.client;
     const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
+      .setColor(0xFFFFFF)
       .setAuthor({
         name: "Uptime Information",
         iconURL: client.user.displayAvatarURL()
@@ -40,7 +40,7 @@ module.exports = {
   async interactionRun(interaction) {
     const client = interaction.client;
     const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
+      .setColor(0xFFFFFF)
       .setAuthor({
         name: "Uptime Information",
         iconURL: client.user.displayAvatarURL()

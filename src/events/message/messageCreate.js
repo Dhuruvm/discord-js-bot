@@ -35,7 +35,7 @@ module.exports = async (client, message) => {
       const { SUPPORT_SERVER } = require("@root/config");
 
       const introEmbed = new EmbedBuilder()
-        .setColor(0x5865F2)
+        .setColor(0xFFFFFF)
         .setAuthor({
           name: `${client.user.username} - Your Server Assistant`,
           iconURL: client.user.displayAvatarURL()

@@ -26,7 +26,7 @@ module.exports = {
     const offlineUsers = users - (onlineUsers + idleUsers + dndUsers);
 
     const embed = new EmbedBuilder()
-      .setColor(0x5865F2)
+      .setColor(0xFFFFFF)
       .setAuthor({ 
         name: `${guild.name} Member Statistics`,
         iconURL: guild.iconURL()
