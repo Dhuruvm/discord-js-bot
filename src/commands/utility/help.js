@@ -90,24 +90,24 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const isOwner = OWNER_IDS.includes(displayUser?.id);
 
   const categoryMapping = {
-    'ADMIN': { emoji: emojis.admin || '⚙️', name: 'Admin' },
-    'AUTOMOD': { emoji: emojis.moderation || '🛡️', name: 'Auto Moderation' },
-    'MUSIC': { emoji: emojis.music || '🎵', name: 'Music' },
-    'MODERATION': { emoji: emojis.moderation || '🔨', name: 'Moderation' },
-    'GIVEAWAY': { emoji: emojis.giveaway || '🎁', name: 'Giveaway' },
-    'TICKET': { emoji: emojis.ticket || '🎟️', name: 'Ticket' },
-    'UTILITY': { emoji: emojis.utility || '🛠️', name: 'Utility' },
-    'SOCIAL': { emoji: '🫂', name: 'Social' },
-    'STATS': { emoji: emojis.stats || '📊', name: 'Statistics' },
-    'ECONOMY': { emoji: emojis.economy || '💰', name: 'Economy' },
-    'SUGGESTION': { emoji: '📝', name: 'Suggestion' },
-    'IMAGE': { emoji: '🖼️', name: 'Image' },
-    'INVITE': { emoji: emojis.invite || '📨', name: 'Invite' },
-    'FUN': { emoji: emojis.fun || '✨', name: 'Fun' },
-    'GRAPHICS': { emoji: '🎨', name: 'Graphics' },
-    'ANIME': { emoji: '🎨', name: 'Anime' },
-    'BOT': { emoji: emojis.bot || '🤖', name: 'Bot' },
-    'INFORMATION': { emoji: emojis.info || 'ℹ️', name: 'Information' },
+    'ADMIN': { name: 'Admin' },
+    'AUTOMOD': { name: 'Auto Moderation' },
+    'MUSIC': { name: 'Music' },
+    'MODERATION': { name: 'Moderation' },
+    'GIVEAWAY': { name: 'Giveaway' },
+    'TICKET': { name: 'Ticket' },
+    'UTILITY': { name: 'Utility' },
+    'SOCIAL': { name: 'Social' },
+    'STATS': { name: 'Statistics' },
+    'ECONOMY': { name: 'Economy' },
+    'SUGGESTION': { name: 'Suggestion' },
+    'IMAGE': { name: 'Image' },
+    'INVITE': { name: 'Invite' },
+    'FUN': { name: 'Fun' },
+    'GRAPHICS': { name: 'Graphics' },
+    'ANIME': { name: 'Anime' },
+    'BOT': { name: 'Bot' },
+    'INFORMATION': { name: 'Information' },
   };
 
   const prefixText = prefix || '!';
@@ -119,14 +119,14 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       iconURL: client?.user?.displayAvatarURL()
     })
     .setDescription(
-      `${emojis.info} **an asterisk(*) means the command has subcommands**\n\n` +
-      `${emojis.arrow_right} *View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
-      `${emojis.docs} *Or view the commands on our* [**Docs**](${SUPPORT_SERVER})`
+      `**an asterisk(*) means the command has subcommands**\n\n` +
+      `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
+      `*Or view the commands on our* [**Docs**](${SUPPORT_SERVER})`
     )
     .addFields(
       { 
-        name: `${emojis.support} Need Extra Help?`, 
-        value: `${emojis.arrow_right} Visit our [**Support Server**](${SUPPORT_SERVER}) on how to get started\n${emojis.arrow_right} Developer: **${DEVELOPER}**`, 
+        name: 'Need Extra Help?', 
+        value: `- Visit our [**Support Server**](${SUPPORT_SERVER}) on how to get started\n- Developer: **${DEVELOPER}**`, 
         inline: false 
       }
     )
@@ -144,12 +144,11 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
         Object.entries(CommandCategory)
           .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
           .map(([k, v]) => {
-            const mapping = categoryMapping[k] || { name: v.name, emoji: '📁' };
+            const mapping = categoryMapping[k] || { name: v.name };
             return {
               label: mapping.name,
               value: k,
               description: `View commands in ${mapping.name} category`,
-              emoji: mapping.emoji,
             };
           })
       )
@@ -223,34 +222,34 @@ function getCategoryEmbed(client, category, prefix) {
   const commands = client.commands.filter((cmd) => cmd.category === category);
   
   const categoryMapping = {
-    'ADMIN': { name: 'Admin', emoji: emojis.admin || '⚙️' },
-    'AUTOMOD': { name: 'Auto Moderation', emoji: emojis.moderation || '🛡️' },
-    'MUSIC': { name: 'Music', emoji: emojis.music || '🎵' },
-    'MODERATION': { name: 'Moderation', emoji: emojis.moderation || '🔨' },
-    'GIVEAWAY': { name: 'Giveaway', emoji: emojis.giveaway || '🎁' },
-    'TICKET': { name: 'Ticket', emoji: emojis.ticket || '🎟️' },
-    'UTILITY': { name: 'Utility', emoji: emojis.utility || '🛠️' },
-    'SOCIAL': { name: 'Social', emoji: '🫂' },
-    'STATS': { name: 'Statistics', emoji: emojis.stats || '📊' },
-    'ECONOMY': { name: 'Economy', emoji: emojis.economy || '💰' },
-    'SUGGESTION': { name: 'Suggestion', emoji: '📝' },
-    'IMAGE': { name: 'Image', emoji: '🖼️' },
-    'INVITE': { name: 'Invite', emoji: emojis.invite || '📨' },
-    'FUN': { name: 'Fun', emoji: emojis.fun || '✨' },
-    'GRAPHICS': { name: 'Graphics', emoji: '🎨' },
-    'ANIME': { name: 'Anime', emoji: '🎨' },
-    'BOT': { name: 'Bot', emoji: emojis.bot || '🤖' },
-    'INFORMATION': { name: 'Information', emoji: emojis.info || 'ℹ️' },
+    'ADMIN': { name: 'Admin' },
+    'AUTOMOD': { name: 'Auto Moderation' },
+    'MUSIC': { name: 'Music' },
+    'MODERATION': { name: 'Moderation' },
+    'GIVEAWAY': { name: 'Giveaway' },
+    'TICKET': { name: 'Ticket' },
+    'UTILITY': { name: 'Utility' },
+    'SOCIAL': { name: 'Social' },
+    'STATS': { name: 'Statistics' },
+    'ECONOMY': { name: 'Economy' },
+    'SUGGESTION': { name: 'Suggestion' },
+    'IMAGE': { name: 'Image' },
+    'INVITE': { name: 'Invite' },
+    'FUN': { name: 'Fun' },
+    'GRAPHICS': { name: 'Graphics' },
+    'ANIME': { name: 'Anime' },
+    'BOT': { name: 'Bot' },
+    'INFORMATION': { name: 'Information' },
   };
 
   const categoryInfo = CommandCategory[category];
-  const mapping = categoryMapping[category] || { name: categoryInfo?.name, emoji: '📁' };
+  const mapping = categoryMapping[category] || { name: categoryInfo?.name };
 
   if (commands.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x2B2D31)
-      .setTitle(`${mapping.emoji} ${mapping.name}`)
-      .setDescription(`${emojis.info} This category is currently empty. Check back later for new commands!`)
+      .setTitle(mapping.name)
+      .setDescription(`This category is currently empty. Check back later for new commands!`)
       .setFooter({ text: "Powered by Blackbit Studio" });
     return { embeds: [embed] };
   }
@@ -259,15 +258,15 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `${emojis.arrow_right} \`${cmd.name} ${trigger}\` *`;
+        return `- \`${cmd.name} ${trigger}\` *`;
       }).join('\n');
     }
-    return `${emojis.arrow_right} \`${cmd.name}\``;
+    return `- \`${cmd.name}\``;
   }).join('\n');
 
   const embed = new EmbedBuilder()
     .setColor(0x2B2D31)
-    .setTitle(`${mapping.emoji} ${mapping.name}`)
+    .setTitle(mapping.name)
     .setDescription(commandsList)
     .setFooter({ text: `Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio` });
 
@@ -279,7 +278,6 @@ function getBackButton() {
     new ButtonBuilder()
       .setCustomId("home-btn")
       .setLabel("Back")
-      .setEmoji(emojis.arrow_left || "◀️")
       .setStyle(ButtonStyle.Secondary)
   );
 }
