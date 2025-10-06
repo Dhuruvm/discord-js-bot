@@ -1,4 +1,6 @@
 const { ApplicationCommandOptionType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
+const emojis = require("@root/emojis.json");
 
 /**
  * @type {import("@structures/Command")}
@@ -40,9 +42,12 @@ module.exports = {
 };
 
 async function setNewPrefix(newPrefix, settings) {
-  if (newPrefix.length > 2) return "Prefix length cannot exceed `2` characters";
+  if (newPrefix.length > 2) {
+    return ModernEmbed.simpleError("Prefix length cannot exceed 2 characters");
+  }
+  
   settings.prefix = newPrefix;
   await settings.save();
 
-  return `New prefix is set to \`${newPrefix}\``;
+  return ModernEmbed.simpleSuccess(`Server prefix has been updated to \`${newPrefix}\``);
 }

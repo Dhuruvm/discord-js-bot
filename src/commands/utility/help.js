@@ -119,14 +119,15 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       iconURL: client?.user?.displayAvatarURL()
     })
     .setDescription(
+      `### Command Information\n` +
       `**an asterisk(*) means the command has subcommands**\n\n` +
       `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
       `*Or view the commands on our* [**Docs**](${SUPPORT_SERVER})`
     )
     .addFields(
       { 
-        name: 'Need Extra Help?', 
-        value: `- Visit our [**Support Server**](${SUPPORT_SERVER}) on how to get started\n- Developer: **${DEVELOPER}**`, 
+        name: '### Need Extra Help?', 
+        value: `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`, 
         inline: false 
       }
     )

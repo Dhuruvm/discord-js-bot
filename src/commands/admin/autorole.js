@@ -1,4 +1,6 @@
 const { ApplicationCommandOptionType } = require("discord.js");
+const ModernEmbed = require("@helpers/ModernEmbed");
+const emojis = require("@root/emojis.json");
 
 /**
  * @type {import("@structures/Command")}
@@ -53,7 +55,7 @@ module.exports = {
       response = await setAutoRole(message, null, data.settings);
     } else {
       const roles = message.guild.findMatchingRoles(input);
-      if (roles.length === 0) response = "No matching roles found matching your query";
+      if (roles.length === 0) response = ModernEmbed.simpleError("No matching roles found");
       else response = await setAutoRole(message, roles[0], data.settings);
     }
 
@@ -69,10 +71,10 @@ module.exports = {
       let role = interaction.options.getRole("role");
       if (!role) {
         const role_id = interaction.options.getString("role_id");
-        if (!role_id) return interaction.followUp("Please provide a role or role id");
+        if (!role_id) return interaction.followUp(ModernEmbed.simpleError("Please provide a role or role id"));
 
         const roles = interaction.guild.findMatchingRoles(role_id);
-        if (roles.length === 0) return interaction.followUp("No matching roles found matching your query");
+        if (roles.length === 0) return interaction.followUp(ModernEmbed.simpleError("No matching roles found"));
         role = roles[0];
       }
 
@@ -85,7 +87,7 @@ module.exports = {
     }
 
     // default
-    else response = "Invalid subcommand";
+    else response = ModernEmbed.simpleError("Invalid subcommand");
 
     await interaction.followUp(response);
   },
@@ -98,16 +100,16 @@ module.exports = {
  */
 async function setAutoRole({ guild }, role, settings) {
   if (role) {
-    if (role.id === guild.roles.everyone.id) return "You cannot set `@everyone` as the autorole";
-    if (!guild.members.me.permissions.has("ManageRoles")) return "I don't have the `ManageRoles` permission";
+    if (role.id === guild.roles.everyone.id) return ModernEmbed.simpleError("You cannot set `@everyone` as the autorole");
+    if (!guild.members.me.permissions.has("ManageRoles")) return ModernEmbed.simpleError("I don't have the `ManageRoles` permission");
     if (guild.members.me.roles.highest.position < role.position)
-      return "I don't have the permissions to assign this role";
-    if (role.managed) return "Oops! This role is managed by an integration";
+      return ModernEmbed.simpleError("I don't have permission to assign this role. My role must be higher than the target role.");
+    if (role.managed) return ModernEmbed.simpleError("This role is managed by an integration and cannot be assigned");
   }
 
   if (!role) settings.autorole = null;
   else settings.autorole = role.id;
 
   await settings.save();
-  return `Configuration saved! Autorole is ${!role ? "disabled" : "setup"}`;
+  return ModernEmbed.simpleSuccess(`Autorole has been ${!role ? "disabled" : `set to ${role}`}`);
 }

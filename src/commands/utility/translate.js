@@ -2,9 +2,8 @@ const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const { EMBED_COLORS } = require("@root/config.js");
 const { translate } = require("@helpers/HttpUtils");
 const { GOOGLE_TRANSLATE } = require("@src/data.json");
-
-// Discord limits to a maximum of 25 choices for slash command
-// Add any 25 language codes from here: https://cloud.google.com/translate/docs/languages
+const ModernEmbed = require("@helpers/ModernEmbed");
+const emojis = require("@root/emojis.json");
 
 const choices = ["ar", "cs", "de", "en", "fa", "fr", "hi", "hr", "it", "ja", "ko", "la", "nl", "pl", "ta", "te"];
 
@@ -43,20 +42,18 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    let embed = new EmbedBuilder();
     const outputCode = args.shift();
 
     if (!GOOGLE_TRANSLATE[outputCode]) {
-      embed
-        .setColor(EMBED_COLORS.WARNING)
-        .setDescription(
+      return message.safeReply(
+        ModernEmbed.simpleError(
           "Invalid translation code. Visit [here](https://cloud.google.com/translate/docs/languages) to see list of supported translation codes"
-        );
-      return message.safeReply({ embeds: [embed] });
+        )
+      );
     }
 
     const input = args.join(" ");
-    if (!input) message.safeReply("Provide some valid translation text");
+    if (!input) return message.safeReply(ModernEmbed.simpleError("Please provide some text to translate"));
 
     const response = await getTranslation(message.author, input, outputCode);
     await message.safeReply(response);
@@ -72,16 +69,16 @@ module.exports = {
 
 async function getTranslation(author, input, outputCode) {
   const data = await translate(input, outputCode);
-  if (!data) return "Failed to translate your text";
+  if (!data) return ModernEmbed.simpleError("Failed to translate your text. Please try again later.");
 
   const embed = new EmbedBuilder()
     .setAuthor({
       name: `${author.username} says`,
       iconURL: author.avatarURL(),
     })
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setDescription(data.output)
-    .setFooter({ text: `${data.inputLang} (${data.inputCode}) ⟶ ${data.outputLang} (${data.outputCode})` });
+    .setColor(0x2B2D31)
+    .setDescription(`### Translation\n> ${data.output}`)
+    .setFooter({ text: `${data.inputLang} (${data.inputCode}) → ${data.outputLang} (${data.outputCode})` });
 
   return { embeds: [embed] };
 }
