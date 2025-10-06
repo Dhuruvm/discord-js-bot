@@ -347,7 +347,7 @@ class ModernEmbed {
    */
   static simpleError(message) {
     const embed = new ModernEmbed()
-      .setColor(0x2B2D31)
+      .setColor(0xFFFFFF)
       .setDescription(`${EMOJIS.error || "❌"} | ${message}`);
     
     return embed.toMessage();
@@ -359,7 +359,7 @@ class ModernEmbed {
    */
   static simpleSuccess(message) {
     const embed = new ModernEmbed()
-      .setColor(0x2B2D31)
+      .setColor(0xFFFFFF)
       .setDescription(`${EMOJIS.success || "✅"} | ${message}`);
     
     return embed.toMessage();
