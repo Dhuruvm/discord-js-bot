@@ -35,33 +35,33 @@ module.exports = async (client, message) => {
       const { SUPPORT_SERVER } = require("@root/config");
 
       const introEmbed = new EmbedBuilder()
-        .setColor(0xFFFFFF)
+        .setColor(0x5865F2)
         .setAuthor({
           name: `${client.user.username} - Your Server Assistant`,
           iconURL: client.user.displayAvatarURL()
         })
-        .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
+        .setThumbnail(message.guild.iconURL() || client.user.displayAvatarURL({ size: 256 }))
         .setDescription(
-          `👋 **Hello! I'm ${client.user.username}**\n\n` +
+          `### 👋 Hello! I'm ${client.user.username}\n\n` +
           `I'm a powerful multipurpose Discord bot designed to help manage and enhance your server with a wide range of features!\n\n` +
-          `**🎯 Key Features:**\n` +
-          `• **Moderation** - Keep your server safe and organized\n` +
-          `• **Music** - High-quality music playback\n` +
-          `• **Economy** - Fun currency and ranking system\n` +
-          `• **Leveling** - Track user activity and engagement\n` +
-          `• **Giveaways** - Host exciting giveaways\n` +
-          `• **Tickets** - Professional support system\n` +
-          `• **And much more!**`
+          `### 🎯 Key Features:\n` +
+          `> • **Moderation** - Keep your server safe and organized\n` +
+          `> • **Music** - High-quality music playback\n` +
+          `> • **Economy** - Fun currency and ranking system\n` +
+          `> • **Leveling** - Track user activity and engagement\n` +
+          `> • **Giveaways** - Host exciting giveaways\n` +
+          `> • **Tickets** - Professional support system\n` +
+          `> • **And much more!**`
         )
         .addFields(
           {
-            name: "📝 Getting Started",
-            value: `My prefix is: \`${settings.prefix}\`\nUse \`${settings.prefix}help\` to see all commands`,
+            name: "### 📝 Getting Started",
+            value: `> **Prefix:** \`${settings.prefix}\`\n> **Help:** \`${settings.prefix}help\``,
             inline: true
           },
           {
-            name: "🔗 Quick Links",
-            value: `[Invite Me](${client.getInvite()})${SUPPORT_SERVER ? ` • [Support Server](${SUPPORT_SERVER})` : ''}`,
+            name: "### 🔗 Quick Links",
+            value: `> [Invite Me](${client.getInvite()})${SUPPORT_SERVER ? `\n> [Support Server](${SUPPORT_SERVER})` : ''}`,
             inline: true
           }
         )
