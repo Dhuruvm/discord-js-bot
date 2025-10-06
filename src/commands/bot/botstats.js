@@ -71,48 +71,44 @@ async function getBotStats(client) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
-    .setTitle(`${ModernEmbed.getEmoji("bot")} ${client.user.username} Statistics`)
-    .setDescription("Comprehensive statistics and system information about your bot.")
-    .setThumbnail(client.user.displayAvatarURL())
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: `${client.user.username} Statistics`,
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setDescription(
+      `### Bot Information\n` +
+      `> **Total Guilds:** \`${guilds}\`\n` +
+      `> **Total Users:** \`${users.toLocaleString()}\`\n` +
+      `> **Total Channels:** \`${channels}\`\n` +
+      `> **Websocket Ping:** \`${client.ws.ping}ms\``
+    )
     .addFields(
       { 
-        name: "🌐 Bot Overview", 
-        value: stripIndent`
-          **Total Guilds:** \`${guilds}\`
-          **Total Users:** \`${users.toLocaleString()}\`
-          **Total Channels:** \`${channels}\`
-          **Websocket Ping:** \`${client.ws.ping}ms\`
-        `,
+        name: "### Founder & Developers", 
+        value: `> ${devList}`,
         inline: false 
       },
       { 
-        name: `${ModernEmbed.getEmoji("owner")} Founder & Developers`, 
-        value: devList,
+        name: "### System Information", 
+        value: 
+          `> **Operating System:** ${platform} [${architecture}]\n` +
+          `> **CPU Cores:** ${cores}\n` +
+          `> **CPU Usage:** ${cpuUsage}\n` +
+          `> **Node.js Version:** ${process.versions.node}\n` +
+          `> **Bot Uptime:** ${timeformat(process.uptime())}`,
         inline: false 
       },
       { 
-        name: "💻 System Information", 
-        value: stripIndent`
-          **Operating System:** ${platform} [${architecture}]
-          **CPU Cores:** ${cores}
-          **CPU Usage:** ${cpuUsage}
-          **Node.js Version:** ${process.versions.node}
-          **Bot Uptime:** ${timeformat(process.uptime())}
-        `,
-        inline: false 
-      },
-      { 
-        name: "🔧 Memory Usage", 
-        value: stripIndent`
-          **Bot:** ${botUsed} / ${botAvailable} (${botUsage})
-          **System:** ${overallUsed} / ${overallAvailable} (${overallUsage})
-        `,
+        name: "### Memory Usage", 
+        value: 
+          `> **Bot:** ${botUsed} / ${botAvailable} (${botUsage})\n` +
+          `> **System:** ${overallUsed} / ${overallAvailable} (${overallUsage})`,
         inline: false 
       }
     )
-    .setFooter({ text: `${client.user.username} • Powered by Discord.js` })
-    .setTimestamp();
+    .setFooter({ text: "Powered by Blackbit Studio" })
+    .setThumbnail(client.user.displayAvatarURL());
 
   let row1Components = [];
   let row2Components = [];

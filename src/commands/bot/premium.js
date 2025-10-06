@@ -33,35 +33,32 @@ module.exports = {
 
 function getPremiumMessage() {
   const embed = new EmbedBuilder()
-    .setColor(0xFFD700)
-    .setTitle(`${ModernEmbed.getEmoji("premium")} Premium Features`)
-    .setDescription("Unlock powerful features and support the bot development!")
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: "Premium Features",
+      iconURL: "https://cdn.discordapp.com/emojis/1234567890.png"
+    })
+    .setDescription(
+      `### Premium Benefits\n` +
+      `> • **Priority Support** - Get help faster\n` +
+      `> • **Custom Commands** - Create your own commands\n` +
+      `> • **Advanced Moderation** - Extended auto-mod features\n` +
+      `> • **Custom Embeds** - Personalized embed colors\n` +
+      `> • **No Cooldowns** - Skip command cooldowns\n` +
+      `> • **Exclusive Modules** - Access to premium-only features\n` +
+      `> • **Badge Recognition** - Premium badge on profile`
+    )
     .addFields(
       {
-        name: `${ModernEmbed.getEmoji("check")} Premium Benefits`,
-        value: [
-          "• **Priority Support** - Get help faster",
-          "• **Custom Commands** - Create your own commands",
-          "• **Advanced Moderation** - Extended auto-mod features",
-          "• **Custom Embeds** - Personalized embed colors",
-          "• **No Cooldowns** - Skip command cooldowns",
-          "• **Exclusive Modules** - Access to premium-only features",
-          "• **Badge Recognition** - Premium badge on profile",
-        ].join("\n"),
-        inline: false,
-      },
-      {
-        name: `${ModernEmbed.getEmoji("economy")} Pricing`,
-        value: [
-          "**Monthly:** $4.99/month",
-          "**Yearly:** $49.99/year (Save 17%)",
-          "**Lifetime:** $99.99 (One-time payment)",
-        ].join("\n"),
+        name: "### Pricing",
+        value: 
+          `> **Monthly:** $4.99/month\n` +
+          `> **Yearly:** $49.99/year (Save 17%)\n` +
+          `> **Lifetime:** $99.99 (One-time payment)`,
         inline: false,
       }
     )
-    .setFooter({ text: "Premium helps us keep the bot running and improving!" })
-    .setTimestamp();
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()

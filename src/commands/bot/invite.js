@@ -33,11 +33,17 @@ module.exports = {
 
 function getInviteMessage(client) {
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
-    .setTitle(`${ModernEmbed.getEmoji("bot")} Invite ${client.user.username}`)
-    .setDescription(`Click the button below to invite me to your server!`)
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: `Invite ${client.user.username}`,
+      iconURL: client.user.displayAvatarURL()
+    })
+    .setDescription(
+      `### Invitation Links\n` +
+      `> Click the button below to invite me to your server!`
+    )
     .setThumbnail(client.user.displayAvatarURL())
-    .setTimestamp();
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   const components = [];
   const row = new ActionRowBuilder();
