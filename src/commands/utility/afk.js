@@ -73,15 +73,6 @@ module.exports.checkAFK = function(message) {
   
   if (afkUsers.has(userId)) {
     afkUsers.delete(userId);
-    
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.SUCCESS)
-      .setDescription(`**Welcome back, ${message.author.username}!** Your **AFK** status has been removed.`)
-      .setTimestamp();
-    
-    message.channel.send({ embeds: [embed] }).then(msg => {
-      setTimeout(() => msg.delete().catch(() => {}), 5000);
-    });
   }
 
   message.mentions.users.forEach(user => {
