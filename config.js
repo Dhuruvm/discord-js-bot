@@ -13,13 +13,13 @@ module.exports = {
     TEST_GUILD_ID: "xxxxxxxxxxx", // Guild ID where the interactions should be registered. [** Test you commands here first **]
   },
   EMBED_COLORS: {
-    BOT_EMBED: "#FFFFFF",
-    TRANSPARENT: "#FFFFFF",
-    SUCCESS: "#FFFFFF",
-    ERROR: "#FFFFFF",
-    WARNING: "#FFFFFF",
-    PRIMARY: "#FFFFFF",
-    SECONDARY: "#FFFFFF",
+    BOT_EMBED: "#5865F2",
+    TRANSPARENT: "#2B2D31",
+    SUCCESS: "#57F287",
+    ERROR: "#ED4245",
+    WARNING: "#FEE75C",
+    PRIMARY: "#5865F2",
+    SECONDARY: "#4E5D94",
   },
   CACHE_SIZE: {
     GUILDS: 100,
@@ -34,8 +34,8 @@ module.exports = {
 
   AUTOMOD: {
     ENABLED: true,
-    LOG_EMBED: "#FFFFFF",
-    DM_EMBED: "#FFFFFF",
+    LOG_EMBED: "#5865F2",
+    DM_EMBED: "#5865F2",
   },
 
   DASHBOARD: {
@@ -74,8 +74,8 @@ module.exports = {
   GIVEAWAYS: {
     ENABLED: true,
     REACTION: "🎁",
-    START_EMBED: "#FFFFFF",
-    END_EMBED: "#FFFFFF",
+    START_EMBED: "#5865F2",
+    END_EMBED: "#57F287",
   },
 
   IMAGE: {
@@ -90,18 +90,18 @@ module.exports = {
   MODERATION: {
     ENABLED: true,
     EMBED_COLORS: {
-      TIMEOUT: "#FFFFFF",
-      UNTIMEOUT: "#FFFFFF",
-      KICK: "#FFFFFF",
-      SOFTBAN: "#FFFFFF",
-      BAN: "#FFFFFF",
-      UNBAN: "#FFFFFF",
-      VMUTE: "#FFFFFF",
-      VUNMUTE: "#FFFFFF",
-      DEAFEN: "#FFFFFF",
-      UNDEAFEN: "#FFFFFF",
-      DISCONNECT: "#FFFFFF",
-      MOVE: "#FFFFFF",
+      TIMEOUT: "#ED4245",
+      UNTIMEOUT: "#57F287",
+      KICK: "#FEE75C",
+      SOFTBAN: "#FEE75C",
+      BAN: "#ED4245",
+      UNBAN: "#57F287",
+      VMUTE: "#ED4245",
+      VUNMUTE: "#57F287",
+      DEAFEN: "#ED4245",
+      UNDEAFEN: "#57F287",
+      DISCONNECT: "#ED4245",
+      MOVE: "#5865F2",
     },
   },
 
@@ -126,15 +126,15 @@ module.exports = {
       UP_VOTE: "⬆️",
       DOWN_VOTE: "⬇️",
     },
-    DEFAULT_EMBED: "#FFFFFF",
-    APPROVED_EMBED: "#FFFFFF",
-    DENIED_EMBED: "#FFFFFF",
+    DEFAULT_EMBED: "#5865F2",
+    APPROVED_EMBED: "#57F287",
+    DENIED_EMBED: "#ED4245",
   },
 
   TICKET: {
     ENABLED: true,
-    CREATE_EMBED: "#FFFFFF",
-    CLOSE_EMBED: "#FFFFFF",
+    CREATE_EMBED: "#5865F2",
+    CLOSE_EMBED: "#ED4245",
   },
 
   // Command Categories

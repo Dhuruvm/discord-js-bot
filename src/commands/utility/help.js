@@ -113,7 +113,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const prefixText = prefix || '!';
   
   const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
+    .setColor(0x5865F2)
     .setAuthor({ 
       name: `${client?.user?.username || 'Bot'} Command Menu`,
       iconURL: client?.user?.displayAvatarURL()
@@ -133,8 +133,8 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     )
     .setFooter({ text: "Powered by Blackbit Studio" });
 
-  if (client?.user?.displayAvatarURL()) {
-    embed.setThumbnail(client.user.displayAvatarURL());
+  if (guild?.iconURL()) {
+    embed.setThumbnail(guild.iconURL());
   }
 
   const menuRow = new ActionRowBuilder().addComponents(
@@ -266,7 +266,7 @@ function getCategoryEmbed(client, category, prefix) {
   }).join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
+    .setColor(0x5865F2)
     .setTitle(mapping.name)
     .setDescription(commandsList)
     .setFooter({ text: `Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio` });
