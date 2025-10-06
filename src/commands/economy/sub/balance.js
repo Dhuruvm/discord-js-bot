@@ -6,26 +6,19 @@ module.exports = async (user) => {
   const economy = await getUser(user);
 
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setAuthor({ name: user.username })
+    .setColor(0xFFFFFF)
+    .setAuthor({ 
+      name: `${user.username}'s Balance`,
+      iconURL: user.displayAvatarURL()
+    })
+    .setDescription(
+      `### Account Summary\n` +
+      `> **Wallet:** \`${economy?.coins || 0}${ECONOMY.CURRENCY}\`\n` +
+      `> **Bank:** \`${economy?.bank || 0}${ECONOMY.CURRENCY}\`\n` +
+      `> **Net Worth:** \`${(economy?.coins || 0) + (economy?.bank || 0)}${ECONOMY.CURRENCY}\``
+    )
     .setThumbnail(user.displayAvatarURL())
-    .addFields(
-      {
-        name: "Wallet",
-        value: `${economy?.coins || 0}${ECONOMY.CURRENCY}`,
-        inline: true,
-      },
-      {
-        name: "Bank",
-        value: `${economy?.bank || 0}${ECONOMY.CURRENCY}`,
-        inline: true,
-      },
-      {
-        name: "Net Worth",
-        value: `${(economy?.coins || 0) + (economy?.bank || 0)}${ECONOMY.CURRENCY}`,
-        inline: true,
-      }
-    );
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 };

@@ -113,7 +113,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const prefixText = prefix || '!';
   
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: `${client?.user?.username || 'Bot'} Command Menu`,
       iconURL: client?.user?.displayAvatarURL()
@@ -266,7 +266,7 @@ function getCategoryEmbed(client, category, prefix) {
   }).join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setTitle(mapping.name)
     .setDescription(commandsList)
     .setFooter({ text: `Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio` });

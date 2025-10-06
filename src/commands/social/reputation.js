@@ -112,21 +112,18 @@ async function viewReputation(target) {
   if (!userData) return `${target.username} has no reputation yet`;
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: `Reputation for ${target.username}` })
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(0xFFFFFF)
+    .setAuthor({ 
+      name: `Reputation for ${target.username}`,
+      iconURL: target.displayAvatarURL()
+    })
+    .setDescription(
+      `### Reputation Stats\n` +
+      `> **Given:** ${userData.reputation?.given.toString()}\n` +
+      `> **Received:** ${userData.reputation?.received.toString()}`
+    )
     .setThumbnail(target.displayAvatarURL())
-    .addFields(
-      {
-        name: "Given",
-        value: userData.reputation?.given.toString(),
-        inline: true,
-      },
-      {
-        name: "Received",
-        value: userData.reputation?.received.toString(),
-        inline: true,
-      }
-    );
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 }
@@ -155,10 +152,16 @@ async function giveReputation(user, target) {
   await targetData.save();
 
   const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setDescription(`${target.toString()} +1 Rep!`)
-    .setFooter({ text: `By ${user.username}` })
-    .setTimestamp(Date.now());
+    .setColor(0xFFFFFF)
+    .setAuthor({ 
+      name: "Reputation Given",
+      iconURL: user.displayAvatarURL()
+    })
+    .setDescription(
+      `### Reputation Update\n` +
+      `> ${target.toString()} +1 Rep!`
+    )
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 }

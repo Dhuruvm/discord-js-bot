@@ -95,7 +95,7 @@ async function getXpLeaderboard({ guild }, author, settings) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: "XP Leaderboard",
       iconURL: guild.iconURL()
@@ -127,7 +127,7 @@ async function getInviteLeaderboard({ guild }, author, settings) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: "Invite Leaderboard",
       iconURL: guild.iconURL()
@@ -153,7 +153,7 @@ async function getRepLeaderboard(author) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: "Reputation Leaderboard",
       iconURL: author.client.guilds.cache.get(lb[i]._id)?.iconURL() || "https://cdn.discordapp.com/embed/avatars/0.png" // Fallback icon

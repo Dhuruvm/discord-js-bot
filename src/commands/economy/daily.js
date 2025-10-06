@@ -57,13 +57,18 @@ async function daily(user) {
 
   const embed = new ModernEmbed()
     .setColor(0xFFFFFF)
-    .setHeader("💰 Daily Reward Claimed!", `Successfully claimed your daily bonus!`)
+    .setAuthor({ 
+      name: "Daily Reward Claimed!",
+      iconURL: user.displayAvatarURL()
+    })
+    .setDescription(
+      `### Reward Information\n` +
+      `> **Received:** \`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\`\n` +
+      `> **Streak:** \`${streak} day${streak !== 1 ? 's' : ''}\`\n` +
+      `> **New Balance:** \`${userDb.coins}${ECONOMY.CURRENCY}\``
+    )
     .setThumbnail(user.displayAvatarURL())
-    .addField("💵 Received", `\`${ECONOMY.DAILY_COINS}${ECONOMY.CURRENCY}\``, true)
-    .addField("🔥 Streak", `\`${streak} day${streak !== 1 ? 's' : ''}\``, true)
-    .addField("💳 New Balance", `\`${userDb.coins}${ECONOMY.CURRENCY}\``, true)
-    .setFooter(`Come back tomorrow for another reward!`)
-    .setTimestamp()
+    .setFooter("Powered by Blackbit Studio")
     .addButton({
       customId: 'view-balance',
       label: 'View Balance',

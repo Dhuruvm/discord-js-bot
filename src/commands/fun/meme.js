@@ -139,8 +139,13 @@ async function getRandomEmbed(choice) {
   const memeUpvotes = json.ups;
 
   return new EmbedBuilder()
-    .setAuthor({ name: memeTitle, url: memeUrl })
+    .setColor(0xFFFFFF)
+    .setAuthor({ 
+      name: memeTitle, 
+      iconURL: "https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png",
+      url: memeUrl 
+    })
+    .setDescription(`### Meme from Reddit\n> 👍 ${memeUpvotes} upvotes`)
     .setImage(memeImage)
-    .setColor("Random")
-    .setFooter({ text: `👍 ${memeUpvotes}` });
+    .setFooter({ text: "Powered by Blackbit Studio" });
 }

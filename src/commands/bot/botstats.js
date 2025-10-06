@@ -71,7 +71,7 @@ async function getBotStats(client) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: `${client.user.username} Statistics`,
       iconURL: client.user.displayAvatarURL()

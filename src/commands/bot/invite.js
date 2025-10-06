@@ -33,7 +33,7 @@ module.exports = {
 
 function getInviteMessage(client) {
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: `Invite ${client.user.username}`,
       iconURL: client.user.displayAvatarURL()

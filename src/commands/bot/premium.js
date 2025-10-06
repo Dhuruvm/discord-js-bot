@@ -33,7 +33,7 @@ module.exports = {
 
 function getPremiumMessage() {
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setAuthor({ 
       name: "Premium Features",
       iconURL: "https://cdn.discordapp.com/emojis/1234567890.png"
