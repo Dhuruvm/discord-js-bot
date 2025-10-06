@@ -122,9 +122,12 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       iconURL: client?.user?.displayAvatarURL()
     })
     .setDescription(
-      `• **an asterisk(*) means the command has subcommands**\n` +
+      `• **an asterisk(*) means the command has subcommands**\n\n` +
       `• *View ${client?.user?.username || 'bot'} commands using the menu below.*\n` +
       `• *Or view the commands on our [**\` Docs \`**](https://github.com/encrypment)*`
+    )
+    .addFields(
+      { name: 'Need Extra Help?', value: `• Visit our **Support Server** on how to get started\n• Developer: **encrypt | nasa**`, inline: false }
     )
     .setFooter({ text: "Powered by Blackbit Studio" });
 
@@ -140,7 +143,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
         Object.entries(CommandCategory)
           .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
           .map(([k, v]) => {
-            const mapping = categoryMapping[k] || { emoji: v.emoji, name: v.name };
+            const mapping = categoryMapping[k] || { name: v.name };
             return {
               label: mapping.name,
               value: k,
