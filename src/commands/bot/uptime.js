@@ -1,5 +1,5 @@
 const { timeformat } = require("@helpers/Utils");
-const ModernEmbed = require("@structures/ModernEmbed");
+const ModernEmbed = require("@helpers/ModernEmbed");
 const { EmbedBuilder } = require("discord.js");
 
 /**
