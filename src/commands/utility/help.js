@@ -1,5 +1,5 @@
 const { CommandCategory, BotClient } = require("@src/structures");
-const { SUPPORT_SERVER, OWNER_IDS } = require("@root/config.js");
+const { SUPPORT_SERVER, OWNER_IDS, DEVELOPER } = require("@root/config.js");
 const {
   EmbedBuilder,
   ActionRowBuilder,
@@ -11,6 +11,7 @@ const {
   ButtonStyle,
 } = require("discord.js");
 const { getCommandUsage, getSlashUsage } = require("@handlers/command");
+const emojis = require("@root/emojis.json");
 
 const IDLE_TIMEOUT = 120;
 
@@ -62,7 +63,7 @@ module.exports = {
       });
     }
 
-    await message.channel.send("No command or category found matching your input");
+    await message.channel.send(`${emojis.error} No command or category found matching your input`);
   },
 
   async interactionRun(interaction) {
@@ -80,40 +81,36 @@ module.exports = {
       return interaction.followUp({ embeds: [embed] });
     }
 
-    await interaction.followUp("No matching command found");
+    await interaction.followUp(`${emojis.error} No matching command found`);
   },
 };
 
 async function getHelpMenu({ client, guild, author, user }, prefix) {
-  const mainCategories = [];
-  const extraCategories = [];
   const displayUser = author || user;
   const isOwner = OWNER_IDS.includes(displayUser?.id);
 
   const categoryMapping = {
-    'ADMIN': { emoji: '🔒', name: 'AntiNuke' },
-    'AUTOMOD': { emoji: '⚡', name: 'Auto Moderation' },
-    'MUSIC': { emoji: '🎵', name: 'Music' },
-    'MODERATION': { emoji: '🔨', name: 'Moderation' },
-    'GIVEAWAY': { emoji: '🎁', name: 'Giveaway' },
-    'TICKET': { emoji: '🎟️', name: 'Ticket' },
-    'UTILITY': { emoji: '⚙️', name: 'Utility' },
-    'SOCIAL': { emoji: '🎊', name: 'Welcomer' },
-    'STATS': { emoji: '✨', name: 'Auto Responder' },
-    'ECONOMY': { emoji: '💡', name: 'Custom Roles' },
-    'SUGGESTION': { emoji: '📝', name: 'Logging' },
-    'IMAGE': { emoji: '📸', name: 'Media' },
-    'INVITE': { emoji: '🎤', name: 'VCRoles' },
-    'FUN': { emoji: '✨', name: 'Fun' },
-    'BOT': { emoji: '🤖', name: 'Bot' },
-    'INFORMATION': { emoji: '🤖', name: 'Bot' },
+    'ADMIN': { emoji: emojis.admin || '⚙️', name: 'Admin' },
+    'AUTOMOD': { emoji: emojis.moderation || '🛡️', name: 'Auto Moderation' },
+    'MUSIC': { emoji: emojis.music || '🎵', name: 'Music' },
+    'MODERATION': { emoji: emojis.moderation || '🔨', name: 'Moderation' },
+    'GIVEAWAY': { emoji: emojis.giveaway || '🎁', name: 'Giveaway' },
+    'TICKET': { emoji: emojis.ticket || '🎟️', name: 'Ticket' },
+    'UTILITY': { emoji: emojis.utility || '🛠️', name: 'Utility' },
+    'SOCIAL': { emoji: '🫂', name: 'Social' },
+    'STATS': { emoji: emojis.stats || '📊', name: 'Statistics' },
+    'ECONOMY': { emoji: emojis.economy || '💰', name: 'Economy' },
+    'SUGGESTION': { emoji: '📝', name: 'Suggestion' },
+    'IMAGE': { emoji: '🖼️', name: 'Image' },
+    'INVITE': { emoji: emojis.invite || '📨', name: 'Invite' },
+    'FUN': { emoji: emojis.fun || '✨', name: 'Fun' },
+    'GRAPHICS': { emoji: '🎨', name: 'Graphics' },
+    'ANIME': { emoji: '🎨', name: 'Anime' },
+    'BOT': { emoji: emojis.bot || '🤖', name: 'Bot' },
+    'INFORMATION': { emoji: emojis.info || 'ℹ️', name: 'Information' },
   };
 
-  const mainKeys = ['ADMIN', 'AUTOMOD', 'MUSIC', 'MODERATION', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL', 'BOT'];
-
-  // Categories are now only displayed in the dropdown menu
-
-  const prefixText = prefix || '?';
+  const prefixText = prefix || '!';
   
   const embed = new EmbedBuilder()
     .setColor(0x2B2D31)
@@ -122,12 +119,16 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
       iconURL: client?.user?.displayAvatarURL()
     })
     .setDescription(
-      `• **an asterisk(*) means the command has subcommands**\n\n` +
-      `• *View ${client?.user?.username || 'bot'} commands using the menu below.*\n` +
-      `• *Or view the commands on our [**\` Docs \`**](https://github.com/encrypment)*`
+      `${emojis.info} **an asterisk(*) means the command has subcommands**\n\n` +
+      `${emojis.arrow_right} *View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
+      `${emojis.docs} *Or view the commands on our* [**Docs**](${SUPPORT_SERVER})`
     )
     .addFields(
-      { name: 'Need Extra Help?', value: `• Visit our **Support Server** on how to get started\n• Developer: **[Falooda](https://discord.com/users/${OWNER_IDS[0]})**`, inline: false }
+      { 
+        name: `${emojis.support} Need Extra Help?`, 
+        value: `${emojis.arrow_right} Visit our [**Support Server**](${SUPPORT_SERVER}) on how to get started\n${emojis.arrow_right} Developer: **${DEVELOPER}**`, 
+        inline: false 
+      }
     )
     .setFooter({ text: "Powered by Blackbit Studio" });
 
@@ -143,11 +144,12 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
         Object.entries(CommandCategory)
           .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
           .map(([k, v]) => {
-            const mapping = categoryMapping[k] || { name: v.name };
+            const mapping = categoryMapping[k] || { name: v.name, emoji: '📁' };
             return {
               label: mapping.name,
               value: k,
               description: `View commands in ${mapping.name} category`,
+              emoji: mapping.emoji,
             };
           })
       )
@@ -217,79 +219,38 @@ const waiter = (msg, userId, prefix) => {
   });
 };
 
-function getModuleEmbed(client, type, prefix, userId) {
-  const isOwner = OWNER_IDS.includes(userId);
-  const mainKeys = ['ADMIN', 'AUTOMOD', 'MUSIC', 'MODERATION', 'GIVEAWAY', 'TICKET', 'UTILITY', 'SOCIAL'];
-  const categories = type === "main" ? mainKeys : 
-    Object.keys(CommandCategory).filter(k => !mainKeys.includes(k) && CommandCategory[k].enabled !== false && (k !== 'OWNER' || isOwner));
-
-  const categoryMapping = {
-    'ADMIN': { name: 'AntiNuke' },
-    'AUTOMOD': { name: 'Auto Moderation' },
-    'MUSIC': { name: 'Music' },
-    'MODERATION': { name: 'Moderation' },
-    'GIVEAWAY': { name: 'Giveaway' },
-    'TICKET': { name: 'Ticket' },
-    'UTILITY': { name: 'Utility' },
-    'SOCIAL': { name: 'Welcomer' },
-    'STATS': { name: 'Auto Responder' },
-    'ECONOMY': { name: 'Custom Roles' },
-    'SUGGESTION': { name: 'Logging' },
-    'IMAGE': { name: 'Media' },
-    'INVITE': { name: 'VCRoles' },
-    'FUN': { name: 'Fun' },
-    'INFORMATION': { name: 'Bot' },
-  };
-
-  const categoryList = categories
-    .filter(k => CommandCategory[k])
-    .filter(k => k !== 'OWNER' || isOwner)
-    .map(k => {
-      const mapping = categoryMapping[k] || { name: CommandCategory[k].name };
-      return `• ${mapping.name}`;
-    })
-    .join('\n');
-
-  const moduleTitle = type.charAt(0).toUpperCase() + type.slice(1);
-
-  const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
-    .setTitle(`${moduleTitle} Modules`)
-    .setDescription(categoryList)
-    .setFooter({ text: "Powered by Blackbit Studio" });
-
-  return { embeds: [embed] };
-}
-
 function getCategoryEmbed(client, category, prefix) {
   const commands = client.commands.filter((cmd) => cmd.category === category);
   
   const categoryMapping = {
-    'ADMIN': { name: 'AntiNuke' },
-    'AUTOMOD': { name: 'Auto Moderation' },
-    'MUSIC': { name: 'Music' },
-    'MODERATION': { name: 'Moderation' },
-    'GIVEAWAY': { name: 'Giveaway' },
-    'TICKET': { name: 'Ticket' },
-    'UTILITY': { name: 'Utility' },
-    'SOCIAL': { name: 'Welcomer' },
-    'STATS': { name: 'Auto Responder' },
-    'ECONOMY': { name: 'Custom Roles' },
-    'SUGGESTION': { name: 'Logging' },
-    'IMAGE': { name: 'Media' },
-    'INVITE': { name: 'VCRoles' },
-    'FUN': { name: 'Fun' },
-    'INFORMATION': { name: 'Bot' },
+    'ADMIN': { name: 'Admin', emoji: emojis.admin || '⚙️' },
+    'AUTOMOD': { name: 'Auto Moderation', emoji: emojis.moderation || '🛡️' },
+    'MUSIC': { name: 'Music', emoji: emojis.music || '🎵' },
+    'MODERATION': { name: 'Moderation', emoji: emojis.moderation || '🔨' },
+    'GIVEAWAY': { name: 'Giveaway', emoji: emojis.giveaway || '🎁' },
+    'TICKET': { name: 'Ticket', emoji: emojis.ticket || '🎟️' },
+    'UTILITY': { name: 'Utility', emoji: emojis.utility || '🛠️' },
+    'SOCIAL': { name: 'Social', emoji: '🫂' },
+    'STATS': { name: 'Statistics', emoji: emojis.stats || '📊' },
+    'ECONOMY': { name: 'Economy', emoji: emojis.economy || '💰' },
+    'SUGGESTION': { name: 'Suggestion', emoji: '📝' },
+    'IMAGE': { name: 'Image', emoji: '🖼️' },
+    'INVITE': { name: 'Invite', emoji: emojis.invite || '📨' },
+    'FUN': { name: 'Fun', emoji: emojis.fun || '✨' },
+    'GRAPHICS': { name: 'Graphics', emoji: '🎨' },
+    'ANIME': { name: 'Anime', emoji: '🎨' },
+    'BOT': { name: 'Bot', emoji: emojis.bot || '🤖' },
+    'INFORMATION': { name: 'Information', emoji: emojis.info || 'ℹ️' },
   };
 
   const categoryInfo = CommandCategory[category];
-  const mapping = categoryMapping[category] || { name: categoryInfo?.name };
+  const mapping = categoryMapping[category] || { name: categoryInfo?.name, emoji: '📁' };
 
   if (commands.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x2B2D31)
-      .setTitle(mapping.name)
-      .setDescription("This category is currently empty. Check back later for new commands!")
+      .setTitle(`${mapping.emoji} ${mapping.name}`)
+      .setDescription(`${emojis.info} This category is currently empty. Check back later for new commands!`)
       .setFooter({ text: "Powered by Blackbit Studio" });
     return { embeds: [embed] };
   }
@@ -298,17 +259,17 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `• \`${cmd.name} ${trigger}\` *`;
+        return `${emojis.arrow_right} \`${cmd.name} ${trigger}\` *`;
       }).join('\n');
     }
-    return `• \`${cmd.name}\``;
+    return `${emojis.arrow_right} \`${cmd.name}\``;
   }).join('\n');
 
   const embed = new EmbedBuilder()
     .setColor(0x2B2D31)
-    .setTitle(mapping.name)
+    .setTitle(`${mapping.emoji} ${mapping.name}`)
     .setDescription(commandsList)
-    .setFooter({ text: `Use ${prefix || '?'}help <command> for more info • Powered by Blackbit Studio` });
+    .setFooter({ text: `Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio` });
 
   return { embeds: [embed] };
 }
@@ -318,7 +279,7 @@ function getBackButton() {
     new ButtonBuilder()
       .setCustomId("home-btn")
       .setLabel("Back")
-      .setEmoji("◀️")
+      .setEmoji(emojis.arrow_left || "◀️")
       .setStyle(ButtonStyle.Secondary)
   );
 }
