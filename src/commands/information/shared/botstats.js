@@ -1,4 +1,3 @@
-
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
@@ -34,11 +33,11 @@ module.exports = async (client) => {
   } catch (error) {
     client.logger.error("Error fetching developers:", error);
   }
-  
+
   // Format founder
   const founderId = "1354287041772392478";
   const founderMention = `<@${founderId}>`;
-  
+
   // Format developers
   let devList = founderMention;
   if (developers.length > 0) {
@@ -47,52 +46,42 @@ module.exports = async (client) => {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
-    .setTitle(`📊 ${client.user.username} Statistics`)
-    .setDescription("Comprehensive statistics and system information about your bot.")
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: `${client.user.username} Statistics`,
+      iconURL: client.user.displayAvatarURL()
+    })
     .setThumbnail(client.user.displayAvatarURL())
     .addFields(
-      { 
-        name: "🌐 Bot Overview", 
+      {
+        name: "### General Statistics",
         value: stripIndent`
-          **Total Guilds:** \`${guilds}\`
-          **Total Users:** \`${users.toLocaleString()}\`
-          **Total Channels:** \`${channels}\`
-          **Websocket Ping:** \`${client.ws.ping}ms\`
-        `,
-        inline: false 
+            > **Commands:** \`${client.commands.size}\`
+            > **Servers:** \`${client.guilds.cache.size}\`
+            > **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0)}\`
+            > **Channels:** \`${client.channels.cache.size}\`
+          `,
+        inline: false,
       },
-      { 
-        name: "👑 Founder & Developers", 
-        value: devList,
-        inline: false 
-      },
-      { 
-        name: "💻 System Information", 
+      {
+        name: "### System Information",
         value: stripIndent`
-          **Operating System:** ${platform} [${architecture}]
-          **CPU Cores:** ${cores}
-          **CPU Usage:** ${cpuUsage}
-          **Node.js Version:** ${process.versions.node}
-          **Bot Uptime:** ${timeformat(process.uptime())}
-        `,
-        inline: false 
-      },
-      { 
-        name: "🔧 Memory Usage", 
-        value: stripIndent`
-          **Bot:** ${botUsed} / ${botAvailable} (${botUsage})
-          **System:** ${overallUsed} / ${overallAvailable} (${overallUsage})
-        `,
-        inline: false 
+            > **Platform:** \`${platform}\`
+            > **Uptime:** <t:${parseInt(client.readyTimestamp / 1000)}:R>
+            > **CPU Model:** \`${os.cpus()[0].model}\`
+            > **CPU Usage:** \`${(process.cpuUsage().system / 1024 / 1024).toFixed(2)}%\`
+            > **Memory:** \`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB / ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB\`
+            > **Node.js:** \`${process.version}\`
+          `,
+        inline: false,
       }
     )
-    .setFooter({ text: `${client.user.username} • Powered by Discord.js` })
+    .setFooter({ text: "Powered by Blackbit Studio" })
     .setTimestamp();
 
   let row1Components = [];
   let row2Components = [];
-  
+
   row1Components.push(
     new ButtonBuilder()
       .setLabel("Invite Bot")
@@ -136,7 +125,7 @@ module.exports = async (client) => {
   );
 
   let components = [];
-  
+
   if (row1Components.length > 0) {
     components.push(new ActionRowBuilder().addComponents(row1Components));
   }

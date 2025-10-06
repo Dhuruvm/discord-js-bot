@@ -35,66 +35,66 @@ module.exports = (member) => {
           description: `${member.displayName} Avatar`
         }
       },
-      
+
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-      
+
       // Basic Info Section
       {
         type: ComponentType.TextDisplay,
         content: `### 📋 Basic Information\n\n**Username:** ${member.user.username}\n**User ID:** \`${member.id}\`\n**Display Name:** ${member.displayName}`
       },
-      
+
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-      
+
       // Timestamps Section
       {
         type: ComponentType.TextDisplay,
         content: `### 📅 Important Dates\n\n**Joined Server:** <t:${Math.floor(member.joinedAt.getTime() / 1000)}:F>\n**Account Created:** <t:${Math.floor(member.user.createdAt.getTime() / 1000)}:F>`
       },
-      
+
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-      
+
       // Roles Section
       {
         type: ComponentType.TextDisplay,
         content: `### 🎭 Roles [${member.roles.cache.size - 1}]\n\n${rolesString}`
       },
-      
+
       // Separator
       {
         type: ComponentType.Separator,
         divider: true,
         spacing: 2
       },
-      
+
       // Avatar Link
       {
         type: ComponentType.TextDisplay,
         content: `### 🖼️ Avatar\n\n[Download Avatar](${member.user.displayAvatarURL({ extension: "png", size: 1024 })})`
       },
-      
+
       // Separator
       {
         type: ComponentType.Separator,
         divider: false,
         spacing: 1
       },
-      
+
       // Footer
       {
         type: ComponentType.TextDisplay,

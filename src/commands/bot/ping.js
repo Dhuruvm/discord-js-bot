@@ -21,34 +21,40 @@ module.exports = {
   async messageRun(message, args) {
     const ping = Math.floor(message.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
-    
+
     const embed = new EmbedBuilder()
-      .setColor(ping < 100 ? 0x57F287 : ping < 200 ? 0xFEE75C : 0xED4245)
-      .setTitle(`${ModernEmbed.getEmoji("bot")} Pong!`)
-      .addFields(
-        { name: "📡 Websocket Latency", value: `\`${ping}ms\``, inline: true },
-        { name: "📊 Status", value: status, inline: true }
+      .setColor(0x2B2D31)
+      .setAuthor({ 
+        name: "🏓 Pong!",
+        iconURL: message.client.user.displayAvatarURL()
+      })
+      .setDescription(
+        `### Latency Information\n` +
+        `> **Bot Latency:** \`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\`\n` +
+        `> **API Latency:** \`${Math.round(message.client.ws.ping)}ms\``
       )
-      .setFooter({ text: message.guild ? message.guild.name : 'Direct Message' })
-      .setTimestamp();
-    
+      .setFooter({ text: "Powered by Blackbit Studio" });
+
     await message.safeReply({ embeds: [embed] });
   },
 
   async interactionRun(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
-    
+
     const embed = new EmbedBuilder()
-      .setColor(ping < 100 ? 0x57F287 : ping < 200 ? 0xFEE75C : 0xED4245)
-      .setTitle(`${ModernEmbed.getEmoji("bot")} Pong!`)
-      .addFields(
-        { name: "📡 Websocket Latency", value: `\`${ping}ms\``, inline: true },
-        { name: "📊 Status", value: status, inline: true }
+      .setColor(0x2B2D31)
+      .setAuthor({ 
+        name: "🏓 Pong!",
+        iconURL: interaction.client.user.displayAvatarURL()
+      })
+      .setDescription(
+        `### Latency Information\n` +
+        `> **Bot Latency:** \`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\`\n` +
+        `> **API Latency:** \`${Math.round(interaction.client.ws.ping)}ms\``
       )
-      .setFooter({ text: interaction.guild ? interaction.guild.name : 'Direct Message' })
-      .setTimestamp();
-    
+      .setFooter({ text: "Powered by Blackbit Studio" });
+
     await interaction.followUp({ embeds: [embed] });
   },
 };

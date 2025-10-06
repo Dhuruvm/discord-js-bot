@@ -95,10 +95,13 @@ async function getXpLeaderboard({ guild }, author, settings) {
   }
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: "XP Leaderboard" })
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: "XP Leaderboard",
+      iconURL: guild.iconURL()
+    })
     .setDescription(collector)
-    .setFooter({ text: `Requested by ${author.tag}` });
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 }
@@ -124,10 +127,13 @@ async function getInviteLeaderboard({ guild }, author, settings) {
   }
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: "Invite Leaderboard" })
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: "Invite Leaderboard",
+      iconURL: guild.iconURL()
+    })
     .setDescription(collector)
-    .setFooter({ text: `Requested by ${author.tag}` });
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 }
@@ -147,10 +153,13 @@ async function getRepLeaderboard(author) {
   }
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: "Reputation Leaderboard" })
-    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: "Reputation Leaderboard",
+      iconURL: author.client.guilds.cache.get(lb[i]._id)?.iconURL() || "https://cdn.discordapp.com/embed/avatars/0.png" // Fallback icon
+    })
     .setDescription(collector)
-    .setFooter({ text: `Requested by ${author.tag}` });
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 }

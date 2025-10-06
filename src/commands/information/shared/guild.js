@@ -41,14 +41,14 @@ module.exports = async (guild) => {
 
   if (rolesString.length > 1024) rolesString = rolesString.substring(0, 1020) + "...";
 
-  let { verificationLevel } = guild;
+  let verificationLevelText = guild.verificationLevel;
   switch (guild.verificationLevel) {
     case GuildVerificationLevel.VeryHigh:
-      verificationLevel = "┻�?┻ミヽ(ಠ益ಠ)ノ彡┻�?┻";
+      verificationLevelText = "┻?┻ミヽ(ಠ益ಠ)ノ彡┻?┻";
       break;
 
     case GuildVerificationLevel.High:
-      verificationLevel = "(╯°□°）╯︵ ┻�?┻";
+      verificationLevelText = "(╯°□°）╯︵ ┻?┻";
       break;
 
     default:
@@ -64,62 +64,49 @@ module.exports = async (guild) => {
   }[guild.verificationLevel] || "📋";
 
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
-    .setTitle(`🏰 ${name}`)
-    .setDescription("Comprehensive server information and statistics.")
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: `${guild.name} Information`,
+      iconURL: guild.iconURL()
+    })
+    .setThumbnail(guild.iconURL())
     .addFields(
-      { 
-        name: "📋 Server Details", 
+      {
+        name: "### Guild Information",
         value: stripIndent`
-          **Server ID:** \`${id}\`
-          **Server Name:** ${name}
-          **Owner:** ${owner.user.username}
-          **Region:** ${preferredLocale}
-        `,
-        inline: false 
+          > **ID:** \`${guild.id}\`
+          > **Name:** ${guild.name}
+          > **Owner:** <@${guild.ownerId}>
+          > **Region:** ${preferredLocale}
+          > **Verification:** ${verificationEmoji} ${verificationLevelText}
+          > **Created:** <t:${Math.floor(guild.createdAt.getTime() / 1000)}:D>
+          `,
+        inline: true,
       },
-      { 
-        name: `👥 Server Members [${all}]`, 
+      {
+        name: "### Server Statistics",
         value: stripIndent`
-          **Members:** ${users}
-          **Bots:** ${bots}
-          
-          **Online Members:** ${onlineUsers}
-          **Online Bots:** ${onlineBots}
-          **Total Online:** ${onlineAll}
-        `,
-        inline: false 
+          > **Members:** \`${all}\`
+          > **Channels:** \`${totalChannels}\`
+          > **Roles:** \`${rolesCount}\`
+          > **Emojis:** \`${guild.emojis.cache.size}\`
+          > **Boosts:** \`${guild.premiumSubscriptionCount}\`
+          `,
+        inline: true,
       },
-      { 
-        name: `📢 Channels & Categories [${totalChannels}]`, 
-        value: `**Categories:** ${categories} • **Text:** ${textChannels} • **Voice:** ${voiceChannels} • **Threads:** ${threadChannels}`,
-        inline: false 
-      },
-      { 
-        name: `🎭 Roles [${rolesCount}]`, 
-        value: rolesString || "No roles",
-        inline: false 
-      },
-      { 
-        name: "⚙️ Server Configuration", 
+      {
+        name: "### Additional Details",
         value: stripIndent`
-          **Verification Level:** ${verificationEmoji} ${verificationLevel}
-          **Boost Level:** 🚀 Tier ${guild.premiumTier} (${guild.premiumSubscriptionCount} boosts)
-        `,
-        inline: false 
-      },
-      { 
-        name: "📅 Server Created", 
-        value: `<t:${Math.floor(guild.createdAt.getTime() / 1000)}:F> (${createdAt.fromNow()})`,
-        inline: false 
+          > **Boost Tier:** ${guild.premiumTier || "None"}
+          > **Active Threads:** \`${threadChannels}\`
+          > **Sticker Count:** \`${guild.stickers.cache.size}\`
+          > **Explicit Filter:** ${guild.explicitContentFilter}
+          `,
+        inline: true,
       }
     )
-    .setFooter({ text: "Server Information" })
+    .setFooter({ text: "Powered by Blackbit Studio" })
     .setTimestamp();
-
-  if (guild.iconURL()) {
-    embed.setThumbnail(guild.iconURL());
-  }
 
   return { embeds: [embed] };
 };

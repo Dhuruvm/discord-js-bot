@@ -1,5 +1,6 @@
 const { timeformat } = require("@helpers/Utils");
-const ModernEmbed = require("@helpers/ModernEmbed");
+const ModernEmbed = require("@structures/ModernEmbed");
+const { EmbedBuilder } = require("discord.js");
 
 /**
  * @type {import("@structures/Command")}
@@ -19,14 +20,37 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    await message.safeReply(
-      ModernEmbed.simpleSuccess(`Bot uptime: \`${timeformat(process.uptime())}\``)
-    );
+    const client = message.client;
+    const embed = new EmbedBuilder()
+      .setColor(0x2B2D31)
+      .setAuthor({
+        name: "Uptime Information",
+        iconURL: client.user.displayAvatarURL()
+      })
+      .setDescription(
+        `### Bot Uptime\n` +
+        `> **Current Uptime:** \`${timeformat(process.uptime())}\`\n` +
+        `> **Started:** <t:${parseInt(client.readyTimestamp / 1000)}:R>`
+      )
+      .setFooter({ text: "Powered by Blackbit Studio" });
+    await message.safeReply({ embeds: [embed] });
   },
 
   async interactionRun(interaction) {
-    await interaction.followUp(
-      ModernEmbed.simpleSuccess(`Bot uptime: \`${timeformat(process.uptime())}\``)
-    );
+    const client = interaction.client;
+    const embed = new EmbedBuilder()
+      .setColor(0x2B2D31)
+      .setAuthor({
+        name: "Uptime Information",
+        iconURL: client.user.displayAvatarURL()
+      })
+      .setDescription(
+        `### Bot Uptime\n` +
+        `> **Current Uptime:** \`${timeformat(process.uptime())}\`\n` +
+        `> **Started:** <t:${parseInt(client.readyTimestamp / 1000)}:R>`
+      )
+      .setFooter({ text: "Powered by Blackbit Studio" });
+
+    await interaction.followUp({ embeds: [embed] });
   },
 };

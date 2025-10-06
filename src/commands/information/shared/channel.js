@@ -53,9 +53,35 @@ module.exports = (channel) => {
   }
 
   const embed = new EmbedBuilder()
-    .setAuthor({ name: "Channel Details" })
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setDescription(desc);
+    .setColor(0x2B2D31)
+    .setAuthor({ 
+      name: `${channel.name} Information`,
+      iconURL: channel.guild.iconURL()
+    })
+    .addFields(
+      {
+        name: "### Channel Information",
+        value: stripIndent`
+        > **ID:** \`${channel.id}\`
+        > **Name:** ${channel.name}
+        > **Type:** ${channelTypes[channel.type]}
+        > **Category:** ${channel.parent || "None"}
+        > **Topic:** ${channel.topic || "No topic set"}
+        `,
+        inline: true,
+      },
+      {
+        name: "### Channel Details",
+        value: stripIndent`
+        > **Position:** \`${channel.position}\`
+        > **Created:** <t:${createdAtTimestamp}:D>
+        > **NSFW:** ${channel.nsfw ? "Yes" : "No"}
+        ${channel.type === ChannelType.GuildText ? `> **Rate Limit:** \`${channel.rateLimitPerUser}s\`` : ""}
+        `,
+        inline: true,
+      }
+    )
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
   return { embeds: [embed] };
 };
