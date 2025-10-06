@@ -12,7 +12,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
-    aliases: ["inv", "botinvite"],
+    aliases: ["inv", "botinvite", "invitebot", "add"],
   },
   slashCommand: {
     enabled: true,
@@ -33,7 +33,7 @@ module.exports = {
 
 function getInviteMessage(client) {
   const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
+    .setColor(0x5865F2)
     .setAuthor({ 
       name: `Invite ${client.user.username}`,
       iconURL: client.user.displayAvatarURL()

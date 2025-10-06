@@ -11,7 +11,7 @@ module.exports = {
   command: {
     enabled: true,
     usage: "[#channel|id]",
-    aliases: ["chinfo"],
+    aliases: ["chinfo", "ci", "channel"],
   },
 
   async messageRun(message, args) {

@@ -53,7 +53,7 @@ module.exports = (channel) => {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0x5865F2)
     .setAuthor({ 
       name: `${channel.name} Information`,
       iconURL: channel.guild.iconURL()

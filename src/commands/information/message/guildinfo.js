@@ -11,7 +11,7 @@ module.exports = {
   cooldown: 5,
   command: {
     enabled: true,
-    aliases: ["serverinfo"],
+    aliases: ["serverinfo", "si", "server", "ginfo"],
   },
 
   async messageRun(message, args) {

@@ -64,7 +64,7 @@ module.exports = async (guild) => {
   }[guild.verificationLevel] || "📋";
 
   const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
+    .setColor(0x5865F2)
     .setAuthor({ 
       name: `${guild.name} Information`,
       iconURL: guild.iconURL()

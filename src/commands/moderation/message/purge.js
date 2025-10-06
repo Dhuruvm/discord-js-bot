@@ -16,6 +16,7 @@ module.exports = {
     enabled: true,
     usage: "<amount>",
     minArgsCount: 1,
+    aliases: ["clear", "clean", "prune"],
   },
 
   async messageRun(message, args) {

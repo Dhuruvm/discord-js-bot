@@ -12,6 +12,7 @@ module.exports = {
     enabled: true,
     usage: "<emoji>",
     minArgsCount: 1,
+    aliases: ["emote", "ei", "emoteinfo"],
   },
 
   async messageRun(message, args) {
