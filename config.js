@@ -108,9 +108,10 @@ module.exports = {
   PRESENCE: {
     ENABLED: true, // Whether or not the bot should update its status
     STATUS: "online", // The bot's status [online, idle, dnd, invisible]
-    TYPE: "WATCHING", // Status type for the bot [ CUSTOM | PLAYING | LISTENING | WATCHING | COMPETING ]
+    TYPE: "STREAMING", // Status type for the bot [ CUSTOM | PLAYING | LISTENING | WATCHING | COMPETING | STREAMING ]
     // Your bot status message (note: in custom status type you won't have "Playing", "Listening", "Competing" prefix)
-    MESSAGE: ["{members} members in {servers} servers", "Cybork is here to help!", "Use /help for commands"],
+    MESSAGE: " ", // Use a space for streaming status
+    URL: "https://twitch.tv/riotgames", // Required for STREAMING type (must be a valid Twitch URL)
   },
 
   STATS: {

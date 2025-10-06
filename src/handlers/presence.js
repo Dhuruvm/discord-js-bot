@@ -32,6 +32,9 @@ function updatePresence(client) {
       case "WATCHING":
         return ActivityType.Watching;
 
+      case "STREAMING":
+        return ActivityType.Streaming;
+
       case "CUSTOM":
         return ActivityType.Custom;
     }
@@ -45,6 +48,17 @@ function updatePresence(client) {
           name: message,
           state: message,
           type: getType(client.config.PRESENCE.TYPE),
+        },
+      ],
+    });
+  } else if (client.config.PRESENCE.TYPE === "STREAMING") {
+    client.user.setPresence({
+      status: client.config.PRESENCE.STATUS,
+      activities: [
+        {
+          name: message,
+          type: getType(client.config.PRESENCE.TYPE),
+          url: client.config.PRESENCE.URL || "https://twitch.tv/discord",
         },
       ],
     });
