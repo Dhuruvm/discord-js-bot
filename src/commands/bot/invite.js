@@ -1,4 +1,3 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const ModernEmbed = require("@helpers/ModernEmbed");
 
@@ -32,51 +31,22 @@ module.exports = {
 };
 
 function getInviteMessage(client) {
-  const embed = new EmbedBuilder()
+  const embed = new ModernEmbed()
     .setColor(0xFFFFFF)
-    .setAuthor({ 
-      name: `Invite ${client.user.username}`,
-      iconURL: client.user.displayAvatarURL()
-    })
-    .setDescription(
-      `### Invitation Links\n` +
-      `> Click the button below to invite me to your server!`
-    )
+    .setHeader(`🔗 Invite ${client.user.username}`, "Click the buttons below to invite me to your server or join our community!")
     .setThumbnail(client.user.displayAvatarURL())
-    .setFooter({ text: "Powered by Blackbit Studio" });
+    .setFooter("Powered by Blackbit Studio")
+    .setTimestamp();
 
-  const components = [];
-  const row = new ActionRowBuilder();
-
-  row.addComponents(
-    new ButtonBuilder()
-      .setLabel("Invite Bot")
-      .setEmoji(ModernEmbed.getEmoji("link"))
-      .setURL(client.getInvite())
-      .setStyle(ButtonStyle.Link)
-  );
+  embed.addButton({ label: "Invite Bot", emoji: "🔗", url: client.getInvite(), style: "Link" });
 
   if (SUPPORT_SERVER) {
-    row.addComponents(
-      new ButtonBuilder()
-        .setLabel("Support Server")
-        .setEmoji(ModernEmbed.getEmoji("support"))
-        .setURL(SUPPORT_SERVER)
-        .setStyle(ButtonStyle.Link)
-    );
+    embed.addButton({ label: "Support Server", emoji: "💬", url: SUPPORT_SERVER, style: "Link" });
   }
 
   if (DASHBOARD.enabled) {
-    row.addComponents(
-      new ButtonBuilder()
-        .setLabel("Dashboard")
-        .setEmoji(ModernEmbed.getEmoji("website"))
-        .setURL(DASHBOARD.baseURL)
-        .setStyle(ButtonStyle.Link)
-    );
+    embed.addButton({ label: "Dashboard", emoji: "🌐", url: DASHBOARD.baseURL, style: "Link" });
   }
 
-  components.push(row);
-
-  return { embeds: [embed], components };
+  return embed.toMessage();
 }

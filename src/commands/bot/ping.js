@@ -1,4 +1,3 @@
-const { EmbedBuilder } = require("discord.js");
 const ModernEmbed = require("@helpers/ModernEmbed");
 
 /**
@@ -22,39 +21,31 @@ module.exports = {
     const ping = Math.floor(message.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
-    const embed = new EmbedBuilder()
+    const response = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setAuthor({ 
-        name: "🏓 Pong!",
-        iconURL: message.client.user.displayAvatarURL()
-      })
-      .setDescription(
-        `### Latency Information\n` +
-        `> **Bot Latency:** \`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\`\n` +
-        `> **API Latency:** \`${Math.round(message.client.ws.ping)}ms\``
-      )
-      .setFooter({ text: "Powered by Blackbit Studio" });
+      .setHeader("🏓 Pong!", "Latency Information")
+      .addField("Bot Latency", `\`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\``, true)
+      .addField("API Latency", `\`${Math.round(message.client.ws.ping)}ms\` - ${status}`, true)
+      .setFooter("Powered by Blackbit Studio")
+      .setTimestamp()
+      .toMessage();
 
-    await message.safeReply({ embeds: [embed] });
+    await message.safeReply(response);
   },
 
   async interactionRun(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
-    const embed = new EmbedBuilder()
+    const response = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setAuthor({ 
-        name: "🏓 Pong!",
-        iconURL: interaction.client.user.displayAvatarURL()
-      })
-      .setDescription(
-        `### Latency Information\n` +
-        `> **Bot Latency:** \`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\`\n` +
-        `> **API Latency:** \`${Math.round(interaction.client.ws.ping)}ms\``
-      )
-      .setFooter({ text: "Powered by Blackbit Studio" });
+      .setHeader("🏓 Pong!", "Latency Information")
+      .addField("Bot Latency", `\`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\``, true)
+      .addField("API Latency", `\`${Math.round(interaction.client.ws.ping)}ms\` - ${status}`, true)
+      .setFooter("Powered by Blackbit Studio")
+      .setTimestamp()
+      .toMessage();
 
-    await interaction.followUp({ embeds: [embed] });
+    await interaction.followUp(response);
   },
 };

@@ -1,9 +1,7 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
 const ModernEmbed = require("@helpers/ModernEmbed");
 const os = require("os");
-const { stripIndent } = require("common-tags");
 
 /**
  * @type {import("@structures/Command")}
@@ -70,98 +68,38 @@ async function getBotStats(client) {
     devList = `${founderMention}, ${devMentions}`;
   }
 
-  const embed = new EmbedBuilder()
+  const embed = new ModernEmbed()
     .setColor(0xFFFFFF)
-    .setAuthor({ 
-      name: `${client.user.username} Statistics`,
-      iconURL: client.user.displayAvatarURL()
-    })
-    .setDescription(
-      `### Bot Information\n` +
-      `> **Total Guilds:** \`${guilds}\`\n` +
-      `> **Total Users:** \`${users.toLocaleString()}\`\n` +
-      `> **Total Channels:** \`${channels}\`\n` +
-      `> **Websocket Ping:** \`${client.ws.ping}ms\``
-    )
-    .addFields(
-      { 
-        name: "### Founder & Developers", 
-        value: `> ${devList}`,
-        inline: false 
-      },
-      { 
-        name: "### System Information", 
-        value: 
-          `> **Operating System:** ${platform} [${architecture}]\n` +
-          `> **CPU Cores:** ${cores}\n` +
-          `> **CPU Usage:** ${cpuUsage}\n` +
-          `> **Node.js Version:** ${process.versions.node}\n` +
-          `> **Bot Uptime:** ${timeformat(process.uptime())}`,
-        inline: false 
-      },
-      { 
-        name: "### Memory Usage", 
-        value: 
-          `> **Bot:** ${botUsed} / ${botAvailable} (${botUsage})\n` +
-          `> **System:** ${overallUsed} / ${overallAvailable} (${overallUsage})`,
-        inline: false 
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" })
-    .setThumbnail(client.user.displayAvatarURL());
+    .setHeader(`📊 ${client.user.username} Statistics`)
+    .setThumbnail(client.user.displayAvatarURL())
+    .addField("Total Guilds", `\`${guilds}\``, true)
+    .addField("Total Users", `\`${users.toLocaleString()}\``, true)
+    .addField("Total Channels", `\`${channels}\``, true)
+    .addField("Websocket Ping", `\`${client.ws.ping}ms\``, true)
+    .addField("Founder & Developers", devList, false)
+    .addField("Operating System", `${platform} [${architecture}]`, true)
+    .addField("CPU Cores", `${cores}`, true)
+    .addField("CPU Usage", `${cpuUsage}`, true)
+    .addField("Node.js Version", `${process.versions.node}`, true)
+    .addField("Bot Uptime", `${timeformat(process.uptime())}`, true)
+    .addField("Bot Memory", `${botUsed} / ${botAvailable} (${botUsage})`, true)
+    .addField("System Memory", `${overallUsed} / ${overallAvailable} (${overallUsage})`, true)
+    .setFooter("Powered by Blackbit Studio")
+    .setTimestamp();
 
-  let row1Components = [];
-  let row2Components = [];
-  
-  row1Components.push(
-    new ButtonBuilder()
-      .setLabel("Invite Bot")
-      .setEmoji(ModernEmbed.getEmoji("link"))
-      .setURL(client.getInvite())
-      .setStyle(ButtonStyle.Link)
-  );
+  // Add interactive buttons
+  embed.addButton({ label: "Invite Bot", emoji: "🔗", url: client.getInvite(), style: "Link" });
 
   if (SUPPORT_SERVER) {
-    row1Components.push(
-      new ButtonBuilder()
-        .setLabel("Support Server")
-        .setEmoji(ModernEmbed.getEmoji("support"))
-        .setURL(SUPPORT_SERVER)
-        .setStyle(ButtonStyle.Link)
-    );
+    embed.addButton({ label: "Support Server", emoji: "💬", url: SUPPORT_SERVER, style: "Link" });
   }
 
   if (DASHBOARD.enabled) {
-    row1Components.push(
-      new ButtonBuilder()
-        .setLabel("Dashboard")
-        .setEmoji(ModernEmbed.getEmoji("website"))
-        .setURL(DASHBOARD.baseURL)
-        .setStyle(ButtonStyle.Link)
-    );
+    embed.addButton({ label: "Dashboard", emoji: "🌐", url: DASHBOARD.baseURL, style: "Link" });
   }
 
-  row2Components.push(
-    new ButtonBuilder()
-      .setLabel("Vote for Bot")
-      .setEmoji(ModernEmbed.getEmoji("premium"))
-      .setURL("https://top.gg/")
-      .setStyle(ButtonStyle.Link),
-    new ButtonBuilder()
-      .setLabel("Documentation")
-      .setEmoji(ModernEmbed.getEmoji("docs"))
-      .setURL("https://github.com")
-      .setStyle(ButtonStyle.Link)
-  );
+  embed.addButton({ label: "Vote", emoji: "⭐", url: "https://top.gg/", style: "Link" });
+  embed.addButton({ label: "Docs", emoji: "📚", url: "https://github.com", style: "Link" });
 
-  let components = [];
-  
-  if (row1Components.length > 0) {
-    components.push(new ActionRowBuilder().addComponents(row1Components));
-  }
-  if (row2Components.length > 0) {
-    components.push(new ActionRowBuilder().addComponents(row2Components));
-  }
-
-  return { embeds: [embed], components };
+  return embed.toMessage();
 }
