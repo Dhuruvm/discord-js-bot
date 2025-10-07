@@ -1,105 +1,136 @@
 
-const { EmbedBuilder, ApplicationCommandOptionType, PermissionFlagsBits } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
-const EMOJIS = require("@helpers/EmojiConstants");
+const { ApplicationCommandOptionType } = require("discord.js");
 
-// Store jailed users
-const jailedUsers = new Map();
+// Map to store jailed bot instances per guild
+const jailedBots = new Map();
+
+/**
+ * @param {import('@structures/BotClient')} client
+ * @param {import('discord.js').Guild} guild
+ */
+async function listJailedBots(client) {
+  if (jailedBots.size === 0) {
+    return "No bot is currently jailed in any voice channel.";
+  }
+
+  let response = "**Jailed Bot Instances:**\n";
+  for (const [guildId, jailInfo] of jailedBots.entries()) {
+    const guild = client.guilds.cache.get(guildId);
+    const channel = guild?.channels.cache.get(jailInfo.channelId);
+    response += `\n• Guild: ${guild?.name || "Unknown"} - Channel: ${channel?.name || "Unknown"}`;
+  }
+
+  return response;
+}
+
+/**
+ * @param {import('discord.js').Guild} guild
+ */
+async function jailBot(guild) {
+  const botMember = guild.members.cache.get(guild.client.user.id);
+  
+  if (!botMember.voice.channel) {
+    return "❌ Bot is not in any voice channel!";
+  }
+
+  const channelId = botMember.voice.channelId;
+  
+  jailedBots.set(guild.id, {
+    guildId: guild.id,
+    channelId: channelId,
+    channelName: botMember.voice.channel.name,
+  });
+
+  return `✅ Bot has been jailed in voice channel: **${botMember.voice.channel.name}**\nThe bot will not be able to leave or be moved from this channel.`;
+}
+
+/**
+ * @param {import('discord.js').Guild} guild
+ */
+async function unjailBot(guild) {
+  if (!jailedBots.has(guild.id)) {
+    return "❌ Bot is not jailed in this server!";
+  }
+
+  const jailInfo = jailedBots.get(guild.id);
+  jailedBots.delete(guild.id);
+
+  return `✅ Bot has been released from jail in **${jailInfo.channelName}**`;
+}
 
 /**
  * @type {import("@structures/Command")}
  */
 module.exports = {
   name: "jail",
-  description: "Lock a user in a voice channel (owner only)",
+  description: "Lock bot in its current voice channel (owner only)",
   category: "OWNER",
-  botPermissions: ["MoveMembers"],
+  botPermissions: ["Connect", "Speak"],
   command: {
     enabled: true,
-    usage: "<@user>",
+    usage: "<add|remove|list>",
     minArgsCount: 1,
   },
   slashCommand: {
     enabled: true,
     options: [
       {
-        name: "user",
-        description: "The user to jail in voice channel",
-        type: ApplicationCommandOptionType.User,
-        required: true,
+        name: "add",
+        description: "Lock the bot in its current voice channel",
+        type: ApplicationCommandOptionType.Subcommand,
+      },
+      {
+        name: "remove",
+        description: "Remove bot jail from this server",
+        type: ApplicationCommandOptionType.Subcommand,
+      },
+      {
+        name: "list",
+        description: "List all jailed bot instances",
+        type: ApplicationCommandOptionType.Subcommand,
       },
     ],
   },
 
   async messageRun(message, args) {
-    const target = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
-    
-    if (!target) {
-      return message.safeReply("Please provide a valid user to jail.");
+    const subCommand = args[0].toLowerCase();
+
+    if (subCommand === "list") {
+      const response = await listJailedBots(message.client);
+      return message.safeReply(response);
     }
 
-    if (!target.voice.channel) {
-      return message.safeReply(`${EMOJIS.WARN} | ${target.user.tag} is not in a voice channel!`);
+    if (subCommand === "add") {
+      const response = await jailBot(message.guild);
+      return message.safeReply(response);
     }
 
-    const response = await jailUser(message.guild, target, message.member);
-    return message.safeReply(response);
+    if (subCommand === "remove") {
+      const response = await unjailBot(message.guild);
+      return message.safeReply(response);
+    }
+
+    return message.safeReply("Invalid subcommand. Use: `add`, `remove`, or `list`");
   },
 
   async interactionRun(interaction) {
-    const target = interaction.options.getMember("user");
-    
-    if (!target) {
-      return interaction.followUp({
-        content: "User not found in this server.",
-        ephemeral: true,
-      });
+    const subCommand = interaction.options.getSubcommand();
+
+    if (subCommand === "list") {
+      const response = await listJailedBots(interaction.client);
+      return interaction.followUp(response);
     }
 
-    if (!target.voice.channel) {
-      return interaction.followUp({
-        content: `${EMOJIS.WARN} | ${target.user.tag} is not in a voice channel!`,
-        ephemeral: true,
-      });
+    if (subCommand === "add") {
+      const response = await jailBot(interaction.guild);
+      return interaction.followUp(response);
     }
 
-    const response = await jailUser(interaction.guild, target, interaction.member);
-    return interaction.followUp(response);
+    if (subCommand === "remove") {
+      const response = await unjailBot(interaction.guild);
+      return interaction.followUp(response);
+    }
   },
 };
 
-async function jailUser(guild, target, issuer) {
-  try {
-    const voiceChannel = target.voice.channel;
-    
-    if (jailedUsers.has(target.id)) {
-      return `${EMOJIS.WARN} | ${target.user.tag} is already jailed!`;
-    }
-
-    // Store jail information
-    jailedUsers.set(target.id, {
-      channelId: voiceChannel.id,
-      guildId: guild.id,
-      jailedAt: Date.now(),
-      jailedBy: issuer.id,
-    });
-
-    const embed = new EmbedBuilder()
-      .setColor(EMBED_COLORS.ERROR)
-      .setDescription(
-        `${EMOJIS.SUCCESS} | **User Jailed in Voice Channel**\n\n` +
-        `**User:** ${target.user.tag}\n` +
-        `**Channel:** ${voiceChannel.name}\n` +
-        `**Jailed by:** ${issuer.user.tag}\n\n` +
-        `This user will be moved back if they try to leave or switch channels.`
-      )
-      .setTimestamp();
-
-    return { embeds: [embed] };
-  } catch (error) {
-    return `${EMOJIS.ERROR} | An error occurred while jailing the user.`;
-  }
-}
-
-// Export for use in voice state handler
-module.exports.jailedUsers = jailedUsers;
+module.exports.jailedBots = jailedBots;
