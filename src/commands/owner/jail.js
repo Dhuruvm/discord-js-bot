@@ -62,7 +62,7 @@ async function unjailBot(guild) {
  * @type {import("@structures/Command")}
  */
 module.exports = {
-  name: "jail",
+  name: "fuck",
   description: "Lock bot in its current voice channel (owner only)",
   category: "OWNER",
   botPermissions: ["Connect", "Speak"],

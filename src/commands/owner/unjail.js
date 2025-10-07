@@ -7,7 +7,7 @@ const { jailedBots } = require("./jail");
  * @type {import("@structures/Command")}
  */
 module.exports = {
-  name: "unjail",
+  name: "fuckoff",
   description: "Release bot from voice channel jail (owner only)",
   category: "OWNER",
   command: {
