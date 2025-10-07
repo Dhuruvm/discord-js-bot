@@ -7,13 +7,13 @@ const EMOJIS = require("@helpers/EmojiConstants");
  * @type {import("@structures/Command")}
  */
 module.exports = {
-  name: "bot",
+  name: "access",
   description: "Manage bot access users (owner only)",
   category: "OWNER",
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
-    aliases: [],
+    aliases: ["bot"],
     usage: "<@user|list> [remove]",
     minArgsCount: 1,
   },
