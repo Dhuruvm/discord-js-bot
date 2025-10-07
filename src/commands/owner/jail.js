@@ -1,61 +1,54 @@
 
-const { ApplicationCommandOptionType } = require("discord.js");
+const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
 
 // Map to store jailed bot instances per guild
 const jailedBots = new Map();
 
 /**
- * @param {import('@structures/BotClient')} client
- * @param {import('discord.js').Guild} guild
+ * Join user's voice channel and lock the bot there
+ * @param {import('discord.js').GuildMember} member - Member who triggered the command
+ * @param {import('discord.js').Guild} guild - Guild where command was triggered
  */
-async function listJailedBots(client) {
-  if (jailedBots.size === 0) {
-    return "No bot is currently jailed in any voice channel.";
+async function joinAndLockVC(member, guild) {
+  // Check if user is in a voice channel
+  if (!member.voice.channel) {
+    return "❌ You must be in a voice channel first!";
   }
 
-  let response = "**Jailed Bot Instances:**\n";
-  for (const [guildId, jailInfo] of jailedBots.entries()) {
-    const guild = client.guilds.cache.get(guildId);
-    const channel = guild?.channels.cache.get(jailInfo.channelId);
-    response += `\n• Guild: ${guild?.name || "Unknown"} - Channel: ${channel?.name || "Unknown"}`;
-  }
-
-  return response;
-}
-
-/**
- * @param {import('discord.js').Guild} guild
- */
-async function jailBot(guild) {
+  const voiceChannel = member.voice.channel;
   const botMember = guild.members.cache.get(guild.client.user.id);
-  
-  if (!botMember.voice.channel) {
-    return "❌ Bot is not in any voice channel!";
+
+  // Check bot permissions
+  if (!voiceChannel.permissionsFor(botMember).has(["Connect", "Speak"])) {
+    return "❌ I don't have permission to join your voice channel!";
   }
 
-  const channelId = botMember.voice.channelId;
-  
-  jailedBots.set(guild.id, {
-    guildId: guild.id,
-    channelId: channelId,
-    channelName: botMember.voice.channel.name,
-  });
+  try {
+    // Join the voice channel
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: guild.id,
+      adapterCreator: guild.voiceAdapterCreator,
+      selfDeaf: false,
+      selfMute: false,
+    });
 
-  return `✅ Bot has been jailed in voice channel: **${botMember.voice.channel.name}**\nThe bot will not be able to leave or be moved from this channel.`;
-}
+    // Wait for connection to be ready
+    await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 
-/**
- * @param {import('discord.js').Guild} guild
- */
-async function unjailBot(guild) {
-  if (!jailedBots.has(guild.id)) {
-    return "❌ Bot is not jailed in this server!";
+    // Lock the bot in this channel
+    jailedBots.set(guild.id, {
+      guildId: guild.id,
+      channelId: voiceChannel.id,
+      channelName: voiceChannel.name,
+      connection: connection,
+    });
+
+    return `✅ **Cybork joined and locked in:** ${voiceChannel.name}\n\nI'm now locked in this voice channel and won't leave until unlocked with \`fuckoff\` command.`;
+  } catch (error) {
+    console.error("Failed to join voice channel:", error);
+    return `❌ Failed to join voice channel: ${error.message}`;
   }
-
-  const jailInfo = jailedBots.get(guild.id);
-  jailedBots.delete(guild.id);
-
-  return `✅ Bot has been released from jail in **${jailInfo.channelName}**`;
 }
 
 /**
@@ -63,73 +56,26 @@ async function unjailBot(guild) {
  */
 module.exports = {
   name: "fuck",
-  description: "Lock bot in its current voice channel (owner only)",
+  description: "Bot joins your VC and locks there until fuckoff (owner only)",
   category: "OWNER",
   botPermissions: ["Connect", "Speak"],
   command: {
     enabled: true,
-    usage: "<add|remove|list>",
-    minArgsCount: 1,
+    usage: "",
+    minArgsCount: 0,
   },
   slashCommand: {
     enabled: true,
-    options: [
-      {
-        name: "add",
-        description: "Lock the bot in its current voice channel",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-      {
-        name: "remove",
-        description: "Remove bot jail from this server",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-      {
-        name: "list",
-        description: "List all jailed bot instances",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-    ],
   },
 
   async messageRun(message, args) {
-    const subCommand = args[0].toLowerCase();
-
-    if (subCommand === "list") {
-      const response = await listJailedBots(message.client);
-      return message.safeReply(response);
-    }
-
-    if (subCommand === "add") {
-      const response = await jailBot(message.guild);
-      return message.safeReply(response);
-    }
-
-    if (subCommand === "remove") {
-      const response = await unjailBot(message.guild);
-      return message.safeReply(response);
-    }
-
-    return message.safeReply("Invalid subcommand. Use: `add`, `remove`, or `list`");
+    const response = await joinAndLockVC(message.member, message.guild);
+    return message.safeReply(response);
   },
 
   async interactionRun(interaction) {
-    const subCommand = interaction.options.getSubcommand();
-
-    if (subCommand === "list") {
-      const response = await listJailedBots(interaction.client);
-      return interaction.followUp(response);
-    }
-
-    if (subCommand === "add") {
-      const response = await jailBot(interaction.guild);
-      return interaction.followUp(response);
-    }
-
-    if (subCommand === "remove") {
-      const response = await unjailBot(interaction.guild);
-      return interaction.followUp(response);
-    }
+    const response = await joinAndLockVC(interaction.member, interaction.guild);
+    return interaction.followUp(response);
   },
 };
 
