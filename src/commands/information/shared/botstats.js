@@ -28,8 +28,10 @@ module.exports = async (client) => {
   // Get developers from database
   let developers = [];
   try {
-    const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
-    developers = settings?.developers || [];
+    if (client.database && client.database.schemas && client.database.schemas.Guild) {
+      const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+      developers = settings?.developers || [];
+    }
   } catch (error) {
     client.logger.error("Error fetching developers:", error);
   }
