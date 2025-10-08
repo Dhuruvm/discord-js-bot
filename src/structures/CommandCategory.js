@@ -33,6 +33,11 @@ module.exports = {
     image: "https://icons.iconarchive.com/icons/flameia/aqua-smiles/128/make-fun-icon.png",
     emoji: "😂",
   },
+  GATEWAY: {
+    name: "Gateway",
+    image: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+    emoji: "🚪",
+  },
   GIVEAWAY: {
     name: "Giveaway",
     enabled: config.GIVEAWAYS.ENABLED,

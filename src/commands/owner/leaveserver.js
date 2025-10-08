@@ -8,7 +8,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
-    aliases: ["leaveguild", "leave"],
+    aliases: ["leaveguild"],
     minArgsCount: 1,
     usage: "<serverId>",
   },

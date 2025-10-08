@@ -13,7 +13,7 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,
-    aliases: ["np", "toggleprefix"],
+    aliases: ["toggleprefix"],
     usage: "<add|remove|list> [@user]",
     minArgsCount: 1,
   },
