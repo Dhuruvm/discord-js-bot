@@ -1,12 +1,12 @@
 const {
-  EmbedBuilder,
   ButtonBuilder,
   ActionRowBuilder,
   ApplicationCommandOptionType,
   ButtonStyle,
 } = require("discord.js");
 const { timeformat } = require("@helpers/Utils");
-const { EMBED_COLORS, SUPPORT_SERVER, DASHBOARD } = require("@root/config.js");
+const { SUPPORT_SERVER, DASHBOARD } = require("@root/config.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const botstats = require("../shared/botstats");
 
 /**
@@ -70,11 +70,12 @@ module.exports = {
 };
 
 function botInvite(client) {
-  const embed = new EmbedBuilder()
-    .setAuthor({ name: "Invite" })
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setThumbnail(client.user.displayAvatarURL())
-    .setDescription("Hey there! Thanks for considering to invite me\nUse the button below to navigate where you want");
+  const payload = ContainerBuilder.quickMessage(
+    `🔗 Invite ${client.user.username}`,
+    "Hey there! Thanks for considering to invite me. Use the buttons below to navigate where you want.",
+    [],
+    0x5865F2
+  );
 
   // Buttons
   let components = [];
@@ -90,6 +91,10 @@ function botInvite(client) {
     );
   }
 
-  let buttonsRow = new ActionRowBuilder().addComponents(components);
-  return { embeds: [embed], components: [buttonsRow] };
+  if (components.length > 0) {
+    let buttonsRow = new ActionRowBuilder().addComponents(components);
+    payload.components.push(buttonsRow.toJSON());
+  }
+
+  return payload;
 }

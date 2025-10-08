@@ -1,5 +1,6 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const ModernEmbed = require("@helpers/ModernEmbed");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const emojis = require("@root/emojis.json");
 const { SUPPORT_SERVER } = require("@root/config");
 
 /**
@@ -32,51 +33,59 @@ module.exports = {
 };
 
 function getPremiumMessage() {
-  const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
-    .setAuthor({ 
-      name: "Premium Features",
-      iconURL: "https://cdn.discordapp.com/emojis/1234567890.png"
-    })
-    .setDescription(
-      `### Premium Benefits\n` +
-      `> • **Priority Support** - Get help faster\n` +
-      `> • **Custom Commands** - Create your own commands\n` +
-      `> • **Advanced Moderation** - Extended auto-mod features\n` +
-      `> • **Custom Embeds** - Personalized embed colors\n` +
-      `> • **No Cooldowns** - Skip command cooldowns\n` +
-      `> • **Exclusive Modules** - Access to premium-only features\n` +
-      `> • **Badge Recognition** - Premium badge on profile`
-    )
-    .addFields(
-      {
-        name: "### Pricing",
-        value: 
-          `> **Monthly:** $4.99/month\n` +
-          `> **Yearly:** $49.99/year (Save 17%)\n` +
-          `> **Lifetime:** $99.99 (One-time payment)`,
-        inline: false,
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" });
+  const fields = [
+    {
+      name: "Premium Benefits",
+      value: 
+        `> ${emojis.check} **Priority Support** - Get help faster\n` +
+        `> ${emojis.check} **Custom Commands** - Create your own commands\n` +
+        `> ${emojis.check} **Advanced Moderation** - Extended auto-mod features\n` +
+        `> ${emojis.check} **Custom Embeds** - Personalized embed colors\n` +
+        `> ${emojis.check} **No Cooldowns** - Skip command cooldowns\n` +
+        `> ${emojis.check} **Exclusive Modules** - Access to premium-only features\n` +
+        `> ${emojis.check} **Badge Recognition** - Premium badge on profile`,
+      inline: false
+    },
+    {
+      name: "Pricing",
+      value: 
+        `> **Monthly:** $4.99/month\n` +
+        `> **Yearly:** $49.99/year (Save 17%)\n` +
+        `> **Lifetime:** $99.99 (One-time payment)`,
+      inline: false
+    }
+  ];
 
-  const row = new ActionRowBuilder().addComponents(
+  const payload = ContainerBuilder.quickMessage(
+    `${emojis.premium} Premium Features`,
+    "*Unlock exclusive features and benefits*",
+    fields,
+    0xFFD700
+  );
+
+  const buttons = [];
+  buttons.push(
     new ButtonBuilder()
       .setLabel("Get Premium")
-      .setEmoji(ModernEmbed.getEmoji("premium"))
+      .setEmoji(emojis.premium)
       .setURL("https://discord.gg/premium")
       .setStyle(ButtonStyle.Link)
   );
 
   if (SUPPORT_SERVER) {
-    row.addComponents(
+    buttons.push(
       new ButtonBuilder()
         .setLabel("Contact Support")
-        .setEmoji(ModernEmbed.getEmoji("support"))
+        .setEmoji(emojis.support)
         .setURL(SUPPORT_SERVER)
         .setStyle(ButtonStyle.Link)
     );
   }
 
-  return { embeds: [embed], components: [row] };
+  if (buttons.length > 0) {
+    const row = new ActionRowBuilder().addComponents(...buttons);
+    payload.components.push(row.toJSON());
+  }
+
+  return payload;
 }
