@@ -1,6 +1,26 @@
 require("dotenv").config();
 require("module-alias/register");
 
+// Load configuration from api.json if .env values are not set
+const fs = require("fs");
+const path = require("path");
+
+const apiJsonPath = path.join(__dirname, "api.json");
+if (fs.existsSync(apiJsonPath)) {
+  try {
+    const apiConfig = JSON.parse(fs.readFileSync(apiJsonPath, "utf8"));
+    
+    // Only set values from api.json if they're not already in process.env
+    Object.keys(apiConfig).forEach((key) => {
+      if (!process.env[key]) {
+        process.env[key] = apiConfig[key];
+      }
+    });
+  } catch (error) {
+    console.error("Error loading api.json:", error.message);
+  }
+}
+
 // register extenders
 require("@helpers/extenders/Message");
 require("@helpers/extenders/Guild");
