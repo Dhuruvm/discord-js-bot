@@ -67,7 +67,6 @@ module.exports = {
         password: "yHQz6bVR8o!LijxJjQmvxuDd!@4hyKcKLP!hoTC8zYD2R3bZ",
         id: "taseki-us-east-1",
         secure: true,
-        ws: "/v4/websocket",
       },
     ],
   },
