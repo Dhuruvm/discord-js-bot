@@ -1,8 +1,7 @@
 
 {
-  "SESSION_SECRET": "your-session-secret-here",
-  "BOT_TOKEN": "your-bot-token-here",
-  "MONGO_CONNECTION": "your-mongodb-connection-string-here",
+  "BOT_TOKEN": "",
+  "MONGO_CONNECTION": "",
   "ERROR_LOGS": "",
   "JOIN_LEAVE_LOGS": "",
   "BOT_SECRET": "",

@@ -49,7 +49,10 @@ npm install
 ```
 
 - Wait for all the dependencies to be installed
-- Rename `.env.example` to `.env` and fill the values
+- **Configure the bot using one of these methods:**
+  - **Method 1 (Recommended):** Rename `.env.example` to `.env` and fill in your values
+  - **Method 2:** Copy `api.json.example` to `api.json` and fill in your values
+  - **Both:** You can use both files together - `.env` values will override `api.json` values
 - Optionally edit `config.js`
 - Type `npm run start` to start the bot
 
