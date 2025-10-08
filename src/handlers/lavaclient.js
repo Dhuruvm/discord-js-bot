@@ -26,7 +26,7 @@ module.exports = (client) => {
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
 
   lavaclient.on("nodeConnect", (node, event) => {
-    client.logger.log(`Node "${node.id}" connected`);
+    client.logger.success(`✅ Lavalink installed and connected successfully - Node "${node.id}" is ready`);
   });
 
   lavaclient.on("nodeDisconnect", (node, event) => {
