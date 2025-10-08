@@ -1,5 +1,6 @@
 const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
-const ModernEmbed = require("@helpers/ModernEmbed");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 /**
  * @type {import("@structures/Command")}
@@ -31,22 +32,47 @@ module.exports = {
 };
 
 function getInviteMessage(client) {
-  const embed = new ModernEmbed()
-    .setColor(0xFFFFFF)
-    .setHeader(`🔗 Invite ${client.user.username}`, "Click the buttons below to invite me to your server or join our community!")
-    .setThumbnail(client.user.displayAvatarURL())
-    .setFooter("Powered by Blackbit Studio")
-    .setTimestamp();
+  const payload = ContainerBuilder.quickMessage(
+    `🔗 Invite ${client.user.username}`,
+    "Click the buttons below to invite me to your server or join our community!",
+    [],
+    0x5865F2
+  );
 
-  embed.addButton({ label: "Invite Bot", emoji: "🔗", url: client.getInvite(), style: "Link" });
+  const buttons = [];
+  
+  buttons.push(
+    new ButtonBuilder()
+      .setLabel("Invite Bot")
+      .setEmoji("🔗")
+      .setURL(client.getInvite())
+      .setStyle(ButtonStyle.Link)
+  );
 
   if (SUPPORT_SERVER) {
-    embed.addButton({ label: "Support Server", emoji: "💬", url: SUPPORT_SERVER, style: "Link" });
+    buttons.push(
+      new ButtonBuilder()
+        .setLabel("Support Server")
+        .setEmoji("💬")
+        .setURL(SUPPORT_SERVER)
+        .setStyle(ButtonStyle.Link)
+    );
   }
 
   if (DASHBOARD.enabled) {
-    embed.addButton({ label: "Dashboard", emoji: "🌐", url: DASHBOARD.baseURL, style: "Link" });
+    buttons.push(
+      new ButtonBuilder()
+        .setLabel("Dashboard")
+        .setEmoji("🌐")
+        .setURL(DASHBOARD.baseURL)
+        .setStyle(ButtonStyle.Link)
+    );
   }
 
-  return embed.toMessage();
+  if (buttons.length > 0) {
+    const row = new ActionRowBuilder().addComponents(...buttons);
+    payload.components.push(row.toJSON());
+  }
+
+  return payload;
 }

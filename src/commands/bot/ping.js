@@ -1,4 +1,5 @@
-const ModernEmbed = require("@helpers/ModernEmbed");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 /**
  * @type {import("@structures/Command")}
@@ -21,14 +22,15 @@ module.exports = {
     const ping = Math.floor(message.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
-    const response = new ModernEmbed()
-      .setColor(0xFFFFFF)
-      .setHeader("🏓 Pong!", "Latency Information")
-      .addField("Bot Latency", `\`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\``, true)
-      .addField("API Latency", `\`${Math.round(message.client.ws.ping)}ms\` - ${status}`, true)
-      .setFooter("Powered by Blackbit Studio")
-      .setTimestamp()
-      .toMessage();
+    const response = ContainerBuilder.quickMessage(
+      "🏓 Pong!",
+      `Latency measurements for ${message.client.user.username}`,
+      [
+        { name: "Bot Latency", value: `\`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\``, inline: true },
+        { name: "API Latency", value: `\`${Math.round(message.client.ws.ping)}ms\` - ${status}`, inline: true }
+      ],
+      0x5865F2
+    );
 
     await message.safeReply(response);
   },
@@ -37,14 +39,15 @@ module.exports = {
     const ping = Math.floor(interaction.client.ws.ping);
     const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
 
-    const response = new ModernEmbed()
-      .setColor(0xFFFFFF)
-      .setHeader("🏓 Pong!", "Latency Information")
-      .addField("Bot Latency", `\`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\``, true)
-      .addField("API Latency", `\`${Math.round(interaction.client.ws.ping)}ms\` - ${status}`, true)
-      .setFooter("Powered by Blackbit Studio")
-      .setTimestamp()
-      .toMessage();
+    const response = ContainerBuilder.quickMessage(
+      "🏓 Pong!",
+      `Latency measurements for ${interaction.client.user.username}`,
+      [
+        { name: "Bot Latency", value: `\`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\``, inline: true },
+        { name: "API Latency", value: `\`${Math.round(interaction.client.ws.ping)}ms\` - ${status}`, inline: true }
+      ],
+      0x5865F2
+    );
 
     await interaction.followUp(response);
   },

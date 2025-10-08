@@ -1,5 +1,5 @@
-const { EMBED_COLORS } = require("@root/config");
-const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const { ApplicationCommandOptionType } = require("discord.js");
 
 /**
  * @type {import("@structures/Command")}
@@ -47,24 +47,31 @@ function getQueue({ client, guild }, pgNo) {
   if (!player) return "🚫 There is no music playing in this guild.";
 
   const queue = player.queue;
-  const embed = new EmbedBuilder().setColor(EMBED_COLORS.BOT_EMBED).setAuthor({ name: `Queue for ${guild.name}` });
 
-  // change for the amount of tracks per page
   const multiple = 10;
   const page = pgNo || 1;
-
   const end = page * multiple;
   const start = end - multiple;
-
   const tracks = queue.tracks.slice(start, end);
-
-  if (queue.current) embed.addFields({ name: "Current", value: `[${queue.current.title}](${queue.current.uri})` });
-  if (!tracks.length) embed.setDescription(`No tracks in ${page > 1 ? `page ${page}` : "the queue"}.`);
-  else embed.setDescription(tracks.map((track, i) => `${start + ++i} - [${track.title}](${track.uri})`).join("\n"));
-
   const maxPages = Math.ceil(queue.tracks.length / multiple);
 
-  embed.setFooter({ text: `Page ${page > maxPages ? maxPages : page} of ${maxPages}` });
+  let description = "";
+  if (queue.current) {
+    description = `**Now Playing:** [${queue.current.title}](${queue.current.uri})\n\n`;
+  }
 
-  return { embeds: [embed] };
+  if (!tracks.length) {
+    description += `No tracks in ${page > 1 ? `page ${page}` : "the queue"}.`;
+  } else {
+    description += tracks.map((track, i) => `${start + ++i}. [${track.title}](${track.uri})`).join("\n");
+  }
+
+  description += `\n\n*Page ${page > maxPages ? maxPages : page} of ${maxPages}*`;
+
+  return ContainerBuilder.quickMessage(
+    `📜 Queue for ${guild.name}`,
+    description,
+    [],
+    0x5865F2
+  );
 }

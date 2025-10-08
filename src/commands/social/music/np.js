@@ -1,5 +1,4 @@
-const { EMBED_COLORS } = require("@root/config");
-const { EmbedBuilder } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const prettyMs = require("pretty-ms");
 const { splitBar } = require("string-progressbar");
 
@@ -39,33 +38,21 @@ function nowPlaying({ client, guildId }) {
 
   const track = player.queue.current;
   const end = track.length > 6.048e8 ? "🔴 LIVE" : new Date(track.length).toISOString().slice(11, 19);
+  
+  const progressBar = new Date(player.position).toISOString().slice(11, 19) +
+    " [" +
+    splitBar(track.length > 6.048e8 ? player.position : track.length, player.position, 15)[0] +
+    "] " +
+    end;
 
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setAuthor({ name: "Now playing" })
-    .setDescription(`[${track.title}](${track.uri})`)
-    .addFields(
-      {
-        name: "Song Duration",
-        value: "`" + prettyMs(track.length, { colonNotation: true }) + "`",
-        inline: true,
-      },
-      {
-        name: "Requested By",
-        value: track.requester || "Unknown",
-        inline: true,
-      },
-      {
-        name: "\u200b",
-        value:
-          new Date(player.position).toISOString().slice(11, 19) +
-          " [" +
-          splitBar(track.length > 6.048e8 ? player.position : track.length, player.position, 15)[0] +
-          "] " +
-          end,
-        inline: false,
-      }
-    );
-
-  return { embeds: [embed] };
+  return ContainerBuilder.quickMessage(
+    "🎵 Now Playing",
+    `[${track.title}](${track.uri})`,
+    [
+      { name: "Song Duration", value: "`" + prettyMs(track.length, { colonNotation: true }) + "`", inline: true },
+      { name: "Requested By", value: track.requester || "Unknown", inline: true },
+      { name: "Progress", value: progressBar, inline: false }
+    ],
+    0x5865F2
+  );
 }

@@ -71,16 +71,15 @@ Preferred communication style: Simple, everyday language.
 - **Emoji Configuration**: Centralized emoji management via `emojis.json` with runtime reload capability.
 
 ### UI/UX Decisions
-- **Modern Embed System**: All bot responses utilize clean, professional Discord embeds with EmbedBuilder for consistent UI across all commands.
-- **ModernEmbed Helper Class**: Simplifies creation of professional embeds with standardized designs (success, error, warning, info messages) using Discord.js EmbedBuilder.
-- **Simple Message Formats**: Text-only success/error messages with dark theme (#2B2D31) using format: `✅ | message` or `❌ | message`.
-- **Interactive Components**: Enhanced ModernEmbed system supports adding buttons, select menus, and action rows below embeds for modern, interactive user experiences following Discord's latest component specifications.
-- **ComponentBuilder Utility**: Pre-built component patterns for pagination, confirmation dialogs, navigation, links, filters, and settings provide consistent interactive UI across commands.
-- **Design Patterns**: Clean embeds without ASCII art decorations, using emoji headers, field-based layouts, color-coded responses (Green for success, Red for error, Yellow for warning, Blurple for info), and native Discord timestamps.
-- **Professional Component Usage**: Buttons and select menus are used strategically, not overused - typically 1-2 action rows per message with clear, concise labels following Discord's component design guidelines.
-- **No ASCII Decorations**: All decorative ASCII art (borders, boxes, separators like ╭╮╯╰) has been removed for a cleaner, modern appearance.
-- **Discord.js Version**: Updated to v14.22.1 for latest features and improvements.
-- **Profile Card Redesign**: `profile` command generates a premium-style Discord profile card image with dark theme, gradient banner, glowing avatar ring, status indicator, and activity display.
+- **Components V2 System**: Bot now uses Discord's latest Components V2 with Container, Text Display, and Separator components for modern, clean message layouts.
+- **ContainerBuilder Helper**: Custom helper class implementing Components V2 spec - creates containers with accent colors, text displays, separators, and action rows for consistent modern UI.
+- **Container Design**: Messages use Type 17 containers with customizable accent colors (left bar), Type 10 text displays for markdown content, Type 14 separators for visual spacing.
+- **Message Flags**: All container-based messages use flag `1 << 15` (IS_COMPONENTS_V2) to enable the new component system.
+- **Interactive Components**: Action rows with buttons/select menus positioned below containers for clean separation of content and actions.
+- **Design Patterns**: Clean containers without ASCII art, markdown headers (##), emoji integration, color-coded accent bars (Blue for info, Green for success, Red for error, Yellow for warning).
+- **ModernEmbed Fallback**: Legacy ModernEmbed system maintained for backwards compatibility with existing commands not yet migrated to Components V2.
+- **No ASCII Decorations**: All decorative ASCII art removed in favor of native Discord markdown and component layouts.
+- **Discord.js Version**: Updated to v14.22.1 for latest Components V2 support.
 - **Centralized Emoji System**: All bot emojis managed through `emojis.json` config file with owner commands to add/remove/list/reload emojis at runtime.
 
 ## External Dependencies
@@ -91,7 +90,7 @@ Preferred communication style: Simple, everyday language.
 - **Lavalink Nodes**: For music functionality.
 
 ### Optional Services
-- **Spotify API**: Client ID and secret for music integration.
+- **Spotify API**: Client ID and secret for music integration. User dismissed Replit integration; if needed in future, ask for credentials manually.
 - **Discord OAuth2**: Bot secret for dashboard authentication.
 - **Error Webhook**: Discord webhook URL for error logging.
 
