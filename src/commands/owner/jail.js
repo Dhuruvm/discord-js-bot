@@ -65,7 +65,7 @@ module.exports = {
     minArgsCount: 0,
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
   },
 
   async messageRun(message, args) {
