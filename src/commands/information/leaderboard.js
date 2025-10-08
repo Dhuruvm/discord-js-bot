@@ -13,7 +13,7 @@ const leaderboardTypes = ["xp", "invite", "rep"];
 module.exports = {
   name: "leaderboard",
   description: "display the XP, invite and rep leaderboard",
-  category: "INFORMATION",
+  category: "LEADERBOARD",
   botPermissions: ["EmbedLinks"],
   command: {
     enabled: true,

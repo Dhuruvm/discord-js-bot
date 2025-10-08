@@ -10,7 +10,7 @@ module.exports = {
   name: "stats",
   description: "displays members stats in this server",
   cooldown: 5,
-  category: "STATS",
+  category: "LEADERBOARD",
   command: {
     enabled: true,
     aliases: ["statistics", "serverstats"],

@@ -6,7 +6,7 @@ const { ApplicationCommandOptionType } = require("discord.js");
 module.exports = {
   name: "statstracking",
   description: "enable or disable tracking stats in the server",
-  category: "STATS",
+  category: "LEADERBOARD",
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,

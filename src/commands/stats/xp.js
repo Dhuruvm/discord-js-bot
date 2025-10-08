@@ -6,7 +6,7 @@ const { ApplicationCommandOptionType, ChannelType } = require("discord.js");
 module.exports = {
   name: "levelup",
   description: "configure the levelling system",
-  category: "STATS",
+  category: "LEADERBOARD",
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,

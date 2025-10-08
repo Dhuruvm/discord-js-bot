@@ -19,7 +19,7 @@ const EMOJIS = require("@helpers/EmojiConstants");
 module.exports = {
   name: "editprofile",
   description: "Customize your profile card with bio and banner",
-  category: "GRAPHICS",
+  category: "PROFILE",
   botPermissions: ["EmbedLinks"],
   cooldown: 5,
   command: {
