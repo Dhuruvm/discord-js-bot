@@ -41,7 +41,7 @@ module.exports = {
     let trigger = args[0];
 
     if (!trigger) {
-      const response = await getHelpMenu({ ...message }, data.prefix);
+      const response = await getHelpMenu(message, data.prefix);
       const sentMsg = await message.channel.send(response);
       return waiter(sentMsg, message.author.id, data.prefix);
     }
@@ -70,7 +70,7 @@ module.exports = {
     let cmdName = interaction.options.getString("command");
 
     if (!cmdName) {
-      const response = await getHelpMenu({ ...interaction });
+      const response = await getHelpMenu(interaction);
       const sentMsg = await interaction.followUp(response);
       return waiter(sentMsg, interaction.user.id);
     }
@@ -85,7 +85,8 @@ module.exports = {
   },
 };
 
-async function getHelpMenu({ client, guild, author, user }, prefix) {
+async function getHelpMenu(context, prefix) {
+  const { client, guild, author, user } = context;
   const displayUser = author || user;
   const isOwner = OWNER_IDS.includes(displayUser?.id);
 
@@ -174,7 +175,7 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
         type: 2,
         style: ButtonStyle.Link,
         label: "Invite Bot",
-        url: client.getInvite()
+        url: client?.getInvite ? client.getInvite() : `https://discord.com/oauth2/authorize?client_id=${client?.user?.id}&permissions=8&scope=bot%20applications.commands`
       },
       SUPPORT_SERVER ? {
         type: 2,
