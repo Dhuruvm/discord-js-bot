@@ -5,6 +5,17 @@ let messageIndex = 0;
 /**
  * @param {import('@src/structures').BotClient} client
  */
+module.exports = (client) => {
+  client.user.setPresence({
+    activities: [
+      {
+        name: "unstoppable",
+        type: ActivityType.Listening,
+      },
+    ],
+    status: "online",
+  });
+}
 function updatePresence(client) {
   let messages = client.config.PRESENCE.MESSAGE;
   let message = Array.isArray(messages) ? messages[messageIndex] : messages;
