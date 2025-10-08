@@ -62,10 +62,10 @@ module.exports = {
     // Refer to https://github.com/freyacodes/Lavalink to host your own lavalink server
     LAVALINK_NODES: [
       {
-        host: "ll-us01.2d.gay",
+        host: "lava-all.ajieblogs.eu.org",
         port: 443,
-        password: "yHQz6bVR8o!LijxJjQmvxuDd!@4hyKcKLP!hoTC8zYD2R3bZ",
-        id: "taseki-us-east-1",
+        password: "https://dsc.gg/ajidevserver",
+        id: "ajiedev-lavalink",
         secure: true,
       },
     ],

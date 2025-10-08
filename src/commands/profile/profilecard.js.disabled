@@ -13,13 +13,13 @@ module.exports = {
   botPermissions: ["AttachFiles"],
   cooldown: 3,
   command: {
-    enabled: true,
+    enabled: false,
     aliases: ["pf", "card"],
     usage: "[user]",
     minArgsCount: 0,
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     options: [
       {
         name: "user",
