@@ -89,25 +89,39 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const displayUser = author || user;
   const isOwner = OWNER_IDS.includes(displayUser?.id);
 
+  // Define category order: Owner first (if owner), then specific order
+  const categoryOrder = [
+    'OWNER',
+    'ANTINUKE',
+    'AUTOMOD',
+    'MUSIC',
+    'MODERATION',
+    'INFORMATION',
+    'GIVEAWAY',
+    'TICKET',
+    'UTILITY',
+    'GATEWAY',
+    'PROFILE',
+    'LEADERBOARD',
+    'SUGGESTION',
+    'BOT'
+  ];
+
   const categoryMapping = {
-    'ADMIN': { name: 'Admin' },
+    'OWNER': { name: 'Owner' },
+    'ANTINUKE': { name: 'Antinuke' },
     'AUTOMOD': { name: 'Auto Moderation' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
+    'INFORMATION': { name: 'Information' },
     'GIVEAWAY': { name: 'Giveaway' },
     'TICKET': { name: 'Ticket' },
     'UTILITY': { name: 'Utility' },
-    'SOCIAL': { name: 'Social' },
-    'STATS': { name: 'Statistics' },
-    'ECONOMY': { name: 'Economy' },
-    'SUGGESTION': { name: 'Suggestion' },
-    'IMAGE': { name: 'Image' },
-    'INVITE': { name: 'Invite' },
-    'FUN': { name: 'Fun' },
-    'GRAPHICS': { name: 'Graphics' },
-    'ANIME': { name: 'Anime' },
+    'GATEWAY': { name: 'Gateway' },
+    'PROFILE': { name: 'Profile' },
+    'LEADERBOARD': { name: 'Leaderboard' },
+    'SUGGESTION': { name: 'Suggestions' },
     'BOT': { name: 'Bot' },
-    'INFORMATION': { name: 'Information' },
   };
 
   const prefixText = prefix || '!';
@@ -124,22 +138,32 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     `> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`
   );
 
+  // Build menu options in specific order, filtering based on ownership
+  const menuOptions = categoryOrder
+    .filter(key => {
+      const category = CommandCategory[key];
+      if (!category) return false;
+      if (category.enabled === false) return false;
+      if (key === 'OWNER' && !isOwner) return false;
+      return true;
+    })
+    .map(key => {
+      const category = CommandCategory[key];
+      const mapping = categoryMapping[key] || { name: category.name };
+      return {
+        label: mapping.name,
+        value: key,
+        description: `View commands in ${mapping.name} category`,
+      };
+    });
+
   const menuRow = ActionRowBuilder.from({
     type: 1,
     components: [{
       type: 3,
       custom_id: "help-menu",
       placeholder: `${client?.user?.username || 'Bot'} Command Modules`,
-      options: Object.entries(CommandCategory)
-        .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
-        .map(([k, v]) => {
-          const mapping = categoryMapping[k] || { name: v.name };
-          return {
-            label: mapping.name,
-            value: k,
-            description: `View commands in ${mapping.name} category`,
-          };
-        })
+      options: menuOptions
     }]
   });
 
@@ -243,24 +267,20 @@ function getCategoryEmbed(client, category, prefix) {
   const commands = client.commands.filter((cmd) => cmd.category === category);
   
   const categoryMapping = {
-    'ADMIN': { name: 'Admin' },
+    'OWNER': { name: 'Owner' },
+    'ANTINUKE': { name: 'Antinuke' },
     'AUTOMOD': { name: 'Auto Moderation' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
+    'INFORMATION': { name: 'Information' },
     'GIVEAWAY': { name: 'Giveaway' },
     'TICKET': { name: 'Ticket' },
     'UTILITY': { name: 'Utility' },
-    'SOCIAL': { name: 'Social' },
-    'STATS': { name: 'Statistics' },
-    'ECONOMY': { name: 'Economy' },
-    'SUGGESTION': { name: 'Suggestion' },
-    'IMAGE': { name: 'Image' },
-    'INVITE': { name: 'Invite' },
-    'FUN': { name: 'Fun' },
-    'GRAPHICS': { name: 'Graphics' },
-    'ANIME': { name: 'Anime' },
+    'GATEWAY': { name: 'Gateway' },
+    'PROFILE': { name: 'Profile' },
+    'LEADERBOARD': { name: 'Leaderboard' },
+    'SUGGESTION': { name: 'Suggestions' },
     'BOT': { name: 'Bot' },
-    'INFORMATION': { name: 'Information' },
   };
 
   const categoryInfo = CommandCategory[category];
