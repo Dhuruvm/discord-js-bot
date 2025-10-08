@@ -31,44 +31,55 @@ module.exports = async (client, message) => {
   if (PREFIX_COMMANDS.ENABLED) {
     // check for bot mentions
     if (message.content.includes(`${client.user.id}`)) {
-      const { EmbedBuilder } = require("discord.js");
+      const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
       const { SUPPORT_SERVER } = require("@root/config");
+      const ContainerBuilder = require("@helpers/ContainerBuilder");
 
-      const introEmbed = new EmbedBuilder()
-        .setColor(0xFFFFFF)
-        .setAuthor({
-          name: `${client.user.username} - Your Server Assistant`,
-          iconURL: client.user.displayAvatarURL()
+      const mainText = ContainerBuilder.createTextDisplay(
+        `## 👋 Hello! I'm ${client.user.username}\n\n` +
+        `I'm a powerful multipurpose Discord bot designed to help manage and enhance your server with a wide range of features!\n\n` +
+        `### 🎯 Key Features:\n` +
+        `> • **Moderation** - Keep your server safe and organized\n` +
+        `> • **Music** - High-quality music playback\n` +
+        `> • **Economy** - Fun currency and ranking system\n` +
+        `> • **Leveling** - Track user activity and engagement\n` +
+        `> • **Giveaways** - Host exciting giveaways\n` +
+        `> • **Tickets** - Professional support system\n` +
+        `> • **And much more!**\n\n` +
+        `### 📝 Getting Started\n` +
+        `> **Prefix:** \`${settings.prefix}\`\n` +
+        `> **Help:** \`${settings.prefix}help\``
+      );
+
+      const buttons = [];
+      buttons.push(
+        new ButtonBuilder()
+          .setLabel("Invite Me")
+          .setEmoji("🔗")
+          .setURL(client.getInvite())
+          .setStyle(ButtonStyle.Link)
+      );
+
+      if (SUPPORT_SERVER) {
+        buttons.push(
+          new ButtonBuilder()
+            .setLabel("Support Server")
+            .setEmoji("💬")
+            .setURL(SUPPORT_SERVER)
+            .setStyle(ButtonStyle.Link)
+        );
+      }
+
+      const buttonRow = new ActionRowBuilder().addComponents(buttons);
+
+      const payload = new ContainerBuilder()
+        .addContainer({ 
+          accentColor: 0xFFFFFF, 
+          components: [mainText, buttonRow]
         })
-        .setThumbnail(message.guild.iconURL() || client.user.displayAvatarURL({ size: 256 }))
-        .setDescription(
-          `### 👋 Hello! I'm ${client.user.username}\n\n` +
-          `I'm a powerful multipurpose Discord bot designed to help manage and enhance your server with a wide range of features!\n\n` +
-          `### 🎯 Key Features:\n` +
-          `> • **Moderation** - Keep your server safe and organized\n` +
-          `> • **Music** - High-quality music playback\n` +
-          `> • **Economy** - Fun currency and ranking system\n` +
-          `> • **Leveling** - Track user activity and engagement\n` +
-          `> • **Giveaways** - Host exciting giveaways\n` +
-          `> • **Tickets** - Professional support system\n` +
-          `> • **And much more!**`
-        )
-        .addFields(
-          {
-            name: "### 📝 Getting Started",
-            value: `> **Prefix:** \`${settings.prefix}\`\n> **Help:** \`${settings.prefix}help\``,
-            inline: true
-          },
-          {
-            name: "### 🔗 Quick Links",
-            value: `> [Invite Me](${client.getInvite()})${SUPPORT_SERVER ? `\n> [Support Server](${SUPPORT_SERVER})` : ''}`,
-            inline: true
-          }
-        )
-        .setFooter({ text: "Powered by Blackbit Studio" })
-        .setTimestamp();
+        .build();
 
-      return message.channel.send({ embeds: [introEmbed] });
+      return message.channel.send(payload);
     }
 
     // Check for no-prefix commands (for owners and whitelisted users only)

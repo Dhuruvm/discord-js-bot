@@ -111,54 +111,46 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   };
 
   const prefixText = prefix || '!';
+  const ContainerBuilder = require("@helpers/ContainerBuilder");
   
-  const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
-    .setAuthor({ 
-      name: `${client?.user?.username || 'Bot'} Command Menu`,
-      iconURL: client?.user?.displayAvatarURL()
-    })
-    .setDescription(
-      `### Command Information\n` +
-      `**an asterisk(*) means the command has subcommands**\n\n` +
-      `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
-      `*Or view the commands on our* [**Docs**](${SUPPORT_SERVER})`
-    )
-    .addFields(
-      { 
-        name: '### Need Extra Help?', 
-        value: `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`, 
-        inline: false 
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" });
-
-  if (guild?.iconURL()) {
-    embed.setThumbnail(guild.iconURL());
-  }
-
-  const menuRow = new ActionRowBuilder().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId("help-menu")
-      .setPlaceholder(`${client?.user?.username || 'Bot'} Command Modules`)
-      .addOptions(
-        Object.entries(CommandCategory)
-          .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
-          .map(([k, v]) => {
-            const mapping = categoryMapping[k] || { name: v.name };
-            return {
-              label: mapping.name,
-              value: k,
-              description: `View commands in ${mapping.name} category`,
-            };
-          })
-      )
+  const mainText = ContainerBuilder.createTextDisplay(
+    `## ${client?.user?.username || 'Bot'} Command Menu\n\n` +
+    `### Command Information\n` +
+    `**an asterisk(*) means the command has subcommands**\n\n` +
+    `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
+    `*Or view the commands on our* [**Docs**](${SUPPORT_SERVER})\n\n` +
+    `### Need Extra Help?\n` +
+    `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n` +
+    `> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`
   );
 
-  return {
-    embeds: [embed],
-    components: [menuRow]
-  };
+  const menuRow = ActionRowBuilder.from({
+    type: 1,
+    components: [{
+      type: 3,
+      custom_id: "help-menu",
+      placeholder: `${client?.user?.username || 'Bot'} Command Modules`,
+      options: Object.entries(CommandCategory)
+        .filter(([k, v]) => v.enabled !== false && (k !== 'OWNER' || isOwner))
+        .map(([k, v]) => {
+          const mapping = categoryMapping[k] || { name: v.name };
+          return {
+            label: mapping.name,
+            value: k,
+            description: `View commands in ${mapping.name} category`,
+          };
+        })
+    }]
+  });
+
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0xFFFFFF, 
+      components: [mainText, menuRow]
+    })
+    .build();
+
+  return payload;
 }
 
 const waiter = (msg, userId, prefix) => {
@@ -186,8 +178,17 @@ const waiter = (msg, userId, prefix) => {
         const cat = response.values[0].toUpperCase();
         const categoryResponse = getCategoryEmbed(msg.client, cat, prefix);
         const backRow = getBackButton();
-        currentComponents = [backRow];
-        msg.editable && (await msg.edit({ embeds: categoryResponse.embeds, components: currentComponents }));
+        
+        // Add back button to the container's components
+        if (categoryResponse.components && categoryResponse.components.length > 0) {
+          const container = categoryResponse.components[0];
+          if (container.components) {
+            container.components.push(backRow.toJSON());
+          }
+        }
+        
+        currentComponents = categoryResponse.components || [];
+        msg.editable && (await msg.edit(categoryResponse));
         break;
       }
     }
@@ -220,6 +221,7 @@ const waiter = (msg, userId, prefix) => {
 };
 
 function getCategoryEmbed(client, category, prefix) {
+  const ContainerBuilder = require("@helpers/ContainerBuilder");
   const commands = client.commands.filter((cmd) => cmd.category === category);
   
   const categoryMapping = {
@@ -247,12 +249,19 @@ function getCategoryEmbed(client, category, prefix) {
   const mapping = categoryMapping[category] || { name: categoryInfo?.name };
 
   if (commands.length === 0) {
-    const embed = new EmbedBuilder()
-      .setColor(0x2B2D31)
-      .setTitle(mapping.name)
-      .setDescription(`This category is currently empty. Check back later for new commands!`)
-      .setFooter({ text: "Powered by Blackbit Studio" });
-    return { embeds: [embed] };
+    const emptyText = ContainerBuilder.createTextDisplay(
+      `## ${mapping.name}\n\nThis category is currently empty. Check back later for new commands!\n\n` +
+      `*Powered by Blackbit Studio*`
+    );
+
+    const payload = new ContainerBuilder()
+      .addContainer({ 
+        accentColor: 0x2B2D31, 
+        components: [emptyText]
+      })
+      .build();
+
+    return payload;
   }
 
   const commandsList = commands.map(cmd => {
@@ -265,20 +274,29 @@ function getCategoryEmbed(client, category, prefix) {
     return `- \`${cmd.name}\``;
   }).join('\n');
 
-  const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
-    .setTitle(mapping.name)
-    .setDescription(commandsList)
-    .setFooter({ text: `Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio` });
+  const categoryText = ContainerBuilder.createTextDisplay(
+    `## ${mapping.name}\n\n${commandsList}\n\n` +
+    `*Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio*`
+  );
 
-  return { embeds: [embed] };
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0xFFFFFF, 
+      components: [categoryText]
+    })
+    .build();
+
+  return payload;
 }
 
 function getBackButton() {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("home-btn")
-      .setLabel("Back")
-      .setStyle(ButtonStyle.Secondary)
-  );
+  return ActionRowBuilder.from({
+    type: 1,
+    components: [{
+      type: 2,
+      custom_id: "home-btn",
+      label: "Back",
+      style: ButtonStyle.Secondary
+    }]
+  });
 }
