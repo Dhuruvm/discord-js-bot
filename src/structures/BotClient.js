@@ -346,4 +346,25 @@ module.exports = class BotClient extends Client {
       ],
     });
   }
+
+  /**
+   * Initialize music manager
+   */
+  initMusicManager() {
+    if (!this.musicManager) {
+      const lavaclient = require("@handlers/lavaclient");
+      this.musicManager = lavaclient(this);
+    }
+  }
+
+  /**
+   * Destroy music player
+   */
+  async destroyPlayer(guildId) {
+    if (!this.musicManager) return;
+    const player = this.musicManager.players.get(guildId);
+    if (player) {
+      await player.destroy();
+    }
+  }
 };

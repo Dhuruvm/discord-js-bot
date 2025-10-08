@@ -10,8 +10,8 @@ module.exports = async (client) => {
 
   // Initialize Music Manager
   if (client.config.MUSIC.ENABLED) {
-    client.musicManager.connect(client.user.id);
-    client.logger.success("Music Manager initialized");
+    client.initMusicManager();
+    client.logger.log("Music Manager initialized");
   }
 
   // Initialize Giveaways Manager
