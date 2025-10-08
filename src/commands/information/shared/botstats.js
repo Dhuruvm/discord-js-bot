@@ -1,8 +1,8 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SUPPORT_SERVER, DASHBOARD, DEVELOPER, OWNER_IDS } = require("@root/config");
 const { timeformat } = require("@helpers/Utils");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const os = require("os");
-const { stripIndent } = require("common-tags");
 
 /**
  * @param {import('@structures/BotClient')} client
@@ -36,104 +36,95 @@ module.exports = async (client) => {
     client.logger.error("Error fetching developers:", error);
   }
 
-  // Format founder
-  const founderId = "1354287041772392478";
-  const founderMention = `<@${founderId}>`;
+  // Format founder with blue bold text
+  const founderId = OWNER_IDS[0] || "1354287041772392478";
+  const founderMention = `**[${DEVELOPER}](https://discord.com/users/${founderId} "${DEVELOPER}")**`;
 
   // Format developers
   let devList = founderMention;
   if (developers.length > 0) {
-    const devMentions = developers.map(id => `<@${id}>`).join(", ");
+    const devMentions = developers.map(id => `**<@${id}>**`).join(", ");
     devList = `${founderMention}, ${devMentions}`;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
-    .setAuthor({ 
-      name: `${client.user.username} Statistics`,
-      iconURL: client.user.displayAvatarURL()
-    })
-    .setThumbnail(client.user.displayAvatarURL())
-    .addFields(
-      {
-        name: "### General Statistics",
-        value: stripIndent`
-            > **Commands:** \`${client.commands.size}\`
-            > **Servers:** \`${client.guilds.cache.size}\`
-            > **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0)}\`
-            > **Channels:** \`${client.channels.cache.size}\`
-          `,
-        inline: false,
-      },
-      {
-        name: "### System Information",
-        value: stripIndent`
-            > **Platform:** \`${platform}\`
-            > **Uptime:** <t:${parseInt(client.readyTimestamp / 1000)}:R>
-            > **CPU Model:** \`${os.cpus()[0].model}\`
-            > **CPU Usage:** \`${(process.cpuUsage().system / 1024 / 1024).toFixed(2)}%\`
-            > **Memory:** \`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB / ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB\`
-            > **Node.js:** \`${process.version}\`
-          `,
-        inline: false,
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" })
-    .setTimestamp();
+  const titleText = ContainerBuilder.createTextDisplay(
+    `## ${client.user.username} Statistics\n\n` +
+    `**Bot and system information**`
+  );
 
-  let row1Components = [];
-  let row2Components = [];
+  const generalStats = ContainerBuilder.createTextDisplay(
+    `### General Statistics\n` +
+    `> **Commands:** \`${client.commands.size}\`\n` +
+    `> **Servers:** \`${client.guilds.cache.size}\`\n` +
+    `> **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0)}\`\n` +
+    `> **Channels:** \`${client.channels.cache.size}\``
+  );
 
-  row1Components.push(
+  const systemInfo = ContainerBuilder.createTextDisplay(
+    `### System Information\n` +
+    `> **Platform:** \`${platform}\`\n` +
+    `> **Uptime:** <t:${parseInt(client.readyTimestamp / 1000)}:R>\n` +
+    `> **CPU Model:** \`${os.cpus()[0].model}\`\n` +
+    `> **CPU Usage:** \`${(process.cpuUsage().system / 1024 / 1024).toFixed(2)}%\`\n` +
+    `> **Memory:** \`${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB / ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)} GB\`\n` +
+    `> **Node.js:** \`${process.version}\``
+  );
+
+  const ownerInfo = ContainerBuilder.createTextDisplay(
+    `### Owner / Developer\n${devList}\n\n` +
+    `*Powered by Blackbit Studio*`
+  );
+
+  // Add buttons inside container
+  const buttons = [];
+
+  buttons.push(
     new ButtonBuilder()
       .setLabel("Invite Bot")
-      .setEmoji("🔗")
       .setURL(client.getInvite())
       .setStyle(ButtonStyle.Link)
   );
 
   if (SUPPORT_SERVER) {
-    row1Components.push(
+    buttons.push(
       new ButtonBuilder()
         .setLabel("Support Server")
-        .setEmoji("💬")
         .setURL(SUPPORT_SERVER)
         .setStyle(ButtonStyle.Link)
     );
   }
 
   if (DASHBOARD.enabled) {
-    row1Components.push(
+    buttons.push(
       new ButtonBuilder()
         .setLabel("Dashboard")
-        .setEmoji("🌐")
         .setURL(DASHBOARD.baseURL)
         .setStyle(ButtonStyle.Link)
     );
   }
 
-  // Add vote/review buttons
-  row2Components.push(
+  buttons.push(
     new ButtonBuilder()
-      .setLabel("Vote for Bot")
-      .setEmoji("⭐")
+      .setLabel("Vote")
       .setURL("https://top.gg/")
-      .setStyle(ButtonStyle.Link),
+      .setStyle(ButtonStyle.Link)
+  );
+
+  buttons.push(
     new ButtonBuilder()
-      .setLabel("Documentation")
-      .setEmoji("📚")
+      .setLabel("Website")
       .setURL("https://github.com")
       .setStyle(ButtonStyle.Link)
   );
 
-  let components = [];
+  const buttonRow = new ActionRowBuilder().addComponents(...buttons.slice(0, 5));
 
-  if (row1Components.length > 0) {
-    components.push(new ActionRowBuilder().addComponents(row1Components));
-  }
-  if (row2Components.length > 0) {
-    components.push(new ActionRowBuilder().addComponents(row2Components));
-  }
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0x5865F2, 
+      components: [titleText, generalStats, systemInfo, ownerInfo, buttonRow]
+    })
+    .build();
 
-  return { embeds: [embed], components };
+  return payload;
 };

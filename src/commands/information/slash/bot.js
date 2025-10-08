@@ -70,31 +70,33 @@ module.exports = {
 };
 
 function botInvite(client) {
-  const payload = ContainerBuilder.quickMessage(
-    `🔗 Invite ${client.user.username}`,
-    "Hey there! Thanks for considering to invite me. Use the buttons below to navigate where you want.",
-    [],
-    0x5865F2
+  const titleText = ContainerBuilder.createTextDisplay(
+    `## Invite ${client.user.username}\n\n` +
+    `**Hey there! Thanks for considering to invite me. Use the buttons below to navigate where you want.**`
   );
 
-  // Buttons
-  let components = [];
-  components.push(new ButtonBuilder().setLabel("Invite Link").setURL(client.getInvite()).setStyle(ButtonStyle.Link));
+  // Buttons inside container
+  let buttons = [];
+  buttons.push(new ButtonBuilder().setLabel("Invite Link").setURL(client.getInvite()).setStyle(ButtonStyle.Link));
 
   if (SUPPORT_SERVER) {
-    components.push(new ButtonBuilder().setLabel("Support Server").setURL(SUPPORT_SERVER).setStyle(ButtonStyle.Link));
+    buttons.push(new ButtonBuilder().setLabel("Support Server").setURL(SUPPORT_SERVER).setStyle(ButtonStyle.Link));
   }
 
   if (DASHBOARD.enabled) {
-    components.push(
+    buttons.push(
       new ButtonBuilder().setLabel("Dashboard Link").setURL(DASHBOARD.baseURL).setStyle(ButtonStyle.Link)
     );
   }
 
-  if (components.length > 0) {
-    let buttonsRow = new ActionRowBuilder().addComponents(components);
-    payload.components.push(buttonsRow.toJSON());
-  }
+  const buttonsRow = new ActionRowBuilder().addComponents(...buttons);
+
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0x5865F2, 
+      components: [titleText, buttonsRow]
+    })
+    .build();
 
   return payload;
 }

@@ -62,12 +62,13 @@ async function getBotStats(client) {
     client.logger.error("Error fetching developers:", error);
   }
   
+  const { DEVELOPER } = require("@root/config.js");
   const founderId = "1354287041772392478";
-  const founderMention = `<@${founderId}>`;
+  const founderMention = `**[${DEVELOPER}](https://discord.com/users/${founderId} "${DEVELOPER}")**`;
   
   let devList = founderMention;
   if (developers.length > 0) {
-    const devMentions = developers.map(id => `<@${id}>`).join(", ");
+    const devMentions = developers.map(id => `**<@${id}>**`).join(", ");
     devList = `${founderMention}, ${devMentions}`;
   }
 
@@ -76,7 +77,7 @@ async function getBotStats(client) {
     { name: "Total Users", value: `\`${users.toLocaleString()}\``, inline: true },
     { name: "Total Channels", value: `\`${channels}\``, inline: true },
     { name: "Websocket Ping", value: `\`${client.ws.ping}ms\``, inline: true },
-    { name: "Founder & Developers", value: devList, inline: false },
+    { name: "Owner / Developer", value: devList, inline: false },
     { name: "Operating System", value: `${platform} [${architecture}]`, inline: true },
     { name: "CPU Cores", value: `${cores}`, inline: true },
     { name: "CPU Usage", value: `${cpuUsage}`, inline: true },
@@ -86,20 +87,32 @@ async function getBotStats(client) {
     { name: "System Memory", value: `${overallUsed} / ${overallAvailable} (${overallUsage})`, inline: true }
   ];
 
-  const payload = ContainerBuilder.quickMessage(
-    `📊 ${client.user.username} Statistics`,
-    `Complete system and bot statistics`,
-    fields,
-    0x5865F2
+  const titleText = ContainerBuilder.createTextDisplay(
+    `## ${client.user.username} Statistics\n\n` +
+    `**Complete system and bot statistics**`
   );
 
-  // Add interactive buttons
+  const statsText = fields.map(field => {
+    if (field.inline && fields.filter(f => f.inline).indexOf(field) % 3 === 0) {
+      const row = fields.filter(f => f.inline).slice(
+        fields.filter(f => f.inline).indexOf(field),
+        fields.filter(f => f.inline).indexOf(field) + 3
+      );
+      return row.map(f => `**${f.name}:** ${f.value}`).join(' • ');
+    } else if (!field.inline) {
+      return `**${field.name}**\n${field.value}`;
+    }
+    return null;
+  }).filter(Boolean).join('\n\n');
+
+  const contentText = ContainerBuilder.createTextDisplay(statsText);
+
+  // Add interactive buttons inside container
   const buttons = [];
   
   buttons.push(
     new ButtonBuilder()
       .setLabel("Invite Bot")
-      .setEmoji("🔗")
       .setURL(client.getInvite())
       .setStyle(ButtonStyle.Link)
   );
@@ -107,8 +120,7 @@ async function getBotStats(client) {
   if (SUPPORT_SERVER) {
     buttons.push(
       new ButtonBuilder()
-        .setLabel("Support")
-        .setEmoji("💬")
+        .setLabel("Support Server")
         .setURL(SUPPORT_SERVER)
         .setStyle(ButtonStyle.Link)
     );
@@ -118,7 +130,6 @@ async function getBotStats(client) {
     buttons.push(
       new ButtonBuilder()
         .setLabel("Dashboard")
-        .setEmoji("🌐")
         .setURL(DASHBOARD.baseURL)
         .setStyle(ButtonStyle.Link)
     );
@@ -127,15 +138,18 @@ async function getBotStats(client) {
   buttons.push(
     new ButtonBuilder()
       .setLabel("Vote")
-      .setEmoji("⭐")
       .setURL("https://top.gg/")
       .setStyle(ButtonStyle.Link)
   );
 
-  if (buttons.length > 0) {
-    const row = new ActionRowBuilder().addComponents(...buttons.slice(0, 5));
-    payload.components.push(row.toJSON());
-  }
+  const buttonRow = new ActionRowBuilder().addComponents(...buttons.slice(0, 5));
+
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0x5865F2, 
+      components: [titleText, contentText, buttonRow]
+    })
+    .build();
 
   return payload;
 }

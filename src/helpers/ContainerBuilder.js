@@ -83,19 +83,19 @@ class ContainerBuilder {
   }
 
   static success(title, message, accentColor = 0x57F287) {
-    return ContainerBuilder.quickMessage(`✅ ${title}`, message, [], accentColor);
+    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
   static error(title, message, accentColor = 0xED4245) {
-    return ContainerBuilder.quickMessage(`❌ ${title}`, message, [], accentColor);
+    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
   static warning(title, message, accentColor = 0xFEE75C) {
-    return ContainerBuilder.quickMessage(`⚠️ ${title}`, message, [], accentColor);
+    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
   static info(title, message, accentColor = 0x5865F2) {
-    return ContainerBuilder.quickMessage(`ℹ️ ${title}`, message, [], accentColor);
+    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 }
 

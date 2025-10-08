@@ -116,9 +116,9 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
   const mainText = ContainerBuilder.createTextDisplay(
     `## ${client?.user?.username || 'Bot'} Command Menu\n\n` +
     `### Command Information\n` +
-    `**an asterisk(*) means the command has subcommands**\n\n` +
+    `**Select a category from the menu below to view available commands**\n\n` +
     `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
-    `*Or view the commands on our* [**Docs**](${SUPPORT_SERVER})\n\n` +
+    `*Or view the commands on our* [**Website**](${SUPPORT_SERVER})\n\n` +
     `### Need Extra Help?\n` +
     `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n` +
     `> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`
@@ -143,10 +143,28 @@ async function getHelpMenu({ client, guild, author, user }, prefix) {
     }]
   });
 
+  const linkButtons = ActionRowBuilder.from({
+    type: 1,
+    components: [
+      {
+        type: 2,
+        style: ButtonStyle.Link,
+        label: "Invite Bot",
+        url: client.getInvite()
+      },
+      SUPPORT_SERVER ? {
+        type: 2,
+        style: ButtonStyle.Link,
+        label: "Support Server",
+        url: SUPPORT_SERVER
+      } : null
+    ].filter(Boolean)
+  });
+
   const payload = new ContainerBuilder()
     .addContainer({ 
       accentColor: 0xFFFFFF, 
-      components: [mainText, menuRow]
+      components: [mainText, menuRow, linkButtons]
     })
     .build();
 
