@@ -66,7 +66,7 @@ module.exports = {
         port: 2010,
         password: "abcd",
         id: "lavalink-main",
-        secure: false,
+        secure: true,
       },
       // Backup public server for testing
       {
