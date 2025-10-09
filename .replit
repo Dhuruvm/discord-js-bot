@@ -1,6 +1,6 @@
 entrypoint = "bot.js"
 run = ["sh", "-c", "npm install && node bot.js"]
-modules = ["nodejs-18", "web", "bash"]
+modules = ["nodejs-18", "web", "bash", "java", "java-graalvm22.3"]
 
 [nix]
 channel = "stable-25_05"
@@ -17,6 +17,10 @@ author = "agent"
 task = "workflow.run"
 args = "Discord Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Lavalink Server"
+
 [[workflows.workflow]]
 name = "Discord Bot"
 author = "agent"
@@ -28,8 +32,23 @@ outputType = "console"
 task = "shell.exec"
 args = "node ."
 
+[[workflows.workflow]]
+name = "Lavalink Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "java -Djdk.tls.client.protocols=TLSv1.3,TLSv1.2 -Xmx512M -jar Lavalink.jar"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 2010
+externalPort = 3000
 
 [[ports]]
 localPort = 5000
