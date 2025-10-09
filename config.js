@@ -63,7 +63,7 @@ module.exports = {
     LAVALINK_NODES: [
       {
         id: "local-lavalink",
-        host: "0.0.0.0",
+        host: "localhost",
         port: 2010,
         password: "abcd",
         secure: false,
