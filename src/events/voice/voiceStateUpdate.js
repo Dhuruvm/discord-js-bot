@@ -55,15 +55,21 @@ module.exports = async (client, oldState, newState) => {
   }
 
   // Erela.js - only disconnect if NOT jailed
-  if (client.config.MUSIC.ENABLED && !jailedBots.has(oldState.guild.id)) {
+  if (client.config.MUSIC.ENABLED) {
     const guild = oldState.guild;
 
     // if nobody left the channel in question, return.
     if (oldState.channelId !== guild.members.me.voice.channelId || newState.channel) return;
 
+    // Don't auto-disconnect if bot is jailed
+    if (jailedBots.has(guild.id)) return;
+
     // otherwise, check how many people are in the channel now
     if (oldState.channel.members.size === 1) {
       setTimeout(() => {
+        // Double-check bot is still not jailed before disconnecting
+        if (jailedBots.has(guild.id)) return;
+        
         // if 1 (you), wait 1 minute
         if (!oldState.channel.members.size - 1) {
           const player = client.musicManager.getPlayer(guild.id);

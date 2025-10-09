@@ -56,7 +56,7 @@ async function joinAndLockVC(member, guild) {
  */
 module.exports = {
   name: "fuck",
-  description: "Bot joins your VC and locks there until fuckoff (owner only)",
+  description: "Bot joins your VC and locks there until fuckoff (owner/access only)",
   category: "OWNER",
   botPermissions: ["Connect", "Speak"],
   command: {

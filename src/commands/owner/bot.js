@@ -14,7 +14,7 @@ module.exports = {
   command: {
     enabled: true,
     aliases: ["bot"],
-    usage: "<@user|list> [remove]",
+    usage: "<@user|list|reset> [remove]",
     minArgsCount: 1,
   },
   slashCommand: {
@@ -60,10 +60,15 @@ module.exports = {
       return await listAccessUsers(message);
     }
 
+    // Handle reset command
+    if (args[0].toLowerCase() === "reset") {
+      return await resetAllAccess(message);
+    }
+
     const target = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
     
     if (!target) {
-      return message.safeReply("Please provide a valid user or use `list` to see all access users.");
+      return message.safeReply("Please provide a valid user or use `list` to see all access users, or `reset` to remove all.");
     }
 
     // Check if remove action
@@ -154,6 +159,26 @@ async function removeAccess(context, target) {
       `${EMOJIS.SUCCESS} | **Bot Access Removed**\n\n` +
       `**User:** ${target.user.tag}\n` +
       `**Removed by:** ${issuer.tag}`
+    )
+    .setTimestamp();
+
+  return context.deferred ? context.followUp({ embeds: [embed] }) : context.safeReply({ embeds: [embed] });
+}
+
+async function resetAllAccess(context) {
+  const settings = await getSettings(context.guild);
+  const removedCount = settings.developers ? settings.developers.length : 0;
+  
+  settings.developers = [];
+  await settings.save();
+
+  const issuer = context.user || context.author;
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.WARNING)
+    .setDescription(
+      `${EMOJIS.SUCCESS} | **All Bot Access Reset**\n\n` +
+      `**Removed:** ${removedCount} user(s)\n` +
+      `**Reset by:** ${issuer.tag}`
     )
     .setTimestamp();
 

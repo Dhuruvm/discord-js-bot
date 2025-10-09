@@ -5,7 +5,7 @@ const { jailedBots } = require("./jail");
  */
 module.exports = {
   name: "fuckoff",
-  description: "Release bot from voice channel jail (owner only)",
+  description: "Release bot from voice channel jail (owner/access only)",
   category: "OWNER",
   command: {
     enabled: true,
