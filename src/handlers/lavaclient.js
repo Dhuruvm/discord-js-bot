@@ -1,6 +1,6 @@
 
 const { EmbedBuilder } = require("discord.js");
-const { Manager } = require("lavaclient");
+const { Cluster } = require("lavaclient");
 const prettyMs = require("pretty-ms");
 const { load, SpotifyItemType } = require("@lavaclient/spotify");
 require("@lavaclient/queue/register");
@@ -28,7 +28,8 @@ module.exports = (client) => {
     console.log("⚠️ Spotify credentials not found - Spotify links will not work");
   }
 
-  const lavaclient = new Manager(client.config.MUSIC.LAVALINK_NODES, {
+  const lavaclient = new Cluster({
+    nodes: client.config.MUSIC.LAVALINK_NODES,
     send: (id, payload) => {
       const guild = client.guilds.cache.get(id);
       if (guild) guild.shard.send(payload);
@@ -40,7 +41,7 @@ module.exports = (client) => {
   // Connect to Lavalink nodes when client is ready
   client.once("ready", () => {
     console.log(`📡 Initializing Lavalink with User ID: ${client.user.id}`);
-    lavaclient.init(client.user.id);
+    lavaclient.connect(client.user.id);
     
     // Check connection status after initialization
     setTimeout(() => {
