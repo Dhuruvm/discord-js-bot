@@ -43,9 +43,12 @@ module.exports = {
       }
     }
 
-    // Owner commands - silently ignore for non-owners
-    if (cmd.category === "OWNER" && !OWNER_IDS.includes(message.author.id)) {
-      return;
+    // Owner commands - check both owners and developers
+    if (cmd.category === "OWNER") {
+      const isDeveloper = settings.developers && settings.developers.includes(message.author.id);
+      if (!OWNER_IDS.includes(message.author.id) && !isDeveloper) {
+        return;
+      }
     }
 
     // check user permissions
@@ -105,9 +108,13 @@ module.exports = {
       }
     }
 
-    // Owner commands - silently ignore for non-owners
-    if (cmd.category === "OWNER" && !OWNER_IDS.includes(interaction.user.id)) {
-      return;
+    // Owner commands - check both owners and developers
+    if (cmd.category === "OWNER") {
+      const settings = await getSettings(interaction.guild);
+      const isDeveloper = settings.developers && settings.developers.includes(interaction.user.id);
+      if (!OWNER_IDS.includes(interaction.user.id) && !isDeveloper) {
+        return;
+      }
     }
 
     // user permissions
