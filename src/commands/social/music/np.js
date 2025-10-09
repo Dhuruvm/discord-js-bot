@@ -1,6 +1,4 @@
-const ContainerBuilder = require("@helpers/ContainerBuilder");
-const prettyMs = require("pretty-ms");
-const { splitBar } = require("string-progressbar");
+const MusicPlayerBuilder = require("@helpers/MusicPlayerBuilder");
 
 /**
  * @type {import("@structures/Command")}
@@ -32,27 +30,15 @@ module.exports = {
 /**
  * @param {import("discord.js").CommandInteraction|import("discord.js").Message} arg0
  */
-function nowPlaying({ client, guildId }) {
+function nowPlaying({ client, guildId, member, author }) {
   const player = client.musicManager.getPlayer(guildId);
-  if (!player || !player.queue.current) return "🚫 No music is being played!";
+  
+  if (!player || !player.queue.current) {
+    return MusicPlayerBuilder.createEmptyQueueDisplay();
+  }
 
   const track = player.queue.current;
-  const end = track.length > 6.048e8 ? "🔴 LIVE" : new Date(track.length).toISOString().slice(11, 19);
+  const requester = track.requester ? `@${track.requester}` : (member?.user?.username ? `@${member.user.username}` : (author ? `@${author.username}` : "@User"));
   
-  const progressBar = new Date(player.position).toISOString().slice(11, 19) +
-    " [" +
-    splitBar(track.length > 6.048e8 ? player.position : track.length, player.position, 15)[0] +
-    "] " +
-    end;
-
-  return ContainerBuilder.quickMessage(
-    "🎵 Now Playing",
-    `[${track.title}](${track.uri})`,
-    [
-      { name: "Song Duration", value: "`" + prettyMs(track.length, { colonNotation: true }) + "`", inline: true },
-      { name: "Requested By", value: track.requester || "Unknown", inline: true },
-      { name: "Progress", value: progressBar, inline: false }
-    ],
-    0x5865F2
-  );
+  return MusicPlayerBuilder.createNowPlayingDisplay(player, requester, { member, author });
 }
