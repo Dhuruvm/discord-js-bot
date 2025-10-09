@@ -29,7 +29,7 @@ module.exports = (client) => {
 
   const lavaclient = new Cluster({
     nodes: client.config.MUSIC.LAVALINK_NODES,
-    send: (id, payload) => {
+    sendGatewayPayload: (id, payload) => {
       const guild = client.guilds.cache.get(id);
       if (guild) guild.shard.send(payload);
     },
