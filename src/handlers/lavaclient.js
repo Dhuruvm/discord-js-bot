@@ -28,7 +28,11 @@ module.exports = (client) => {
   }
 
   const lavaclient = new Cluster({
-    nodes: client.config.MUSIC.LAVALINK_NODES,
+    nodes: client.config.MUSIC.LAVALINK_NODES.map(node => ({
+      ...node,
+      // Ensure proper configuration
+      authorization: node.password,
+    })),
     sendGatewayPayload: (id, payload) => client.guilds.cache.get(id)?.shard?.send(payload),
   });
   

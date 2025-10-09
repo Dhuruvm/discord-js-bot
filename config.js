@@ -68,6 +68,14 @@ module.exports = {
         id: "lavalink-main",
         secure: false,
       },
+      // Backup public server for testing
+      {
+        host: "lava-v4.ajieblogs.eu.org",
+        port: 443,
+        password: "https://dsc.gg/ajidevserver",
+        id: "lavalink-backup",
+        secure: true,
+      },
     ],
   },
 
