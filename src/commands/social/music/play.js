@@ -200,7 +200,6 @@ async function play({ member, guild, channel }, query) {
 
   // create a player and/or join the member's vc
   if (!player?.connected) {
-    let player;
     try {
       player = guild.client.musicManager.createPlayer({
         guildId: guild.id,
