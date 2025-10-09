@@ -104,7 +104,13 @@ async function play({ member, guild, channel }, query) {
 
       if (!tracks) guild.client.logger.debug({ query, item });
     } else {
-      const res = await guild.client.musicManager.rest.loadTracks(
+      // Get the first available node's REST API
+      const node = guild.client.musicManager.nodes.values().next().value;
+      if (!node || !node.rest) {
+        return "🚫 Music system is not available. Please try again later.";
+      }
+      
+      const res = await node.rest.loadTracks(
         /^https?:\/\//.test(query) ? query : `${search_prefix[MUSIC.DEFAULT_SOURCE]}:${query}`
       );
       switch (res.loadType) {
