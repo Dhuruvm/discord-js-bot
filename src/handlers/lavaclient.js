@@ -8,33 +8,45 @@ require("@lavaclient/queue/register");
  * @param {import("@structures/BotClient")} client
  */
 module.exports = (client) => {
-  load({
-    client: {
-      id: process.env.SPOTIFY_CLIENT_ID,
-      secret: process.env.SPOTIFY_CLIENT_SECRET,
-    },
-    autoResolveYoutubeTracks: false,
-    loaders: [SpotifyItemType.Album, SpotifyItemType.Artist, SpotifyItemType.Playlist, SpotifyItemType.Track],
-  });
+  // Initialize Spotify
+  if (process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET) {
+    try {
+      load({
+        client: {
+          id: process.env.SPOTIFY_CLIENT_ID,
+          secret: process.env.SPOTIFY_CLIENT_SECRET,
+        },
+        autoResolveYoutubeTracks: false,
+        loaders: [SpotifyItemType.Album, SpotifyItemType.Artist, SpotifyItemType.Playlist, SpotifyItemType.Track],
+      });
+      client.logger.success("✅ Spotify integration connected successfully");
+    } catch (error) {
+      client.logger.error("❌ Spotify integration failed:", error.message);
+    }
+  } else {
+    client.logger.warn("⚠️ Spotify credentials not found - Spotify links will not work");
+  }
 
   const lavaclient = new Cluster({
     nodes: client.config.MUSIC.LAVALINK_NODES,
     sendGatewayPayload: (id, payload) => client.guilds.cache.get(id)?.shard?.send(payload),
   });
+  
+  client.logger.log(`🔗 Connecting to Lavalink server: ${client.config.MUSIC.LAVALINK_NODES[0].host}:${client.config.MUSIC.LAVALINK_NODES[0].port}`);
 
   client.ws.on("VOICE_SERVER_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
 
   lavaclient.on("nodeConnect", (node, event) => {
-    client.logger.success(`✅ Lavalink installed and connected successfully - Node "${node.id}" is ready`);
+    client.logger.success(`✅ Lavalink connected successfully - Node "${node.id}" (${node.options.host}:${node.options.port}) is ready`);
   });
 
   lavaclient.on("nodeDisconnect", (node, event) => {
-    client.logger.log(`Node "${node.id}" disconnected`);
+    client.logger.warn(`⚠️ Lavalink node "${node.id}" disconnected`);
   });
 
   lavaclient.on("nodeError", (node, error) => {
-    client.logger.error(`Node "${node.id}" encountered an error: ${error.message}.`, error);
+    client.logger.error(`❌ Lavalink node "${node.id}" error: ${error.message}`, error);
   });
 
   lavaclient.on("nodeDebug", (node, message) => {
