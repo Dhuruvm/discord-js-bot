@@ -66,7 +66,7 @@ module.exports = {
         port: 2010,
         password: "abcd",
         id: "lavalink-main",
-        secure: true,
+        secure: false,  // Changed to false - SSL error indicates non-SSL connection
       },
       // Backup public server for testing
       {
