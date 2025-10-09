@@ -19,12 +19,12 @@ module.exports = (client) => {
         autoResolveYoutubeTracks: false,
         loaders: [SpotifyItemType.Album, SpotifyItemType.Artist, SpotifyItemType.Playlist, SpotifyItemType.Track],
       });
-      client.logger.success("✅ Spotify integration connected successfully");
+      console.log("✅ Spotify integration connected successfully");
     } catch (error) {
-      client.logger.error("❌ Spotify integration failed:", error.message);
+      console.error("❌ Spotify integration failed:", error.message);
     }
   } else {
-    client.logger.warn("⚠️ Spotify credentials not found - Spotify links will not work");
+    console.log("⚠️ Spotify credentials not found - Spotify links will not work");
   }
 
   const lavaclient = new Cluster({
@@ -32,7 +32,7 @@ module.exports = (client) => {
     sendGatewayPayload: (id, payload) => client.guilds.cache.get(id)?.shard?.send(payload),
   });
   
-  client.logger.log(`🔗 Connecting to Lavalink server: ${client.config.MUSIC.LAVALINK_NODES[0].host}:${client.config.MUSIC.LAVALINK_NODES[0].port}`);
+  console.log(`🔗 Connecting to Lavalink server: ${client.config.MUSIC.LAVALINK_NODES[0].host}:${client.config.MUSIC.LAVALINK_NODES[0].port}`);
 
   client.ws.on("VOICE_SERVER_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
