@@ -33,6 +33,23 @@ module.exports = (client) => {
   });
   
   console.log(`🔗 Connecting to Lavalink server: ${client.config.MUSIC.LAVALINK_NODES[0].host}:${client.config.MUSIC.LAVALINK_NODES[0].port}`);
+  
+  // Attempt to connect to all nodes
+  setTimeout(() => {
+    const nodeStatus = [];
+    for (const [id, node] of lavaclient.nodes) {
+      if (node.connected) {
+        nodeStatus.push(`✅ ${id}: Connected`);
+      } else {
+        nodeStatus.push(`❌ ${id}: Not connected`);
+      }
+    }
+    if (nodeStatus.length > 0) {
+      console.log("Lavalink Node Status:", nodeStatus.join(", "));
+    } else {
+      console.log("⚠️ No Lavalink nodes found - check your configuration");
+    }
+  }, 3000);
 
   client.ws.on("VOICE_SERVER_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
@@ -46,6 +63,9 @@ module.exports = (client) => {
   });
 
   lavaclient.on("nodeError", (node, error) => {
+    console.error(`❌ Lavalink node "${node.id}" error: ${error.message}`);
+    console.error(`   Host: ${node.options.host}:${node.options.port}`);
+    console.error(`   Check if the server is online and credentials are correct`);
     client.logger.error(`❌ Lavalink node "${node.id}" error: ${error.message}`, error);
   });
 
