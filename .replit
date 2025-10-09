@@ -30,7 +30,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node ."
+args = "node bot.js"
 
 [[workflows.workflow]]
 name = "Lavalink Server"
