@@ -1,4 +1,3 @@
-
 const { EmbedBuilder } = require("discord.js");
 const { Cluster } = require("lavaclient");
 const prettyMs = require("pretty-ms");
@@ -35,14 +34,14 @@ module.exports = (client) => {
       if (guild) guild.shard.send(payload);
     },
   });
-  
+
   console.log(`🔗 Attempting to connect to Lavalink server: ${client.config.MUSIC.LAVALINK_NODES[0].host}:${client.config.MUSIC.LAVALINK_NODES[0].port}`);
-  
+
   // Connect to Lavalink nodes when client is ready
   client.once("ready", () => {
     console.log(`📡 Initializing Lavalink with User ID: ${client.user.id}`);
     lavaclient.connect(client.user.id);
-    
+
     // Check connection status after initialization
     setTimeout(() => {
       const nodeStatus = [];
