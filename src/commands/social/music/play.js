@@ -200,17 +200,7 @@ async function play({ member, guild, channel }, query) {
 
   // create a player and/or join the member's vc
   if (!player?.connected) {
-    try {
-      player = guild.client.musicManager.createPlayer({
-        guildId: guild.id,
-        voiceChannelId: member.voice.channel.id,
-        textChannelId: channel.id,
-        selfDeaf: true,
-        volume: MUSIC.DEFAULT_VOLUME,
-      });
-    } catch (error) {
-      return "Failed to create music player. Please ensure Lavalink is properly configured.";
-    }
+    player = guild.client.musicManager.createPlayer(guild.id);
     player.queue.data.channel = channel;
     player.connect(member.voice.channel.id, { deafened: true });
   }
