@@ -62,18 +62,18 @@ module.exports = {
     // Refer to https://github.com/freyacodes/Lavalink to host your own lavalink server
     LAVALINK_NODES: [
       {
+        id: "lavalink-main",
         host: "vip.visionhost.cloud",
         port: 2010,
         password: "abcd",
-        id: "lavalink-main",
-        secure: false,  // Changed to false - SSL error indicates non-SSL connection
+        secure: false,
       },
-      // Backup public server for testing
+      // For v3, use a v3-compatible Lavalink server
       {
-        host: "lava-v4.ajieblogs.eu.org",
-        port: 443,
-        password: "https://dsc.gg/ajidevserver",
         id: "lavalink-backup",
+        host: "lavalink.devamop.in",
+        port: 443,
+        password: "hellothere",
         secure: true,
       },
     ],
