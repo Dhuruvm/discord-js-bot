@@ -68,7 +68,7 @@ async function beg(user) {
   const randomUser = users[Math.floor(Math.random() * users.length)];
   
   const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
+    .setColor(0xFFFFFF)
     .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
     .setTitle("🎁 Donation Received!")
     .setDescription(`**${randomUser}** donated you some coins!`)

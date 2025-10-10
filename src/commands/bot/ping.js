@@ -29,7 +29,7 @@ module.exports = {
         { name: "Bot Latency", value: `\`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\``, inline: true },
         { name: "API Latency", value: `\`${Math.round(message.client.ws.ping)}ms\` - ${status}`, inline: true }
       ],
-      0x5865F2
+      0xFFFFFF
     );
 
     await message.safeReply(response);
@@ -46,7 +46,7 @@ module.exports = {
         { name: "Bot Latency", value: `\`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\``, inline: true },
         { name: "API Latency", value: `\`${Math.round(interaction.client.ws.ping)}ms\` - ${status}`, inline: true }
       ],
-      0x5865F2
+      0xFFFFFF
     );
 
     await interaction.followUp(response);

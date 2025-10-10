@@ -60,7 +60,7 @@ function getPremiumMessage() {
     `${emojis.premium} Premium Features`,
     "*Unlock exclusive features and benefits*",
     fields,
-    0xFFD700
+    0xFFFFFF
   );
 
   const buttons = [];

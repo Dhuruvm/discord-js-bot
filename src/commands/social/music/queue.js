@@ -72,6 +72,6 @@ function getQueue({ client, guild }, pgNo) {
     `📜 Queue for ${guild.name}`,
     description,
     [],
-    0x5865F2
+    0xFFFFFF
   );
 }

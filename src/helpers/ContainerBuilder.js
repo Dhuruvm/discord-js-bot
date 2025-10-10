@@ -56,7 +56,7 @@ class ContainerBuilder {
     };
   }
 
-  static quickMessage(title, description = null, fields = [], accentColor = 0x5865F2) {
+  static quickMessage(title, description = null, fields = [], accentColor = 0xFFFFFF) {
     const components = [];
 
     if (title) {
@@ -82,19 +82,19 @@ class ContainerBuilder {
       .build();
   }
 
-  static success(title, message, accentColor = 0x57F287) {
+  static success(title, message, accentColor = 0xFFFFFF) {
     return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
-  static error(title, message, accentColor = 0xED4245) {
+  static error(title, message, accentColor = 0xFFFFFF) {
     return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
-  static warning(title, message, accentColor = 0xFEE75C) {
+  static warning(title, message, accentColor = 0xFFFFFF) {
     return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 
-  static info(title, message, accentColor = 0x5865F2) {
+  static info(title, message, accentColor = 0xFFFFFF) {
     return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
   }
 }

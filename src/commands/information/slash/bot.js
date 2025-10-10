@@ -93,7 +93,7 @@ function botInvite(client) {
 
   const payload = new ContainerBuilder()
     .addContainer({ 
-      accentColor: 0x5865F2, 
+      accentColor: 0xFFFFFF, 
       components: [titleText, buttonsRow]
     })
     .build();

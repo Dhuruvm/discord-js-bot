@@ -36,7 +36,7 @@ function getInviteMessage(client) {
     `🔗 Invite ${client.user.username}`,
     "Click the buttons below to invite me to your server or join our community!",
     [],
-    0x5865F2
+    0xFFFFFF
   );
 
   const buttons = [];

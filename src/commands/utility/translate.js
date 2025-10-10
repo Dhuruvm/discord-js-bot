@@ -76,7 +76,7 @@ async function getTranslation(author, input, outputCode) {
       name: `${author.username} says`,
       iconURL: author.avatarURL(),
     })
-    .setColor(0x2B2D31)
+    .setColor(0xFFFFFF)
     .setDescription(`### Translation\n> ${data.output}`)
     .setFooter({ text: `${data.inputLang} (${data.inputCode}) → ${data.outputLang} (${data.outputCode})` });
 

@@ -121,7 +121,7 @@ module.exports = async (client) => {
 
   const payload = new ContainerBuilder()
     .addContainer({ 
-      accentColor: 0x5865F2, 
+      accentColor: 0xFFFFFF, 
       components: [titleText, generalStats, systemInfo, ownerInfo, buttonRow]
     })
     .build();

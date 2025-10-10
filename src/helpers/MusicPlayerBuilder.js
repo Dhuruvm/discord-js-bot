@@ -68,7 +68,7 @@ class MusicPlayerBuilder {
       components: [
         {
           type: 17,
-          accent_color: 0x2B2D31,
+          accent_color: 0xFFFFFF,
           components: components
         }
       ],
@@ -178,7 +178,7 @@ class MusicPlayerBuilder {
       components: [
         {
           type: 17,
-          accent_color: 0x2B2D31,
+          accent_color: 0xFFFFFF,
           components: components
         }
       ],
@@ -256,7 +256,7 @@ class MusicPlayerBuilder {
       components: [
         {
           type: 17,
-          accent_color: 0x2B2D31,
+          accent_color: 0xFFFFFF,
           components: components,
           thumbnail: track?.thumbnail ? { url: track.thumbnail } : undefined
         }

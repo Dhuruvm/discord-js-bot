@@ -295,7 +295,7 @@ function getCategoryEmbed(client, category, prefix) {
 
     const payload = new ContainerBuilder()
       .addContainer({ 
-        accentColor: 0x2B2D31, 
+        accentColor: 0xFFFFFF, 
         components: [emptyText]
       })
       .build();
