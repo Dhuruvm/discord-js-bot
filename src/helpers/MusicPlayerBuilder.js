@@ -81,7 +81,7 @@ class MusicPlayerBuilder {
     const queue = player.queue.tracks;
     const components = [];
     
-    const trackNumber = String(player.queue.tracks.indexOf(track) + 1).padStart(2, '0');
+    const trackNumber = String((player.queue.previous?.length || 0) + 1).padStart(2, '0');
     const bars = "|||";
     
     components.push(ContainerBuilder.createTextDisplay(`Queued by ${requester} 🎵`));
@@ -104,9 +104,10 @@ class MusicPlayerBuilder {
     
     components.push(ContainerBuilder.createTextDisplay("*From search*"));
     
+    const currentTrackNumber = (player.queue.previous?.length || 0) + 1;
     const tracksToShow = queue.slice(0, 10);
     tracksToShow.forEach((queueTrack, index) => {
-      const trackNum = String(index + 4).padStart(2, '0');
+      const trackNum = String(currentTrackNumber + index + 1).padStart(2, '0');
       const rating = "@10/10";
       const trackLine = `**${trackNum}** ${queueTrack.title} – ${queueTrack.author} **[${prettyMs(queueTrack.length, { colonNotation: true })}]** ${rating}`;
       components.push(ContainerBuilder.createTextDisplay(trackLine));
@@ -197,7 +198,7 @@ class MusicPlayerBuilder {
     
     const track = player.queue.current;
     if (track) {
-      const trackNumber = "03";
+      const trackNumber = String((player.queue.previous?.length || 0) + 1).padStart(2, '0');
       const bars = "|||";
       
       components.push(ContainerBuilder.createTextDisplay(`Queued by ${requester} 🎵`));
@@ -219,8 +220,9 @@ class MusicPlayerBuilder {
     const end = start + itemsPerPage;
     const tracksToShow = queue.slice(start, end);
     
+    const currentTrackNum = (player.queue.previous?.length || 0) + 1;
     tracksToShow.forEach((queueTrack, index) => {
-      const trackNum = String(start + index + 4).padStart(2, '0');
+      const trackNum = String(currentTrackNum + start + index + 1).padStart(2, '0');
       const rating = "@10/10";
       const trackLine = `**${trackNum}** ${queueTrack.title} – ${queueTrack.author} **[${prettyMs(queueTrack.length, { colonNotation: true })}]** ${rating}`;
       components.push(ContainerBuilder.createTextDisplay(trackLine));

@@ -94,6 +94,16 @@ module.exports = async (interaction) => {
           ephemeral: true 
         });
         
+      case 'music_repeat':
+        const currentLoop = player.queue.loop;
+        const nextLoop = currentLoop === 1 ? 0 : 1;
+        player.queue.setLoop(nextLoop);
+        const loopText = nextLoop === 1 ? "🔁 Repeating current track" : "➡️ Repeat disabled";
+        return interaction.followUp({ 
+          content: loopText, 
+          ephemeral: true 
+        });
+        
       case 'music_queue':
         const requester = member?.user?.username ? `@${member.user.username}` : "@User";
         const queueDisplay = MusicPlayerBuilder.createQueueDisplay(player, requester, 1);
