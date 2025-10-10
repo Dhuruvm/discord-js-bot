@@ -63,17 +63,23 @@ module.exports = (client) => {
     const currentPosition = queue.tracks.length > 0 ? 1 : 1;
     const totalInQueue = queue.tracks.length + 1;
     
-    const duration = prettyMs(track.length, { colonNotation: true });
+    const trackInfo = track.info || track;
+    const duration = prettyMs(trackInfo.length, { colonNotation: true });
     const signalBars = "▌▌▌";
     
     let thumbnail = null;
-    if (track.sourceName === "youtube") {
-      thumbnail = `https://img.youtube.com/vi/${track.identifier}/maxresdefault.jpg`;
+    if (trackInfo.sourceName === "youtube" || track.sourceName === "youtube") {
+      const identifier = trackInfo.identifier || track.identifier;
+      thumbnail = `https://img.youtube.com/vi/${identifier}/maxresdefault.jpg`;
     }
 
-    let description = `**Queued by <@${track.requester}>** 🎵\n\n`;
-    description += `**${String(currentPosition).padStart(2, '0')} ${signalBars} ${track.title}**\n`;
-    description += `${track.author || 'Unknown Artist'} **[${duration}]**\n\n`;
+    const requester = track.requester || 'Unknown User';
+    const title = trackInfo.title || track.title || 'Unknown Track';
+    const author = trackInfo.author || track.author || 'Unknown Artist';
+
+    let description = `**Queued by ${requester.includes('@') ? requester : `<@${requester}>`}** 🎵\n\n`;
+    description += `**${String(currentPosition).padStart(2, '0')} ${signalBars} ${title}**\n`;
+    description += `${author} **[${duration}]**\n\n`;
     
     description += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
     
@@ -84,10 +90,12 @@ module.exports = (client) => {
       const upcoming = queue.tracks.slice(0, 5);
       upcoming.forEach((t, i) => {
         const pos = String(currentPosition + i + 1).padStart(2, '0');
-        const trackDuration = prettyMs(t.info.length, { colonNotation: true });
-        const trackTitle = t.info.title.length > 40 ? t.info.title.substring(0, 40) + '...' : t.info.title;
-        const trackAuthor = t.info.author || 'Unknown Artist';
-        description += `**${pos}** ${trackTitle} - ${trackAuthor} **[${trackDuration}]** <@${t.requester}>\n`;
+        const tInfo = t.info || t;
+        const trackDuration = prettyMs(tInfo.length, { colonNotation: true });
+        const trackTitle = tInfo.title.length > 40 ? tInfo.title.substring(0, 40) + '...' : tInfo.title;
+        const trackAuthor = tInfo.author || 'Unknown Artist';
+        const tRequester = t.requester || 'Unknown User';
+        description += `**${pos}** ${trackTitle} - ${trackAuthor} **[${trackDuration}]** ${tRequester.includes('@') ? tRequester : `<@${tRequester}>`}\n`;
       });
       
       if (queue.tracks.length > 5) {
@@ -164,6 +172,11 @@ module.exports = (client) => {
       });
     } catch (error) {
       client.logger.error("Failed to send now playing message:", error);
+      try {
+        await channel.send(`🎵 Now Playing: **${title}** by ${author}`);
+      } catch (err) {
+        console.error("Could not send any message to channel:", err.message);
+      }
     }
   });
 
