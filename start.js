@@ -26,11 +26,29 @@ const hasLavalink = fs.existsSync(lavalinkPath);
 let lavalinkProcess = null;
 let botProcess = null;
 
+// Function to check if Lavalink is already running
+async function checkLavalinkRunning() {
+  const { exec } = require('child_process');
+  return new Promise((resolve) => {
+    exec('lsof -i:2010 || netstat -an | grep 2010', (error, stdout) => {
+      resolve(stdout && stdout.trim().length > 0);
+    });
+  });
+}
+
 // Function to start Lavalink
-function startLavalink() {
+async function startLavalink() {
   if (!hasLavalink) {
     log('⚠️  Lavalink.jar not found - skipping Lavalink server', colors.yellow);
     log('ℹ️  Music commands will use external Lavalink nodes', colors.cyan);
+    return null;
+  }
+
+  // Check if Lavalink is already running on port 2010
+  const isRunning = await checkLavalinkRunning();
+  if (isRunning) {
+    log('ℹ️  Lavalink is already running on port 2010 - skipping local instance', colors.cyan);
+    log('ℹ️  Using existing Lavalink server', colors.cyan);
     return null;
   }
 
@@ -125,14 +143,19 @@ async function main() {
   log('╚════════════════════════════════════════╝', colors.bright);
   log('');
 
-  // Start Lavalink first
+  // Start Lavalink first (if not already running)
   if (hasLavalink) {
-    lavalinkProcess = startLavalink();
+    lavalinkProcess = await startLavalink();
     
-    // Wait for Lavalink to initialize (5 seconds)
-    log('⏳ Waiting for Lavalink to initialize...', colors.yellow);
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    log('✅ Lavalink initialization period complete', colors.green);
+    if (lavalinkProcess) {
+      // Wait for Lavalink to initialize (5 seconds)
+      log('⏳ Waiting for Lavalink to initialize...', colors.yellow);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      log('✅ Lavalink initialization period complete', colors.green);
+    } else {
+      // Lavalink is already running, wait a bit less
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 
   // Start Discord bot
