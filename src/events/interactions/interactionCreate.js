@@ -1,6 +1,7 @@
 const { getSettings } = require("@schemas/Guild");
 const { commandHandler, contextHandler, statsHandler, suggestionHandler, ticketHandler } = require("@src/handlers");
-const { InteractionType } = require("discord.js");
+const { InteractionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SUPPORT_SERVER } = require("@root/config");
 
 /**
  * @param {import('@src/structures').BotClient} client
@@ -101,6 +102,91 @@ module.exports = async (client, interaction) => {
           embeds: [premiumEmbed],
           components: [premiumRow],
           ephemeral: true
+        });
+      }
+
+      case "music_pause": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player || !player.queue.current) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        if (player.paused) return interaction.reply({ content: "⏸️ Music is already paused!", ephemeral: true });
+        player.pause(true);
+        return interaction.reply({ content: "⏸️ Paused the music!", ephemeral: true });
+      }
+
+      case "music_next": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player || !player.queue.current) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        player.queue.next();
+        return interaction.reply({ content: "⏭️ Skipped to next track!", ephemeral: true });
+      }
+
+      case "music_previous": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player || !player.queue.current) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        if (!player.queue.previous.length) return interaction.reply({ content: "❌ No previous tracks!", ephemeral: true });
+        player.queue.previous();
+        return interaction.reply({ content: "⏮️ Playing previous track!", ephemeral: true });
+      }
+
+      case "music_stop": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        await player.disconnect();
+        return interaction.reply({ content: "⏹️ Stopped the music and disconnected!", ephemeral: true });
+      }
+
+      case "music_shuffle": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player || !player.queue.tracks.length) return interaction.reply({ content: "❌ Queue is empty!", ephemeral: true });
+        player.queue.shuffle();
+        return interaction.reply({ content: "🔀 Shuffled the queue!", ephemeral: true });
+      }
+
+      case "music_loop": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        const loopModes = ["off", "repeat", "queue"];
+        const currentMode = player.queue.loop || "off";
+        const nextIndex = (loopModes.indexOf(currentMode) + 1) % loopModes.length;
+        player.queue.setLoop(loopModes[nextIndex]);
+        const modeEmojis = { off: "🔁 Loop: Off", repeat: "🔂 Loop: Single Track", queue: "🔁 Loop: Queue" };
+        return interaction.reply({ content: modeEmojis[loopModes[nextIndex]], ephemeral: true });
+      }
+
+      case "music_volup": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        const newVol = Math.min(player.volume + 10, 150);
+        player.setVolume(newVol);
+        return interaction.reply({ content: `🔊 Volume increased to ${newVol}%`, ephemeral: true });
+      }
+
+      case "music_voldown": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player) return interaction.reply({ content: "❌ No music is currently playing!", ephemeral: true });
+        const newVol = Math.max(player.volume - 10, 0);
+        player.setVolume(newVol);
+        return interaction.reply({ content: `🔉 Volume decreased to ${newVol}%`, ephemeral: true });
+      }
+
+      case "music_back": {
+        return interaction.reply({ content: "↩️ Back button - This will show the previous page of results", ephemeral: true });
+      }
+
+      case "music_history": {
+        const player = client.musicManager.getPlayer(interaction.guildId);
+        if (!player) return interaction.reply({ content: "❌ No music session active!", ephemeral: true });
+        
+        const history = player.queue.previous || [];
+        if (!history.length) return interaction.reply({ content: "🕐 No history yet!", ephemeral: true });
+        
+        const historyList = history.slice(-10).reverse().map((track, i) => 
+          `${i + 1}. **${track.info.title}** - ${track.info.author}`
+        ).join('\n');
+        
+        return interaction.reply({ 
+          content: `🕐 **Recently Played:**\n\n${historyList}`, 
+          ephemeral: true 
         });
       }
     }
