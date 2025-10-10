@@ -37,20 +37,6 @@ module.exports = (client) => {
     
     setTimeout(() => {
       lavaclient.connect(client.user.id);
-      
-      setTimeout(() => {
-        const nodeStatus = [];
-        for (const [id, node] of lavaclient.nodes) {
-          if (node.connected) {
-            nodeStatus.push(`✅ ${id}: Connected`);
-          } else {
-            nodeStatus.push(`❌ ${id}: Not connected`);
-          }
-        }
-        if (nodeStatus.length > 0) {
-          console.log("Lavalink Status:", nodeStatus.join(", "));
-        }
-      }, 5000);
     }, 3000);
   });
 
