@@ -6,7 +6,7 @@ modules = ["nodejs-18", "web", "bash", "java", "java-graalvm22.3"]
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Start All Services"
 
 [[workflows.workflow]]
 name = "Project"
@@ -42,6 +42,15 @@ args = "java -Djdk.tls.client.protocols=TLSv1.3,TLSv1.2 -Xmx512M -jar Lavalink.j
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow]]
+name = "Start All Services"
+author = 48491915
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
 
 [agent]
 expertMode = true

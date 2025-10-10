@@ -10,7 +10,8 @@
   },
   "scripts": {
     "dev": "nodemon .",
-    "start": "node .",
+    "start": "node start.js",
+    "bot": "node bot.js",
     "format": "prettier --write src",
     "docker:package": "tar -cf discord-js-bot.tar dashboard logs src bot.js config.js dockerfile package.json package-lock.json",
     "docker:build": "docker build -t saitejamadha/discord-js-bot:5.6.0 ."
