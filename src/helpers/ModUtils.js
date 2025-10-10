@@ -302,7 +302,7 @@ module.exports = class ModUtils {
   static async timeoutTarget(issuer, target, ms, reason) {
     if (!memberInteract(issuer, target)) return "MEMBER_PERM";
     if (!memberInteract(issuer.guild.members.me, target)) return "BOT_PERM";
-    if (target.communicationDisabledUntilTimestamp - Date.now() > 0) return "ALREADY_TIMEOUT";
+    if (target.communicationDisabledUntilTimestamp && target.communicationDisabledUntilTimestamp > Date.now()) return "ALREADY_TIMEOUT";
 
     try {
       await target.timeout(ms, reason);
@@ -323,7 +323,7 @@ module.exports = class ModUtils {
   static async unTimeoutTarget(issuer, target, reason) {
     if (!memberInteract(issuer, target)) return "MEMBER_PERM";
     if (!memberInteract(issuer.guild.members.me, target)) return "BOT_PERM";
-    if (target.communicationDisabledUntilTimestamp - Date.now() < 0) return "NO_TIMEOUT";
+    if (!target.communicationDisabledUntilTimestamp || target.communicationDisabledUntilTimestamp < Date.now()) return "NO_TIMEOUT";
 
     try {
       await target.timeout(null, reason);
