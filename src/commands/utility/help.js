@@ -127,7 +127,7 @@ async function getHelpMenu(context, prefix) {
 
   const prefixText = prefix || '!';
   const ContainerBuilder = require("@helpers/ContainerBuilder");
-  
+
   const mainText = ContainerBuilder.createTextDisplay(
     `## ${client?.user?.username || 'Bot'} Command Menu\n\n` +
     `### Command Information\n` +
@@ -221,7 +221,7 @@ const waiter = (msg, userId, prefix) => {
         const cat = response.values[0].toUpperCase();
         const categoryResponse = getCategoryEmbed(msg.client, cat, prefix);
         const backRow = getBackButton();
-        
+
         // Add back button to the container's components
         if (categoryResponse.components && categoryResponse.components.length > 0) {
           const container = categoryResponse.components[0];
@@ -229,7 +229,7 @@ const waiter = (msg, userId, prefix) => {
             container.components.push(backRow.toJSON());
           }
         }
-        
+
         currentComponents = categoryResponse.components || [];
         msg.editable && (await msg.edit(categoryResponse));
         break;
@@ -266,10 +266,10 @@ const waiter = (msg, userId, prefix) => {
 function getCategoryEmbed(client, category, prefix) {
   const ContainerBuilder = require("@helpers/ContainerBuilder");
   const commands = client.commands.filter((cmd) => cmd.category === category);
-  
+
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
-    'ANTINUKE': { name: 'Antinuke' },
+    'SECURITY': { name: 'Security & Antinuke' },
     'AUTOMOD': { name: 'Auto Moderation' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
