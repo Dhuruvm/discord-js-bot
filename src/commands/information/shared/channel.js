@@ -1,5 +1,5 @@
-const { EmbedBuilder, ChannelType } = require("discord.js");
-const { EMBED_COLORS } = require("@root/config");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const { ChannelType } = require("discord.js");
 const { stripIndent } = require("common-tags");
 const channelTypes = require("@helpers/channelTypes");
 
@@ -8,80 +8,62 @@ const channelTypes = require("@helpers/channelTypes");
  */
 module.exports = (channel) => {
   const { id, name, parent, position, type } = channel;
+  const createdAtTimestamp = Math.floor(channel.createdTimestamp / 1000);
 
-  let desc = stripIndent`
-      ❯ ID: **${id}**
-      ❯ Name: **${name}**
-      ❯ Type: **${channelTypes(channel.type)}**
-      ❯ Category: **${parent || "NA"}**\n
-      `;
+  const fields = [
+    {
+      name: "📺 Channel Information",
+      value: stripIndent`
+      **ID:** \`${channel.id}\`
+      **Name:** ${channel.name}
+      **Type:** ${channelTypes[channel.type] || "Unknown"}
+      **Category:** ${channel.parent || "None"}
+      ${channel.topic ? `**Topic:** ${channel.topic}` : ""}
+      `,
+      inline: true,
+    },
+    {
+      name: "⚙️ Channel Details",
+      value: stripIndent`
+      **Position:** \`${channel.position}\`
+      **Created:** <t:${createdAtTimestamp}:D>
+      ${channel.nsfw !== undefined ? `**NSFW:** ${channel.nsfw ? "Yes" : "No"}` : ""}
+      ${channel.type === ChannelType.GuildText ? `**Rate Limit:** \`${channel.rateLimitPerUser}s\`` : ""}
+      `,
+      inline: true,
+    }
+  ];
 
-  if (type === ChannelType.GuildText) {
-    const { rateLimitPerUser, nsfw } = channel;
-    desc += stripIndent`
-      ❯ Topic: **${channel.topic || "No topic set"}**
-      ❯ Position: **${position}**
-      ❯ Slowmode: **${rateLimitPerUser}**
-      ❯ isNSFW: **${nsfw ? "✓" : "✕"}**\n
-      `;
+  if (type === ChannelType.GuildVoice || type === ChannelType.GuildStageVoice) {
+    fields.push({
+      name: "🔊 Voice Details",
+      value: stripIndent`
+      **Bitrate:** ${channel.bitrate}
+      **User Limit:** ${channel.userLimit || "Unlimited"}
+      **Full:** ${channel.full ? "Yes" : "No"}
+      `,
+      inline: true,
+    });
   }
 
   if (type === ChannelType.GuildPublicThread || type === ChannelType.GuildPrivateThread) {
-    const { ownerId, archived, locked } = channel;
-    desc += stripIndent`
-      ❯ Owner Id: **${ownerId}**
-      ❯ Is Archived: **${archived ? "✓" : "✕"}**
-      ❯ Is Locked: **${locked ? "✓" : "✕"}**\n
-      `;
+    fields.push({
+      name: "🧵 Thread Details",
+      value: stripIndent`
+      **Owner:** <@${channel.ownerId}>
+      **Archived:** ${channel.archived ? "Yes" : "No"}
+      **Locked:** ${channel.locked ? "Yes" : "No"}
+      `,
+      inline: true,
+    });
   }
 
-  if (type === ChannelType.GuildNews || type === ChannelType.GuildNewsThread) {
-    const { nsfw } = channel;
-    desc += stripIndent`
-      ❯ isNSFW: **${nsfw ? "✓" : "✕"}**\n
-      `;
-  }
-
-  if (type === ChannelType.GuildVoice || type === ChannelType.GuildStageVoice) {
-    const { bitrate, userLimit, full } = channel;
-    desc += stripIndent`
-      ❯ Position: **${position}**
-      ❯ Bitrate: **${bitrate}**
-      ❯ User Limit: **${userLimit}**
-      ❯ isFull: **${full ? "✓" : "✕"}**\n
-      `;
-  }
-
-  const embed = new EmbedBuilder()
-    .setColor(0xFFFFFF)
-    .setAuthor({ 
-      name: `${channel.name} Information`,
-      iconURL: channel.guild.iconURL()
-    })
-    .addFields(
-      {
-        name: "### Channel Information",
-        value: stripIndent`
-        > **ID:** \`${channel.id}\`
-        > **Name:** ${channel.name}
-        > **Type:** ${channelTypes[channel.type]}
-        > **Category:** ${channel.parent || "None"}
-        > **Topic:** ${channel.topic || "No topic set"}
-        `,
-        inline: true,
-      },
-      {
-        name: "### Channel Details",
-        value: stripIndent`
-        > **Position:** \`${channel.position}\`
-        > **Created:** <t:${createdAtTimestamp}:D>
-        > **NSFW:** ${channel.nsfw ? "Yes" : "No"}
-        ${channel.type === ChannelType.GuildText ? `> **Rate Limit:** \`${channel.rateLimitPerUser}s\`` : ""}
-        `,
-        inline: true,
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" });
-
-  return { embeds: [embed] };
+  return ContainerBuilder.serverInfo({
+    title: `${channel.name} Information`,
+    description: `Channel details for ${channel.name}`,
+    thumbnail: null,
+    fields,
+    accentColor: 0xFFFFFF,
+    buttons: []
+  });
 };

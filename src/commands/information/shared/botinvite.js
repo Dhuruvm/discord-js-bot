@@ -1,56 +1,47 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { EMBED_COLORS, SUPPORT_SERVER, DASHBOARD } = require("@root/config");
 
 module.exports = (client) => {
-  const embed = new EmbedBuilder()
-    .setColor(EMBED_COLORS.PRIMARY)
-    .setAuthor({ 
-      name: "Invite Cybork to Your Server!",
-      iconURL: client.user.displayAvatarURL()
-    })
-    .setThumbnail(client.user.displayAvatarURL())
-    .setDescription(
-      `**Hey there! Thanks for considering to invite me!** 🎉\n\n` +
-      `**What I Can Do:**\n` +
-      `• **Advanced moderation tools**\n` +
-      `• **Fun commands and games**\n` +
-      `• **Music playback**\n` +
-      `• **Custom automation**\n` +
-      `• **And much more!**\n\n` +
-      `**Use the buttons below to get started!**`
-    )
-    .setFooter({ text: "Cybork - Your All-in-One Discord Bot" })
-    .setTimestamp();
-
-  let components = [];
-  components.push(
-    new ButtonBuilder()
-      .setLabel("Invite Cybork")
-      .setEmoji("🔗")
-      .setURL(client.getInvite())
-      .setStyle(ButtonStyle.Link)
-  );
+  const buttons = [];
+  
+  buttons.push({
+    label: "Invite Cybork",
+    emoji: "🔗",
+    url: client.getInvite(),
+    style: "Link"
+  });
 
   if (SUPPORT_SERVER) {
-    components.push(
-      new ButtonBuilder()
-        .setLabel("Support Server")
-        .setEmoji("💬")
-        .setURL(SUPPORT_SERVER)
-        .setStyle(ButtonStyle.Link)
-    );
+    buttons.push({
+      label: "Support Server",
+      emoji: "💬",
+      url: SUPPORT_SERVER,
+      style: "Link"
+    });
   }
 
   if (DASHBOARD.enabled) {
-    components.push(
-      new ButtonBuilder()
-        .setLabel("Dashboard")
-        .setEmoji("🌐")
-        .setURL(DASHBOARD.baseURL)
-        .setStyle(ButtonStyle.Link)
-    );
+    buttons.push({
+      label: "Dashboard",
+      emoji: "🌐",
+      url: DASHBOARD.baseURL,
+      style: "Link"
+    });
   }
 
-  let buttonsRow = new ActionRowBuilder().addComponents(components);
-  return { embeds: [embed], components: [buttonsRow] };
+  return ContainerBuilder.serverInfo({
+    title: `🎉 Invite ${client.user.username} to Your Server!`,
+    description: `**Hey there! Thanks for considering to invite me!**\n\n` +
+      `**What I Can Do:**\n` +
+      `• Advanced moderation tools\n` +
+      `• Fun commands and games\n` +
+      `• Music playback\n` +
+      `• Custom automation\n` +
+      `• And much more!\n\n` +
+      `**Use the buttons below to get started!**`,
+    thumbnail: client.user.displayAvatarURL(),
+    fields: [],
+    accentColor: parseInt(EMBED_COLORS.PRIMARY.replace('#', ''), 16),
+    buttons
+  });
 };
