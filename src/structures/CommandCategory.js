@@ -10,6 +10,7 @@ module.exports = {
     name: "Antinuke",
     image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/shield-icon.png",
     emoji: "🛡️",
+    enabled: true,
   },
   AUTOMOD: {
     name: "Auto Moderation",
