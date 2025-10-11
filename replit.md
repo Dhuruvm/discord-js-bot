@@ -3,6 +3,30 @@
 ## Overview
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14. It features a modular command system supporting both prefix and slash commands, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
+## Recent Changes (October 2025)
+### Music Player Redesign
+- Completely redesigned music player UI using Components V2 system
+- Modern player display with orange accent bar matching Discord's aesthetic
+- Enhanced now playing display with:
+  - Track number with visual bars indicator (|||)
+  - Album artwork thumbnail display
+  - Detailed queue view with track ratings
+  - Page navigation for long queues
+  - View History button
+- Interactive playback controls:
+  - Row 1: Back (⬅), Previous (◄◄), Pause/Play (⏸/▶), Next (►►)
+  - Row 2: Stop (🛑 red button)
+  - Row 3: Shuffle (🔀), Volume Up (🔼), Volume Down (🔽), Boost (🔼)
+  - Row 4: Loop/Repeat (🔁)
+- Shows requester information and interaction timestamps
+- Seamless integration with play command - shows player UI when starting playback
+
+### Owner Commands Enhancement
+- **listservers**: Complete redesign with dropdown menus, pagination, detailed server info, and leave confirmation
+- **Server Notifications**: Enhanced guild join/leave notifications with invite links, server statistics, and interactive controls
+- **PFP Commands**: Fixed spfp, sbanner, sname commands to correctly handle global vs per-server settings
+- **sreset Command**: New command to reset server-specific bot settings (nickname)
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -25,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Feature Modules
 - **Bot Information**: Dedicated BOT category with ping, bot stats, uptime, invite links, and premium feature showcase.
-- **Music System**: Lavalink-based player with queue management and Spotify integration.
+- **Music System**: Lavalink-based player with modern Components V2 UI, queue management, Spotify integration, interactive controls (play/pause, skip, shuffle, loop, volume), and album artwork display.
 - **Economy System**: Coin-based virtual economy with banking, daily rewards, and gambling.
 - **Moderation & Auto-Moderation**: Comprehensive mod actions (warn, kick, ban) and auto-moderation for spam, links, etc.
 - **Invite Tracking**: Real-time invite tracking with role rewards and fake invite detection.

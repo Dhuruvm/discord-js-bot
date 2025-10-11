@@ -2,6 +2,7 @@ const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const prettyMs = require("pretty-ms");
 const { EMBED_COLORS, MUSIC } = require("@root/config");
 const { SpotifyItemType } = require("@lavaclient/spotify");
+const MusicPlayerBuilder = require("@helpers/MusicPlayerBuilder");
 
 const search_prefix = {
   YT: "ytsearch",
@@ -147,32 +148,51 @@ async function play({ member, guild, channel }, query) {
 
   if (!tracks) return "🚫 An error occurred while searching for the song";
 
+  // create a player and/or join the member's vc
+  if (!player?.connected) {
+    player = guild.client.musicManager.createPlayer(guild.id);
+    player.queue.data.channel = channel;
+    player.connect(member.voice.channel.id, { deafened: true });
+  }
+
+  // do queue things
+  const started = player.playing || player.paused;
+  const wasEmpty = !player?.queue.tracks.length;
+  player.queue.add(tracks, { requester: member.user.username, next: false });
+  
+  if (!started) {
+    await player.queue.start();
+    
+    // Show the modern music player when starting playback
+    if (wasEmpty && tracks.length === 1) {
+      const requester = `@${member.user.username}`;
+      return MusicPlayerBuilder.createNowPlayingDisplay(player, requester, { member });
+    }
+  }
+
+  // For adding to existing queue or playlists, show traditional embed
   if (tracks.length === 1) {
     const track = tracks[0];
-    if (!player?.playing && !player?.paused && !player?.queue.tracks.length) {
-      embed.setAuthor({ name: "Added Track to queue" });
-    } else {
-      const fields = [];
-      embed
-        .setAuthor({ name: "Added Track to queue" })
-        .setDescription(`[${track.info.title}](${track.info.uri})`)
-        .setFooter({ text: `Requested By: ${member.user.username}` });
+    const fields = [];
+    embed
+      .setAuthor({ name: "Added Track to queue" })
+      .setDescription(`[${track.info.title}](${track.info.uri})`)
+      .setFooter({ text: `Requested By: ${member.user.username}` });
 
+    fields.push({
+      name: "Song Duration",
+      value: "`" + prettyMs(track.info.length, { colonNotation: true }) + "`",
+      inline: true,
+    });
+
+    if (player?.queue?.tracks?.length > 0) {
       fields.push({
-        name: "Song Duration",
-        value: "`" + prettyMs(track.info.length, { colonNotation: true }) + "`",
+        name: "Position in Queue",
+        value: (player.queue.tracks.length + 1).toString(),
         inline: true,
       });
-
-      if (player?.queue?.tracks?.length > 0) {
-        fields.push({
-          name: "Position in Queue",
-          value: (player.queue.tracks.length + 1).toString(),
-          inline: true,
-        });
-      }
-      embed.addFields(fields);
     }
+    embed.addFields(fields);
   } else {
     embed
       .setAuthor({ name: "Added Playlist to queue" })
@@ -196,20 +216,6 @@ async function play({ member, guild, channel }, query) {
         }
       )
       .setFooter({ text: `Requested By: ${member.user.username}` });
-  }
-
-  // create a player and/or join the member's vc
-  if (!player?.connected) {
-    player = guild.client.musicManager.createPlayer(guild.id);
-    player.queue.data.channel = channel;
-    player.connect(member.voice.channel.id, { deafened: true });
-  }
-
-  // do queue things
-  const started = player.playing || player.paused;
-  player.queue.add(tracks, { requester: member.user.username, next: false });
-  if (!started) {
-    await player.queue.start();
   }
 
   return { embeds: [embed] };

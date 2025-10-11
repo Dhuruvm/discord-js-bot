@@ -104,6 +104,14 @@ module.exports = async (interaction) => {
           ephemeral: true 
         });
         
+      case 'music_boost':
+        const boostVolume = Math.min(200, player.volume + 20);
+        await player.setVolume(boostVolume);
+        return interaction.followUp({ 
+          content: `🔊 Bass boost! Volume set to ${boostVolume}%`, 
+          ephemeral: true 
+        });
+        
       case 'music_queue':
         const requester = member?.user?.username ? `@${member.user.username}` : "@User";
         const queueDisplay = MusicPlayerBuilder.createQueueDisplay(player, requester, 1);
