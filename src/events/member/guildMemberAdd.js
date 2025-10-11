@@ -1,5 +1,7 @@
 const { inviteHandler, greetingHandler } = require("@src/handlers");
 const { getSettings } = require("@schemas/Guild");
+const AntinukeHandler = require("@handlers/antinuke");
+const { AuditLogEvent } = require("discord.js");
 
 /**
  * @param {import('@src/structures').BotClient} client
@@ -10,6 +12,26 @@ module.exports = async (client, member) => {
 
   const { guild } = member;
   const settings = await getSettings(guild);
+
+  // Antinuke: Check for bot additions
+  if (member.user.bot) {
+    try {
+      const auditLogs = await guild.fetchAuditLogs({
+        type: AuditLogEvent.BotAdd,
+        limit: 1,
+      });
+
+      const botAddLog = auditLogs.entries.first();
+      if (botAddLog) {
+        const executor = botAddLog.executor;
+        if (executor && !executor.bot) {
+          await AntinukeHandler.handleBotAdd(guild, member, executor);
+        }
+      }
+    } catch (error) {
+      client.logger.error("Antinuke Bot Add Check Error", error);
+    }
+  }
 
   // Autorole
   if (settings.autorole) {

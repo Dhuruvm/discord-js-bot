@@ -108,6 +108,62 @@ const Schema = new mongoose.Schema({
     rejected_channel: String,
     staff_roles: [String],
   },
+  antinuke: {
+    enabled: Boolean,
+    log_channel: String,
+    whitelist: [String],
+    punishment: { type: String, enum: ["BAN", "KICK", "STRIP_ROLES"], default: "BAN" },
+    anti_ban: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_kick: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_role_create: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_role_delete: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_channel_create: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_channel_delete: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_webhook: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_bot: {
+      enabled: Boolean,
+      action: { type: String, enum: ["KICK", "BAN"], default: "KICK" },
+    },
+    anti_server_update: {
+      enabled: Boolean,
+    },
+    anti_emoji_delete: {
+      enabled: Boolean,
+      limit: { type: Number, default: 3 },
+      timeframe: { type: Number, default: 10 },
+    },
+    anti_prune: {
+      enabled: Boolean,
+    },
+  },
   // Global bot settings (stored with _id: "GLOBAL_SETTINGS")
   developers: [String],
 });

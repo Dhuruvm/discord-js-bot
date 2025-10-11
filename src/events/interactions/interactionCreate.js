@@ -34,6 +34,12 @@ module.exports = async (client, interaction) => {
       return musicControlHandler(interaction);
     }
 
+    // Handle antinuke controls
+    if (interaction.customId.startsWith('antinuke_')) {
+      const antinukeHandler = require("@src/components/antinuke/interaction-handler");
+      return antinukeHandler(interaction);
+    }
+
     switch (interaction.customId) {
       case "TICKET_CREATE":
         return ticketHandler.handleTicketOpen(interaction);
@@ -113,8 +119,23 @@ module.exports = async (client, interaction) => {
     }
   }
 
+  // Select Menus
+  else if (interaction.isStringSelectMenu()) {
+    // Handle antinuke module selection
+    if (interaction.customId.startsWith('antinuke_')) {
+      const antinukeHandler = require("@src/components/antinuke/interaction-handler");
+      return antinukeHandler(interaction);
+    }
+  }
+
   // Modals
   else if (interaction.type === InteractionType.ModalSubmit) {
+    // Handle antinuke modals
+    if (interaction.customId.startsWith('antinuke_')) {
+      const antinukeModalHandler = require("@src/components/antinuke/modal-handler");
+      return antinukeModalHandler(interaction);
+    }
+
     switch (interaction.customId) {
       case "SUGGEST_APPROVE_MODAL":
         return suggestionHandler.handleApproveModal(interaction);

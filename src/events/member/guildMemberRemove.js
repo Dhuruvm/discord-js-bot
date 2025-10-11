@@ -1,5 +1,7 @@
 const { inviteHandler, greetingHandler } = require("@src/handlers");
 const { getSettings } = require("@schemas/Guild");
+const AntinukeHandler = require("@handlers/antinuke");
+const { AuditLogEvent } = require("discord.js");
 
 /**
  * @param {import('@src/structures').BotClient} client
@@ -11,6 +13,24 @@ module.exports = async (client, member) => {
 
   const { guild } = member;
   const settings = await getSettings(guild);
+
+  // Antinuke: Check for kicks
+  try {
+    const auditLogs = await guild.fetchAuditLogs({
+      type: AuditLogEvent.MemberKick,
+      limit: 1,
+    });
+
+    const kickLog = auditLogs.entries.first();
+    if (kickLog && kickLog.target?.id === member.id) {
+      const executor = kickLog.executor;
+      if (executor && !executor.bot) {
+        await AntinukeHandler.handleKick(guild, member, executor);
+      }
+    }
+  } catch (error) {
+    client.logger.error("Antinuke Kick Check Error", error);
+  }
 
   // Check for counter channel
   if (settings.counters.find((doc) => ["MEMBERS", "BOTS", "USERS"].includes(doc.counter_type.toUpperCase()))) {
