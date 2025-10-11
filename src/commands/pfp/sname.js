@@ -5,7 +5,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
  */
 module.exports = {
   name: "sname",
-  description: "Set the server nickname for the bot in this server",
+  description: "Set the bot's nickname in this server (per-server setting)",
   category: "PFP",
   userPermissions: ["ManageGuild"],
   botPermissions: ["ChangeNickname"],

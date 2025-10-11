@@ -5,7 +5,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
  */
 module.exports = {
   name: "spfp",
-  description: "Set the server profile picture for the bot in this server",
+  description: "Set the bot's global profile picture (affects all servers)",
   category: "PFP",
   userPermissions: ["ManageGuild"],
   botPermissions: ["ManageGuild"],
@@ -35,7 +35,7 @@ module.exports = {
       imageUrl = mentionedUser.displayAvatarURL({ extension: "png", size: 1024 });
     } 
     // Check if it's a URL
-    else if (args[0].startsWith("http")) {
+    else if (args[0] && args[0].startsWith("http")) {
       imageUrl = args[0];
     }
     // Check for attachments
@@ -53,24 +53,26 @@ module.exports = {
     }
 
     try {
-      await message.guild.members.me.setAvatar(imageUrl);
+      // Note: Discord bots can only have ONE global avatar, not per-server avatars
+      // This changes the bot's avatar globally
+      await message.client.user.setAvatar(imageUrl);
 
       return message.safeReply(
         ContainerBuilder.success(
-          "Server Profile Updated!",
-          `Bot's profile picture has been updated in ${message.guild.name}!`,
+          "Global Bot Avatar Updated!",
+          `Bot's profile picture has been updated globally!\n\n⚠️ **Note:** Discord bots cannot have per-server avatars. This change affects the bot everywhere.`,
           0x00FF00,
           [
             {
               label: "View Avatar",
-              url: message.guild.members.me.displayAvatarURL({ size: 1024 }),
+              url: message.client.user.displayAvatarURL({ size: 1024 }),
               style: "Link"
             }
           ]
         )
       );
     } catch (error) {
-      console.error("Error setting server avatar:", error);
+      console.error("Error setting bot avatar:", error);
       return message.safeReply(
         ContainerBuilder.error(
           "Failed to Update Avatar",
@@ -97,24 +99,26 @@ module.exports = {
     }
 
     try {
-      await interaction.guild.members.me.setAvatar(imageUrl);
+      // Note: Discord bots can only have ONE global avatar, not per-server avatars
+      // This changes the bot's avatar globally
+      await interaction.client.user.setAvatar(imageUrl);
 
       return interaction.followUp(
         ContainerBuilder.success(
-          "Server Profile Updated!",
-          `Bot's profile picture has been updated in ${interaction.guild.name}!`,
+          "Global Bot Avatar Updated!",
+          `Bot's profile picture has been updated globally!\n\n⚠️ **Note:** Discord bots cannot have per-server avatars. This change affects the bot everywhere.`,
           0x00FF00,
           [
             {
               label: "View Avatar",
-              url: interaction.guild.members.me.displayAvatarURL({ size: 1024 }),
+              url: interaction.client.user.displayAvatarURL({ size: 1024 }),
               style: "Link"
             }
           ]
         )
       );
     } catch (error) {
-      console.error("Error setting server avatar:", error);
+      console.error("Error setting bot avatar:", error);
       return interaction.followUp(
         ContainerBuilder.error(
           "Failed to Update Avatar",

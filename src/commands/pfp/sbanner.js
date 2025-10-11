@@ -5,7 +5,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
  */
 module.exports = {
   name: "sbanner",
-  description: "Set the server banner for the bot in this server",
+  description: "Set the bot's global banner (affects all servers, requires bot Nitro)",
   category: "PFP",
   userPermissions: ["ManageGuild"],
   botPermissions: ["ManageGuild"],
@@ -30,7 +30,7 @@ module.exports = {
     let imageUrl;
 
     // Check if it's a URL
-    if (args[0].startsWith("http")) {
+    if (args[0] && args[0].startsWith("http")) {
       imageUrl = args[0];
     }
     // Check for attachments
@@ -48,12 +48,14 @@ module.exports = {
     }
 
     try {
-      await message.guild.members.me.setBanner(imageUrl);
+      // Note: Discord bots can only have ONE global banner, not per-server banners
+      // This changes the bot's banner globally and requires bot Nitro
+      await message.client.user.setBanner(imageUrl);
 
       return message.safeReply(
         ContainerBuilder.success(
-          "Server Banner Updated!",
-          `Bot's banner has been updated in ${message.guild.name}!`,
+          "Global Bot Banner Updated!",
+          `Bot's banner has been updated globally!\n\n⚠️ **Note:** Discord bots cannot have per-server banners. This change affects the bot everywhere.`,
           0x00FF00,
           [
             {
@@ -65,11 +67,11 @@ module.exports = {
         )
       );
     } catch (error) {
-      console.error("Error setting server banner:", error);
+      console.error("Error setting bot banner:", error);
       return message.safeReply(
         ContainerBuilder.error(
           "Failed to Update Banner",
-          `Error: ${error.message}\n\nNote: Your bot may need Nitro to set a banner.`,
+          `Error: ${error.message}\n\n**Note:** Your bot needs Discord Nitro to set a banner.`,
           0xFF0000
         )
       );
@@ -80,12 +82,14 @@ module.exports = {
     const imageUrl = interaction.options.getString("image_url");
 
     try {
-      await interaction.guild.members.me.setBanner(imageUrl);
+      // Note: Discord bots can only have ONE global banner, not per-server banners
+      // This changes the bot's banner globally and requires bot Nitro
+      await interaction.client.user.setBanner(imageUrl);
 
       return interaction.followUp(
         ContainerBuilder.success(
-          "Server Banner Updated!",
-          `Bot's banner has been updated in ${interaction.guild.name}!`,
+          "Global Bot Banner Updated!",
+          `Bot's banner has been updated globally!\n\n⚠️ **Note:** Discord bots cannot have per-server banners. This change affects the bot everywhere.`,
           0x00FF00,
           [
             {
@@ -97,11 +101,11 @@ module.exports = {
         )
       );
     } catch (error) {
-      console.error("Error setting server banner:", error);
+      console.error("Error setting bot banner:", error);
       return interaction.followUp(
         ContainerBuilder.error(
           "Failed to Update Banner",
-          `Error: ${error.message}\n\nNote: Your bot may need Nitro to set a banner.`,
+          `Error: ${error.message}\n\n**Note:** Your bot needs Discord Nitro to set a banner.`,
           0xFF0000
         )
       );
