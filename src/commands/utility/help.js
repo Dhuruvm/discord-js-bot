@@ -265,7 +265,8 @@ const waiter = (msg, userId, prefix) => {
 
 function getCategoryEmbed(client, category, prefix) {
   const ContainerBuilder = require("@helpers/ContainerBuilder");
-  const commands = client.commands.filter((cmd) => cmd.category === category);
+  // Get both message and slash commands for the category
+  const commands = Array.from(client.commands.values()).filter((cmd) => cmd.category === category);
 
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
@@ -304,13 +305,27 @@ function getCategoryEmbed(client, category, prefix) {
   }
 
   const commandsList = commands.map(cmd => {
-    if (cmd.command.subcommands && cmd.command.subcommands.length > 0) {
+    // Check for slash command subcommands first
+    if (cmd.slashCommand?.enabled && cmd.slashCommand?.options) {
+      const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1); // ApplicationCommandOptionType.Subcommand
+      if (subcommands.length > 0) {
+        return subcommands.map(sub => 
+          `- \`/${cmd.name} ${sub.name}\` - ${sub.description}`
+        ).join('\n');
+      }
+    }
+    
+    // Check for message command subcommands
+    if (cmd.command?.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `- \`${cmd.name} ${trigger}\` *`;
+        return `- \`${prefix || '!'}${cmd.name} ${trigger}\``;
       }).join('\n');
     }
-    return `- \`${cmd.name}\``;
+    
+    // Single command
+    const slashPrefix = cmd.slashCommand?.enabled ? '/' : (prefix || '!');
+    return `- \`${slashPrefix}${cmd.name}\` - ${cmd.description}`;
   }).join('\n');
 
   const categoryText = ContainerBuilder.createTextDisplay(
