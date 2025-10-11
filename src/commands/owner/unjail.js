@@ -16,10 +16,19 @@ module.exports = {
 
   async messageRun(message, args) {
     if (!jailedBots.has(message.guild.id)) {
-      return message.safeReply("❌ Cybork is not jailed in this server!");
+      return message.safeReply("❌ Bot is not jailed in this server!");
     }
 
     const jailInfo = jailedBots.get(message.guild.id);
+    
+    // Stop audio player first
+    if (jailInfo.player) {
+      try {
+        jailInfo.player.stop();
+      } catch (error) {
+        console.error("Error stopping player:", error);
+      }
+    }
     
     // Destroy the voice connection
     if (jailInfo.connection) {
@@ -32,15 +41,24 @@ module.exports = {
     
     jailedBots.delete(message.guild.id);
 
-    return message.safeReply(`✅ **Cybork has been released from:** ${jailInfo.channelName}`);
+    return message.safeReply(`✅ **Bot has been released from:** ${jailInfo.channelName}`);
   },
 
   async interactionRun(interaction) {
     if (!jailedBots.has(interaction.guild.id)) {
-      return interaction.followUp("❌ Cybork is not jailed in this server!");
+      return interaction.followUp("❌ Bot is not jailed in this server!");
     }
 
     const jailInfo = jailedBots.get(interaction.guild.id);
+    
+    // Stop audio player first
+    if (jailInfo.player) {
+      try {
+        jailInfo.player.stop();
+      } catch (error) {
+        console.error("Error stopping player:", error);
+      }
+    }
     
     // Destroy the voice connection
     if (jailInfo.connection) {
@@ -53,6 +71,6 @@ module.exports = {
     
     jailedBots.delete(interaction.guild.id);
 
-    return interaction.followUp(`✅ **Cybork has been released from:** ${jailInfo.channelName}`);
+    return interaction.followUp(`✅ **Bot has been released from:** ${jailInfo.channelName}`);
   },
 };

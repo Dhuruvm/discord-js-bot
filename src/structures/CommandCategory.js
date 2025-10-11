@@ -78,6 +78,11 @@ module.exports = {
     image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/robot-icon.png",
     emoji: "🤖",
   },
+  PFP: {
+    name: "Profile & Customization",
+    image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/profile-icon.png",
+    emoji: "🎭",
+  },
   // Hidden categories (not shown in help menu)
   ADMIN: {
     name: "Admin",

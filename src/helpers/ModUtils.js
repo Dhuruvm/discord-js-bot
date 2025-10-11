@@ -453,7 +453,7 @@ module.exports = class ModUtils {
 
     try {
       await target.voice.setMute(false, reason);
-      logModeration(issuer, target, reason, "Vmute");
+      logModeration(issuer, target, reason, "Vunmute");
       return true;
     } catch (ex) {
       error(`vUnmuteTarget`, ex);

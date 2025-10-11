@@ -1,8 +1,15 @@
 
-const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require("@discordjs/voice");
+const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer, createAudioResource, StreamType } = require("@discordjs/voice");
+const { Readable } = require("stream");
 
 // Map to store jailed bot instances per guild
 const jailedBots = new Map();
+
+// Create a silent audio stream to keep connection alive
+function createSilentAudioStream() {
+  const silence = Buffer.from([0xF8, 0xFF, 0xFE]);
+  return Readable.from(silence);
+}
 
 /**
  * Join user's voice channel and lock the bot there
@@ -30,11 +37,63 @@ async function joinAndLockVC(member, guild) {
       guildId: guild.id,
       adapterCreator: guild.voiceAdapterCreator,
       selfDeaf: false,
-      selfMute: false,
+      selfMute: true,
     });
 
     // Wait for connection to be ready
     await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
+
+    // Create audio player to keep connection alive
+    const player = createAudioPlayer();
+    const resource = createAudioResource(createSilentAudioStream(), {
+      inputType: StreamType.Arbitrary,
+    });
+
+    player.play(resource);
+    connection.subscribe(player);
+
+    // Handle disconnections and reconnect automatically
+    connection.on('stateChange', async (oldState, newState) => {
+      if (newState.status === VoiceConnectionStatus.Disconnected) {
+        try {
+          await Promise.race([
+            entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+            entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+          ]);
+        } catch (error) {
+          // Reconnect if still jailed
+          if (jailedBots.has(guild.id)) {
+            try {
+              connection.rejoin({
+                channelId: voiceChannel.id,
+                guildId: guild.id,
+                selfDeaf: false,
+                selfMute: true,
+              });
+            } catch (rejoinError) {
+              console.error("Failed to rejoin voice channel:", rejoinError);
+            }
+          }
+        }
+      }
+    });
+
+    // Handle connection errors
+    connection.on('error', (error) => {
+      console.error('Voice connection error:', error);
+      if (jailedBots.has(guild.id)) {
+        try {
+          connection.rejoin({
+            channelId: voiceChannel.id,
+            guildId: guild.id,
+            selfDeaf: false,
+            selfMute: true,
+          });
+        } catch (rejoinError) {
+          console.error("Failed to rejoin after error:", rejoinError);
+        }
+      }
+    });
 
     // Lock the bot in this channel
     jailedBots.set(guild.id, {
@@ -42,9 +101,10 @@ async function joinAndLockVC(member, guild) {
       channelId: voiceChannel.id,
       channelName: voiceChannel.name,
       connection: connection,
+      player: player,
     });
 
-    return `✅ **Cybork joined and locked in:** ${voiceChannel.name}\n\nI'm now locked in this voice channel and won't leave until unlocked with \`fuckoff\` command.`;
+    return `✅ **Bot joined and locked in:** ${voiceChannel.name}\n\nI'm now locked in this voice channel with auto-reconnect enabled. Use \`fuckoff\` to unlock.`;
   } catch (error) {
     console.error("Failed to join voice channel:", error);
     return `❌ Failed to join voice channel: ${error.message}`;
