@@ -4,22 +4,34 @@
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14. It features a modular command system supporting both prefix and slash commands, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
 ## Recent Changes (October 2025)
-### Music Player Redesign
-- Completely redesigned music player UI using Components V2 system
-- Modern player display with orange accent bar matching Discord's aesthetic
-- Enhanced now playing display with:
-  - Track number with visual bars indicator (|||)
-  - Album artwork thumbnail display
-  - Detailed queue view with track ratings
-  - Page navigation for long queues
-  - View History button
-- Interactive playback controls:
+### Music Player Enhancement (October 11, 2025)
+- **Fixed music player button handling**: Routed all music control buttons to dedicated handler for proper UI updates
+- **Improved interaction routing**: Music buttons now use `player-controls.js` instead of simple inline handlers
+- **Professional UI**: Components V2 system with orange accent bar, album artwork, queue pagination, and responsive controls
+- **Enhanced playback controls**:
   - Row 1: Back (⬅), Previous (◄◄), Pause/Play (⏸/▶), Next (►►)
   - Row 2: Stop (🛑 red button)
   - Row 3: Shuffle (🔀), Volume Up (🔼), Volume Down (🔽), Boost (🔼)
   - Row 4: Loop/Repeat (🔁)
-- Shows requester information and interaction timestamps
-- Seamless integration with play command - shows player UI when starting playback
+- **Real-time UI updates**: Player display refreshes when buttons are pressed
+- **Track info display**: Shows track number with visual bars (|||), artist, duration, and requester
+- **Queue management**: Pagination for long queues with page navigation buttons
+
+### New Fun Commands (October 11, 2025)
+- **fuck command**: Send a "fuck you" message with random variations, user mentions, reasons, and embed display
+- **fuckoff command**: Tell someone to fuck off with 4 intensity levels:
+  - Low: Polite fuck off
+  - Medium: Regular fuck off
+  - High: Aggressive fuck off
+  - Nuclear: Obliterate them completely
+  - Interactive buttons to count agreement ("They deserved it")
+  - Animated GIFs for each intensity level
+
+### Server Customization Documentation (October 11, 2025)
+- **Created SERVER_CUSTOMIZATION_INFO.md**: Comprehensive guide explaining Discord API limitations
+- **Per-server nickname**: `sname` command works perfectly per-server
+- **Global avatar/banner**: `spfp` and `sbanner` change globally (Discord API limitation)
+- **Workarounds documented**: Webhooks, server branding, and alternative solutions explained
 
 ### Owner Commands Enhancement
 - **listservers**: Complete redesign with dropdown menus, pagination, detailed server info, and leave confirmation
