@@ -8,7 +8,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
 module.exports = {
   name: "antinuke",
   description: "Configure advanced server protection system",
-  category: "SECURITY",
+  category: "ANTINUKE",
   userPermissions: [PermissionFlagsBits.Administrator],
   botPermissions: [PermissionFlagsBits.Administrator],
   command: {

@@ -93,7 +93,7 @@ async function getHelpMenu(context, prefix) {
   // Define category order: Owner first (if owner), then specific order
   const categoryOrder = [
     'OWNER',
-    'SECURITY',
+    'ANTINUKE',
     'AUTOMOD',
     'MUSIC',
     'MODERATION',
@@ -110,7 +110,7 @@ async function getHelpMenu(context, prefix) {
 
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
-    'SECURITY': { name: 'Security & Antinuke' },
+    'ANTINUKE': { name: 'Antinuke' },
     'AUTOMOD': { name: 'Auto Moderation' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
@@ -270,7 +270,7 @@ function getCategoryEmbed(client, category, prefix) {
 
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
-    'SECURITY': { name: 'Security & Antinuke' },
+    'ANTINUKE': { name: 'Antinuke' },
     'AUTOMOD': { name: 'Auto Moderation' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
