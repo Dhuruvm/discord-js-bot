@@ -267,17 +267,6 @@ function getCategoryEmbed(client, category, prefix) {
   const ContainerBuilder = require("@helpers/ContainerBuilder");
   // Get both message and slash commands for the category
   const commands = Array.from(client.commands.values()).filter((cmd) => cmd.category === category);
-  
-  // Debug logging
-  if (category === 'ANTINUKE') {
-    console.log('[DEBUG] ANTINUKE Category Check:');
-    console.log('- Total commands:', client.commands.length);
-    console.log('- Commands with ANTINUKE category:', commands.length);
-    console.log('- All categories:', client.commands.map(c => c.category).filter((v, i, a) => a.indexOf(v) === i));
-    if (commands.length > 0) {
-      console.log('- ANTINUKE commands:', commands.map(c => c.name));
-    }
-  }
 
   const categoryMapping = {
     'OWNER': { name: 'Owner' },

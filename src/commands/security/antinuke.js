@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, PermissionFlagsBits } = require("discord.js");
+const { ApplicationCommandOptionType } = require("discord.js");
 const { getSettings } = require("@schemas/Guild");
 const ContainerBuilder = require("@helpers/ContainerBuilder");
 
@@ -9,8 +9,8 @@ module.exports = {
   name: "antinuke",
   description: "Configure advanced server protection system",
   category: "ANTINUKE",
-  userPermissions: [PermissionFlagsBits.Administrator],
-  botPermissions: [PermissionFlagsBits.Administrator],
+  userPermissions: ["Administrator"],
+  botPermissions: ["Administrator"],
   command: {
     enabled: true,
     usage: "setup | whitelist | status | disable",
