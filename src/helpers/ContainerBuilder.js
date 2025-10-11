@@ -1,4 +1,4 @@
-const { MessageFlags } = require("discord.js");
+const { MessageFlags, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 const COMPONENTS_V2_FLAG = 1 << 15; // 32768
 
@@ -42,11 +42,43 @@ class ContainerBuilder {
     };
   }
 
+  static createMediaGallery(items) {
+    return {
+      type: 15,
+      items: items
+    };
+  }
+
+  static createThumbnail(url) {
+    return {
+      type: 16,
+      url: url
+    };
+  }
+
   static createActionRow(components) {
     return {
       type: 1,
       components: components
     };
+  }
+
+  static createButton({ customId, label, style = 'Secondary', emoji, url, disabled = false }) {
+    const buttonStyle = ButtonStyle[style] || ButtonStyle.Secondary;
+    const button = new ButtonBuilder()
+      .setStyle(buttonStyle)
+      .setDisabled(disabled);
+
+    if (label) button.setLabel(label);
+    if (emoji) button.setEmoji(emoji);
+    
+    if (buttonStyle === ButtonStyle.Link) {
+      button.setURL(url);
+    } else {
+      button.setCustomId(customId);
+    }
+
+    return button.toJSON();
   }
 
   build() {
@@ -56,7 +88,7 @@ class ContainerBuilder {
     };
   }
 
-  static quickMessage(title, description = null, fields = [], accentColor = 0xFFFFFF) {
+  static quickMessage(title, description = null, fields = [], accentColor = 0xFFFFFF, buttons = []) {
     const components = [];
 
     if (title) {
@@ -77,25 +109,77 @@ class ContainerBuilder {
       });
     }
 
+    if (buttons.length > 0) {
+      components.push(ContainerBuilder.createSeparator());
+      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
+      components.push(ContainerBuilder.createActionRow(buttonComponents));
+    }
+
     return new ContainerBuilder()
       .addContainer({ accentColor, components })
       .build();
   }
 
-  static success(title, message, accentColor = 0xFFFFFF) {
-    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
+  static serverInfo({ title, description, thumbnail, fields, accentColor = 0xFFFFFF, buttons = [] }) {
+    const components = [];
+
+    if (thumbnail) {
+      components.push(ContainerBuilder.createThumbnail(thumbnail));
+    }
+
+    if (title) {
+      components.push(ContainerBuilder.createTextDisplay(`## ${title}`));
+    }
+
+    if (description) {
+      components.push(ContainerBuilder.createTextDisplay(description));
+    }
+
+    if (fields && fields.length > 0) {
+      components.push(ContainerBuilder.createSeparator());
+      
+      let i = 0;
+      while (i < fields.length) {
+        const field1 = fields[i];
+        const field2 = fields[i + 1];
+        
+        if (field1.inline && field2 && field2.inline) {
+          const combinedText = `**${field1.name}**\n${field1.value}\n\n**${field2.name}**\n${field2.value}`;
+          components.push(ContainerBuilder.createTextDisplay(combinedText));
+          i += 2;
+        } else {
+          const fieldText = `**${field1.name}**\n${field1.value}`;
+          components.push(ContainerBuilder.createTextDisplay(fieldText));
+          i += 1;
+        }
+      }
+    }
+
+    if (buttons && buttons.length > 0) {
+      components.push(ContainerBuilder.createSeparator());
+      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
+      components.push(ContainerBuilder.createActionRow(buttonComponents));
+    }
+
+    return new ContainerBuilder()
+      .addContainer({ accentColor, components })
+      .build();
   }
 
-  static error(title, message, accentColor = 0xFFFFFF) {
-    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
+  static success(title, message, accentColor = 0xFFFFFF, buttons = []) {
+    return ContainerBuilder.quickMessage(`✅ ${title}`, message, [], accentColor, buttons);
   }
 
-  static warning(title, message, accentColor = 0xFFFFFF) {
-    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
+  static error(title, message, accentColor = 0xFFFFFF, buttons = []) {
+    return ContainerBuilder.quickMessage(`❌ ${title}`, message, [], accentColor, buttons);
   }
 
-  static info(title, message, accentColor = 0xFFFFFF) {
-    return ContainerBuilder.quickMessage(`**${title}**`, message, [], accentColor);
+  static warning(title, message, accentColor = 0xFFFFFF, buttons = []) {
+    return ContainerBuilder.quickMessage(`⚠️ ${title}`, message, [], accentColor, buttons);
+  }
+
+  static info(title, message, accentColor = 0xFFFFFF, buttons = []) {
+    return ContainerBuilder.quickMessage(`ℹ️ ${title}`, message, [], accentColor, buttons);
   }
 }
 

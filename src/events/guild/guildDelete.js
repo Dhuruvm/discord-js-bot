@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { getSettings } = require("@schemas/Guild");
 
 /**
@@ -13,8 +13,6 @@ module.exports = async (client, guild) => {
   settings.data.leftAt = new Date();
   await settings.save();
 
-  if (!client.joinLeaveWebhook) return;
-
   let ownerTag;
   const ownerId = guild.ownerId || settings.data.owner;
   try {
@@ -24,37 +22,39 @@ module.exports = async (client, guild) => {
     ownerTag = "Deleted User";
   }
 
-  const embed = new EmbedBuilder()
-    .setTitle("Guild Left")
-    .setThumbnail(guild.iconURL())
-    .setColor(client.config.EMBED_COLORS.ERROR)
-    .addFields(
+  const container = ContainerBuilder.serverInfo({
+    title: `👋 Server Left: ${guild.name || "Unknown"}`,
+    description: `**Server ID:** ${guild.id}\n**Owner:** ${ownerTag} (<@${ownerId}>)\n**Members:** ${guild.memberCount}`,
+    thumbnail: guild.iconURL(),
+    fields: [
       {
-        name: "Guild Name",
-        value: guild.name || "NA",
-        inline: false,
-      },
-      {
-        name: "ID",
-        value: guild.id,
-        inline: false,
-      },
-      {
-        name: "Owner",
-        value: `${ownerTag} [\`${ownerId}\`]`,
-        inline: false,
-      },
-      {
-        name: "Members",
-        value: `\`\`\`yaml\n${guild.memberCount}\`\`\``,
+        name: "📊 Remaining Servers",
+        value: `**Active Servers:** ${client.guilds.cache.size}`,
         inline: false,
       }
-    )
-    .setFooter({ text: `Guild #${client.guilds.cache.size}` });
-
-  client.joinLeaveWebhook.send({
-    username: "Leave",
-    avatarURL: client.user.displayAvatarURL(),
-    embeds: [embed],
+    ],
+    accentColor: parseInt(client.config.EMBED_COLORS.ERROR.replace('#', ''), 16),
+    buttons: []
   });
+
+  for (const ownerIdConfig of client.config.OWNER_IDS) {
+    try {
+      const owner = await client.users.fetch(ownerIdConfig).catch(() => null);
+      if (owner) {
+        await owner.send(container).catch(() => 
+          client.logger.warn(`Failed to send guild leave notification to owner ${ownerIdConfig}`)
+        );
+      }
+    } catch (error) {
+      client.logger.error(`Error sending DM to owner ${ownerIdConfig}:`, error);
+    }
+  }
+
+  if (client.joinLeaveWebhook) {
+    client.joinLeaveWebhook.send({
+      username: "Leave",
+      avatarURL: client.user.displayAvatarURL(),
+      ...container,
+    }).catch(() => {});
+  }
 };

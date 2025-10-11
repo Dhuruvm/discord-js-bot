@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { getSettings: registerGuild } = require("@schemas/Guild");
 
 /**
@@ -21,45 +21,51 @@ module.exports = async (client, guild) => {
   
   const createdTimestamp = Math.floor(guild.createdTimestamp / 1000);
   
-  const embed = new EmbedBuilder()
-    .setTitle(guild.name)
-    .setThumbnail(guild.iconURL({ dynamic: true }))
-    .setColor(client.config.EMBED_COLORS.SUCCESS)
-    .setDescription(`**/${guild.name} (${guild.id})**\nCreated <t:${createdTimestamp}:F>`)
-    .addFields(
+  const container = ContainerBuilder.serverInfo({
+    title: `🎉 New Server Joined: ${guild.name}`,
+    description: `**Server ID:** ${guild.id}\n**Created:** <t:${createdTimestamp}:F>\n**Owner:** <@${guild.ownerId}> (${guild.ownerId})`,
+    thumbnail: guild.iconURL({ dynamic: true }),
+    fields: [
       {
-        name: "Members",
+        name: "👥 Members",
         value: `**Total:** ${guild.memberCount}\n**Humans:** ${humans}\n**Bots:** ${bots}`,
         inline: true,
       },
       {
-        name: "Channels",
+        name: "📺 Channels",
         value: `**Total:** ${guild.channels.cache.size}\n**Text:** ${textChannels}\n**Voice:** ${voiceChannels}`,
         inline: true,
       },
       {
-        name: "Other",
-        value: `**Categories:** ${categories}\n**Roles:** ${guild.roles.cache.size}\n**Emojis:** ${guild.emojis.cache.size}`,
+        name: "📁 Categories",
+        value: `**Count:** ${categories}\n**Roles:** ${guild.roles.cache.size}\n**Emojis:** ${guild.emojis.cache.size}`,
         inline: true,
       },
       {
-        name: "Boost",
+        name: "⚡ Boost Status",
         value: `**Level:** ${guild.premiumTier}/3\n**Boosts:** ${guild.premiumSubscriptionCount || 0}`,
         inline: true,
       },
       {
-        name: "Information",
-        value: `**Verification:** ${guild.verificationLevel}\n**Vanity:** ${guild.vanityURLCode || 'None'}`,
+        name: "🔒 Server Info",
+        value: `**Verification:** ${guild.verificationLevel}\n**Vanity URL:** ${guild.vanityURLCode || 'None'}`,
+        inline: true,
+      },
+      {
+        name: "📊 Total Servers",
+        value: `**Active Servers:** ${client.guilds.cache.size}`,
         inline: true,
       }
-    )
-    .setFooter({ text: `${client.user.username} (${client.user.id})` });
+    ],
+    accentColor: parseInt(client.config.EMBED_COLORS.SUCCESS.replace('#', ''), 16),
+    buttons: []
+  });
 
   for (const ownerId of client.config.OWNER_IDS) {
     try {
       const owner = await client.users.fetch(ownerId).catch(() => null);
       if (owner) {
-        await owner.send({ embeds: [embed] }).catch(() => 
+        await owner.send(container).catch(() => 
           client.logger.warn(`Failed to send guild join notification to owner ${ownerId}`)
         );
       }
@@ -72,7 +78,7 @@ module.exports = async (client, guild) => {
     client.joinLeaveWebhook.send({
       username: "Join",
       avatarURL: client.user.displayAvatarURL(),
-      embeds: [embed],
+      ...container,
     }).catch(() => {});
   }
 };

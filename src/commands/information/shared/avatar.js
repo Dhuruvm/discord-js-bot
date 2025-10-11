@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { EMBED_COLORS } = require("@root/config");
 
 /**
@@ -12,20 +12,28 @@ module.exports = (user) => {
   const x1024 = user.displayAvatarURL({ extension: "png", size: 1024 });
   const x2048 = user.displayAvatarURL({ extension: "png", size: 2048 });
 
-  const embed = new EmbedBuilder()
-    .setTitle(`Avatar of ${user.username}`)
-    .setColor(EMBED_COLORS.BOT_EMBED)
-    .setImage(x256)
-    .setDescription(
-      `Links: • [x64](${x64}) ` +
-        `• [x128](${x128}) ` +
-        `• [x256](${x256}) ` +
-        `• [x512](${x512}) ` +
-        `• [x1024](${x1024}) ` +
-        `• [x2048](${x2048}) `
-    );
+  const components = [
+    ContainerBuilder.createThumbnail(x256),
+    ContainerBuilder.createTextDisplay(`## 🖼️ Avatar of ${user.username}`),
+    ContainerBuilder.createSeparator(),
+    ContainerBuilder.createTextDisplay(
+      `**Download Links:**\n` +
+      `[x64](${x64}) • [x128](${x128}) • [x256](${x256}) • [x512](${x512}) • [x1024](${x1024}) • [x2048](${x2048})`
+    ),
+    ContainerBuilder.createSeparator(),
+    ContainerBuilder.createActionRow([
+      ContainerBuilder.createButton({
+        label: "View Full Size",
+        url: x2048,
+        style: "Link"
+      })
+    ])
+  ];
 
-  return {
-    embeds: [embed],
-  };
+  return new ContainerBuilder()
+    .addContainer({ 
+      accentColor: parseInt(EMBED_COLORS.BOT_EMBED.replace('#', ''), 16),
+      components 
+    })
+    .build();
 };
