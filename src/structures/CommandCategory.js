@@ -138,4 +138,9 @@ module.exports = {
     emoji: "🎨",
     enabled: false,
   },
+  SECURITY: {
+    name: "Security & Antinuke",
+    image: "🛡️",
+    enabled: true,
+  },
 };
