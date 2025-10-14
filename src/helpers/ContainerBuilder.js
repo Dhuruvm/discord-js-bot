@@ -51,8 +51,12 @@ class ContainerBuilder {
 
   static createThumbnail(url) {
     return {
-      type: 13,
-      url: url
+      type: 12,
+      items: [{
+        media: {
+          url: url
+        }
+      }]
     };
   }
 
