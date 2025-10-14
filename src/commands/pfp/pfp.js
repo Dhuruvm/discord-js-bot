@@ -18,7 +18,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
 module.exports = {
   name: "pfp",
   description: "Search Pinterest for high-quality profile pictures and banners",
-  category: "IMAGE",
+  category: "PFP",
   botPermissions: ["SendMessages", "EmbedLinks", "AttachFiles"],
   command: {
     enabled: true,
