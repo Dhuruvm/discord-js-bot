@@ -203,21 +203,24 @@ async function displayResult(message, state) {
   const result = state.results[state.currentIndex];
   const { params } = state;
 
-  // Build container (max 5 components allowed)
+  // Build container (must have 1-5 components)
   const components = [];
 
-  // Thumbnail
+  // Image preview (using MediaGallery)
   if (result.image && !result.isFallback) {
-    components.push(ContainerBuilder.createThumbnail(result.image));
+    components.push(ContainerBuilder.createMediaGallery([{
+      media: { url: result.image }
+    }]));
   }
 
-  // Title and description
+  // Title
   components.push(
     ContainerBuilder.createTextDisplay(
       `## 🎨 ${result.title || "Pinterest Result"}`
     )
   );
 
+  // Description
   const description = result.isFallback
     ? "⚠️ Pinterest API unavailable. Click the link to search manually."
     : result.description || "No description available";
@@ -227,7 +230,7 @@ async function displayResult(message, state) {
   // Separator
   components.push(ContainerBuilder.createSeparator());
 
-  // Consolidated info (combine all info into one text display to stay under 5 components)
+  // Info (combine all info into one text display to stay under 5 components)
   components.push(
     ContainerBuilder.createTextDisplay(
       `**Type:** ${params.type === "pfp" ? "Profile Picture" : "Banner"} • **Format:** ${params.format === "gif" ? "GIF" : "Image"} • **Gender:** ${params.gender}\n**Result:** ${state.currentIndex + 1} / ${state.results.length}`

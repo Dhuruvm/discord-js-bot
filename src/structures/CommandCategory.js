@@ -83,6 +83,7 @@ module.exports = {
     name: "Profile & Customization",
     image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/profile-icon.png",
     emoji: "🎭",
+    enabled: true,
   },
   // Hidden categories (not shown in help menu)
   ADMIN: {
