@@ -22,7 +22,7 @@ module.exports = {
   category: "TICKET",
   userPermissions: ["ManageGuild"],
   command: {
-    enabled: true,
+    enabled: false,
     aliases: ["tickets", "ticketsetup"],
     minArgsCount: 1,
     subcommands: [
@@ -57,7 +57,7 @@ module.exports = {
     ],
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     options: [
       {
         name: "setup",

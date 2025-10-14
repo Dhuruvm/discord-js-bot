@@ -18,7 +18,7 @@ const ContainerBuilder = require("@helpers/ContainerBuilder");
 module.exports = {
   name: "pfp",
   description: "Search Pinterest for high-quality profile pictures and banners",
-  category: "PFP",
+  category: "IMAGE",
   botPermissions: ["SendMessages", "EmbedLinks", "AttachFiles"],
   command: {
     enabled: true,
@@ -203,7 +203,7 @@ async function displayResult(message, state) {
   const result = state.results[state.currentIndex];
   const { params } = state;
 
-  // Build container
+  // Build container (max 5 components allowed)
   const components = [];
 
   // Thumbnail
@@ -224,21 +224,15 @@ async function displayResult(message, state) {
 
   components.push(ContainerBuilder.createTextDisplay(description));
 
-  // Info fields
-  components.push(ContainerBuilder.createSeparator());
-  components.push(
-    ContainerBuilder.createTextDisplay(
-      `**Type:** ${params.type === "pfp" ? "Profile Picture" : "Banner"}\n**Format:** ${params.format === "gif" ? "GIF" : "Image"}\n**Gender:** ${params.gender}`
-    )
-  );
-  components.push(
-    ContainerBuilder.createTextDisplay(
-      `**Result:** ${state.currentIndex + 1} / ${state.results.length}`
-    )
-  );
-
   // Separator
   components.push(ContainerBuilder.createSeparator());
+
+  // Consolidated info (combine all info into one text display to stay under 5 components)
+  components.push(
+    ContainerBuilder.createTextDisplay(
+      `**Type:** ${params.type === "pfp" ? "Profile Picture" : "Banner"} • **Format:** ${params.format === "gif" ? "GIF" : "Image"} • **Gender:** ${params.gender}\n**Result:** ${state.currentIndex + 1} / ${state.results.length}`
+    )
+  );
 
   // Navigation buttons
   const navRow = new ActionRowBuilder().addComponents(

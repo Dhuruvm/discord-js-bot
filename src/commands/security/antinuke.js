@@ -12,12 +12,12 @@ module.exports = {
   userPermissions: ["Administrator"],
   botPermissions: ["Administrator"],
   command: {
-    enabled: true,
+    enabled: false,
     usage: "setup | whitelist | status | disable",
     minArgsCount: 1,
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     options: [
       {
         name: "setup",

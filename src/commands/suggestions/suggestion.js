@@ -13,7 +13,7 @@ module.exports = {
   category: "SUGGESTION",
   userPermissions: ["ManageGuild"],
   command: {
-    enabled: true,
+    enabled: false,
     aliases: ["setsuggest", "suggestions"],
     minArgsCount: 2,
     subcommands: [
@@ -52,7 +52,7 @@ module.exports = {
     ],
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     ephemeral: true,
     options: [
       {

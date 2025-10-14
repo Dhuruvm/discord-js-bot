@@ -23,13 +23,13 @@ module.exports = {
   botPermissions: ["EmbedLinks"],
   cooldown: 5,
   command: {
-    enabled: true,
+    enabled: false,
     usage: "<bio|banner|view>",
     aliases: ["customize", "profileedit"],
     minArgsCount: 1,
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     options: [
       {
         name: "bio",

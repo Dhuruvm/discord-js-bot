@@ -18,13 +18,13 @@ module.exports = {
   category: "SUGGESTION",
   cooldown: 20,
   command: {
-    enabled: true,
+    enabled: false,
     aliases: ["idea", "sug"],
     usage: "<suggestion>",
     minArgsCount: 1,
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     options: [
       {
         name: "suggestion",

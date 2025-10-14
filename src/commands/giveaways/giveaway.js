@@ -29,7 +29,7 @@ module.exports = {
   description: "giveaway commands",
   category: "GIVEAWAY",
   command: {
-    enabled: true,
+    enabled: false,
     aliases: ["gaway", "giveaways"],
     minArgsCount: 1,
     subcommands: [
@@ -64,7 +64,7 @@ module.exports = {
     ],
   },
   slashCommand: {
-    enabled: true,
+    enabled: false,
     ephemeral: true,
     options: [
       {
