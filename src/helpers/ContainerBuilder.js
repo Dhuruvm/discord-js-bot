@@ -44,14 +44,14 @@ class ContainerBuilder {
 
   static createMediaGallery(items) {
     return {
-      type: 15,
+      type: 12,
       items: items
     };
   }
 
   static createThumbnail(url) {
     return {
-      type: 16,
+      type: 13,
       url: url
     };
   }
