@@ -109,15 +109,18 @@ class ContainerBuilder {
       });
     }
 
-    if (buttons.length > 0) {
-      components.push(ContainerBuilder.createSeparator());
-      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
-      components.push(ContainerBuilder.createActionRow(buttonComponents));
-    }
-
-    return new ContainerBuilder()
+    const result = new ContainerBuilder()
       .addContainer({ accentColor, components })
       .build();
+
+    // Add buttons as separate top-level components if provided
+    if (buttons.length > 0) {
+      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
+      const actionRow = ContainerBuilder.createActionRow(buttonComponents);
+      result.components.push(actionRow);
+    }
+
+    return result;
   }
 
   static serverInfo({ title, description, thumbnail, fields, accentColor = 0xFFFFFF, buttons = [] }) {
@@ -155,15 +158,18 @@ class ContainerBuilder {
       }
     }
 
-    if (buttons && buttons.length > 0) {
-      components.push(ContainerBuilder.createSeparator());
-      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
-      components.push(ContainerBuilder.createActionRow(buttonComponents));
-    }
-
-    return new ContainerBuilder()
+    const result = new ContainerBuilder()
       .addContainer({ accentColor, components })
       .build();
+
+    // Add buttons as separate top-level components if provided
+    if (buttons && buttons.length > 0) {
+      const buttonComponents = buttons.map(btn => ContainerBuilder.createButton(btn));
+      const actionRow = ContainerBuilder.createActionRow(buttonComponents);
+      result.components.push(actionRow);
+    }
+
+    return result;
   }
 
   static success(title, message, accentColor = 0xFFFFFF, buttons = []) {

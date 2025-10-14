@@ -4,6 +4,31 @@
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14. It features a modular command system supporting both prefix and slash commands, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
 ## Recent Changes (October 2025)
+### Pinterest Profile Picture & Banner Command (October 14, 2025)
+- **!pfp command**: Search Pinterest for high-quality profile pictures and banners with full interactive UI
+- **Pinterest API Integration**: 
+  - Secure API key management via environment variables
+  - 10-minute caching system for search results
+  - Rate limiting (1 second between requests)
+  - Safe search filtering and fallback handling
+- **Interactive Features**:
+  - Carousel navigation with Prev/Next buttons (up to 25 results)
+  - Gender filter toggle (Male/Female/Neutral)
+  - Type toggle (Profile Picture/Banner)
+  - Format toggle (Image/GIF)
+  - Custom query modal for refined searches
+  - Save/Download with automatic image processing
+  - View on Pinterest link button
+- **Image Processing**:
+  - Automatic aspect ratio adjustment (1:1 for PFP, 16:9 for banners)
+  - Smart cropping and resizing using Canvas
+  - High-quality output (512px for PFP, 960px for banners)
+- **User Experience**: 
+  - 5-minute interaction timeout with proper cleanup
+  - User authorization checks (only command issuer can interact)
+  - Both slash command and prefix command support
+  - Pinterest red accent color (0xE60023) for branding
+
 ### Music Player Enhancement (October 11, 2025)
 - **Fixed music player button handling**: Routed all music control buttons to dedicated handler for proper UI updates
 - **Improved interaction routing**: Music buttons now use `player-controls.js` instead of simple inline handlers
