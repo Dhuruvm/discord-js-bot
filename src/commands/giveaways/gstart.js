@@ -57,12 +57,12 @@ module.exports = {
   async messageRun(message, args) {
     const duration = ems(args[0]);
     if (!duration) {
-      return message.safeReply("❌ Invalid duration! Examples: `1h`, `1d`, `1w`, `30m`");
+      return message.safeReply("<:error:1424072711671382076> Invalid duration! Examples: `1h`, `1d`, `1w`, `30m`");
     }
 
     const winners = parseInt(args[1]);
     if (isNaN(winners) || winners < 1) {
-      return message.safeReply("❌ Invalid number of winners! Must be at least 1.");
+      return message.safeReply("<:error:1424072711671382076> Invalid number of winners! Must be at least 1.");
     }
 
     // Get prize (everything after winners, or until channel mention)
@@ -77,25 +77,25 @@ module.exports = {
 
     const prize = args.slice(2, prizeEndIndex).join(" ");
     if (!prize) {
-      return message.safeReply("❌ Please provide a prize for the giveaway!");
+      return message.safeReply("<:error:1424072711671382076> Please provide a prize for the giveaway!");
     }
 
     let giveawayChannel = message.channel;
     if (channelArg) {
       const match = message.guild.findMatchingChannels(channelArg);
       if (!match.length) {
-        return message.safeReply(`❌ Could not find channel ${channelArg}`);
+        return message.safeReply(`<:error:1424072711671382076> Could not find channel ${channelArg}`);
       }
       giveawayChannel = match[0];
     }
 
     if (giveawayChannel.type !== ChannelType.GuildText) {
-      return message.safeReply("❌ Giveaways can only be hosted in text channels!");
+      return message.safeReply("<:error:1424072711671382076> Giveaways can only be hosted in text channels!");
     }
 
     const perms = ["ViewChannel", "SendMessages", "EmbedLinks"];
     if (!giveawayChannel.permissionsFor(message.guild.members.me).has(perms)) {
-      return message.safeReply(`❌ I need \`${perms.join(", ")}\` permissions in ${giveawayChannel}`);
+      return message.safeReply(`<:error:1424072711671382076> I need \`${perms.join(", ")}\` permissions in ${giveawayChannel}`);
     }
 
     try {
@@ -119,22 +119,22 @@ module.exports = {
       };
 
       await message.client.giveawaysManager.start(giveawayChannel, options);
-      return message.safeReply(`✅ Giveaway started in ${giveawayChannel}!\n**Prize:** ${prize}\n**Duration:** ${args[0]}\n**Winners:** ${winners}`);
+      return message.safeReply(`<:success:1424072640829722745> Giveaway started in ${giveawayChannel}!\n**Prize:** ${prize}\n**Duration:** ${args[0]}\n**Winners:** ${winners}`);
     } catch (error) {
       message.client.logger.error("Giveaway Start", error);
-      return message.safeReply(`❌ An error occurred: ${error.message}`);
+      return message.safeReply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 
   async interactionRun(interaction) {
     const duration = ems(interaction.options.getString("duration"));
     if (!duration) {
-      return interaction.followUp("❌ Invalid duration! Examples: `1h`, `1d`, `1w`, `30m`");
+      return interaction.followUp("<:error:1424072711671382076> Invalid duration! Examples: `1h`, `1d`, `1w`, `30m`");
     }
 
     const winners = interaction.options.getInteger("winners");
     if (winners < 1) {
-      return interaction.followUp("❌ Number of winners must be at least 1!");
+      return interaction.followUp("<:error:1424072711671382076> Number of winners must be at least 1!");
     }
 
     const prize = interaction.options.getString("prize");
@@ -142,12 +142,12 @@ module.exports = {
     const host = interaction.options.getUser("host") || interaction.user;
 
     if (giveawayChannel.type !== ChannelType.GuildText) {
-      return interaction.followUp("❌ Giveaways can only be hosted in text channels!");
+      return interaction.followUp("<:error:1424072711671382076> Giveaways can only be hosted in text channels!");
     }
 
     const perms = ["ViewChannel", "SendMessages", "EmbedLinks"];
     if (!giveawayChannel.permissionsFor(interaction.guild.members.me).has(perms)) {
-      return interaction.followUp(`❌ I need \`${perms.join(", ")}\` permissions in ${giveawayChannel}`);
+      return interaction.followUp(`<:error:1424072711671382076> I need \`${perms.join(", ")}\` permissions in ${giveawayChannel}`);
     }
 
     try {
@@ -171,10 +171,10 @@ module.exports = {
       };
 
       await interaction.client.giveawaysManager.start(giveawayChannel, options);
-      return interaction.followUp(`✅ Giveaway started in ${giveawayChannel}!\n**Prize:** ${prize}\n**Duration:** ${interaction.options.getString("duration")}\n**Winners:** ${winners}`);
+      return interaction.followUp(`<:success:1424072640829722745> Giveaway started in ${giveawayChannel}!\n**Prize:** ${prize}\n**Duration:** ${interaction.options.getString("duration")}\n**Winners:** ${winners}`);
     } catch (error) {
       interaction.client.logger.error("Giveaway Start", error);
-      return interaction.followUp(`❌ An error occurred: ${error.message}`);
+      return interaction.followUp(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 };

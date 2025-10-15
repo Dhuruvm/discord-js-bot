@@ -51,7 +51,7 @@ module.exports = {
 
 async function paste(content, title) {
   const response = await postToBin(content, title);
-  if (!response) return "❌ Something went wrong";
+  if (!response) return "<:error:1424072711671382076> Something went wrong";
 
   const embed = new EmbedBuilder()
     .setAuthor({ name: "Paste links" })

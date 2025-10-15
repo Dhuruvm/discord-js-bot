@@ -139,6 +139,9 @@ async function getHelpMenu(context, prefix) {
     `> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`
   );
 
+  // Categories to exclude from help dropdown
+  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE'];
+
   // Build menu options in specific order, filtering based on ownership
   const menuOptions = categoryOrder
     .filter(key => {
@@ -146,6 +149,7 @@ async function getHelpMenu(context, prefix) {
       if (!category) return false;
       if (category.enabled === false) return false;
       if (key === 'OWNER' && !isOwner) return false;
+      if (excludedCategories.includes(key)) return false;
       return true;
     })
     .map(key => {

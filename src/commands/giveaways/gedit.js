@@ -51,7 +51,7 @@ module.exports = {
     const messageId = args[0];
     
     if (!messageId) {
-      return message.safeReply("❌ Please provide a valid message ID!");
+      return message.safeReply("<:error:1424072711671382076> Please provide a valid message ID!");
     }
 
     const giveaway = message.client.giveawaysManager.giveaways.find(
@@ -59,53 +59,53 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return message.safeReply(`❌ Could not find a giveaway with message ID: \`${messageId}\``);
+      return message.safeReply(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return message.safeReply("❌ Cannot edit an ended giveaway!");
+      return message.safeReply("<:error:1424072711671382076> Cannot edit an ended giveaway!");
     }
 
     const editType = args[1]?.toLowerCase();
     const value = args.slice(2).join(" ");
 
     if (!editType || !value) {
-      return message.safeReply("❌ Usage: `gedit <message_id> <add_time/new_prize/new_winners> <value>`");
+      return message.safeReply("<:error:1424072711671382076> Usage: `gedit <message_id> <add_time/new_prize/new_winners> <value>`");
     }
 
     try {
       if (editType === "add_time" || editType === "addtime" || editType === "time") {
         const addDuration = ems(value);
         if (!addDuration) {
-          return message.safeReply("❌ Invalid duration! Examples: `1h`, `30m`, `1d`");
+          return message.safeReply("<:error:1424072711671382076> Invalid duration! Examples: `1h`, `30m`, `1d`");
         }
         await giveaway.edit({
           addTime: addDuration,
         });
-        return message.safeReply(`✅ Added ${value} to the giveaway duration!`);
+        return message.safeReply(`<:success:1424072640829722745> Added ${value} to the giveaway duration!`);
       } 
       else if (editType === "new_prize" || editType === "prize") {
         await giveaway.edit({
           newPrize: value,
         });
-        return message.safeReply(`✅ Prize updated to: **${value}**`);
+        return message.safeReply(`<:success:1424072640829722745> Prize updated to: **${value}**`);
       } 
       else if (editType === "new_winners" || editType === "winners") {
         const newWinners = parseInt(value);
         if (isNaN(newWinners) || newWinners < 1) {
-          return message.safeReply("❌ Invalid number of winners!");
+          return message.safeReply("<:error:1424072711671382076> Invalid number of winners!");
         }
         await giveaway.edit({
           newWinnerCount: newWinners,
         });
-        return message.safeReply(`✅ Number of winners updated to: **${newWinners}**`);
+        return message.safeReply(`<:success:1424072640829722745> Number of winners updated to: **${newWinners}**`);
       } 
       else {
-        return message.safeReply("❌ Invalid edit type! Use: `add_time`, `new_prize`, or `new_winners`");
+        return message.safeReply("<:error:1424072711671382076> Invalid edit type! Use: `add_time`, `new_prize`, or `new_winners`");
       }
     } catch (error) {
       message.client.logger.error("Giveaway Edit", error);
-      return message.safeReply(`❌ An error occurred: ${error.message}`);
+      return message.safeReply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 
@@ -116,7 +116,7 @@ module.exports = {
     const newWinners = interaction.options.getInteger("new_winners");
 
     if (!addTime && !newPrize && !newWinners) {
-      return interaction.followUp("❌ Please provide at least one option to edit (add_time, new_prize, or new_winners)!");
+      return interaction.followUp("<:error:1424072711671382076> Please provide at least one option to edit (add_time, new_prize, or new_winners)!");
     }
 
     const giveaway = interaction.client.giveawaysManager.giveaways.find(
@@ -124,11 +124,11 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return interaction.followUp(`❌ Could not find a giveaway with message ID: \`${messageId}\``);
+      return interaction.followUp(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return interaction.followUp("❌ Cannot edit an ended giveaway!");
+      return interaction.followUp("<:error:1424072711671382076> Cannot edit an ended giveaway!");
     }
 
     try {
@@ -138,7 +138,7 @@ module.exports = {
       if (addTime) {
         const addDuration = ems(addTime);
         if (!addDuration) {
-          return interaction.followUp("❌ Invalid duration! Examples: `1h`, `30m`, `1d`");
+          return interaction.followUp("<:error:1424072711671382076> Invalid duration! Examples: `1h`, `30m`, `1d`");
         }
         editOptions.addTime = addDuration;
         changes.push(`Added ${addTime} to duration`);
@@ -155,10 +155,10 @@ module.exports = {
       }
 
       await giveaway.edit(editOptions);
-      return interaction.followUp(`✅ Giveaway updated!\n${changes.map(c => `• ${c}`).join("\n")}`);
+      return interaction.followUp(`<:success:1424072640829722745> Giveaway updated!\n${changes.map(c => `• ${c}`).join("\n")}`);
     } catch (error) {
       interaction.client.logger.error("Giveaway Edit", error);
-      return interaction.followUp(`❌ An error occurred: ${error.message}`);
+      return interaction.followUp(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 };

@@ -142,7 +142,7 @@ module.exports = async (interaction) => {
   } catch (error) {
     console.error("Music control error:", error);
     interaction.followUp({ 
-      content: `❌ Error: ${error.message}`, 
+      content: `<:error:1424072711671382076> Error: ${error.message}`, 
       ephemeral: true 
     }).catch(() => {});
   }

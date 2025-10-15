@@ -285,7 +285,7 @@ async function showBannerList(interaction, userDb, category) {
     const isCurrent = id === currentBanner;
     
     let label = banner.name;
-    if (isCurrent) label = `✅ ${label} (Current)`;
+    if (isCurrent) label = `<:success:1424072640829722745> ${label} (Current)`;
     else if (!canAfford && !owned) label = `🔒 ${label}`;
 
     return new StringSelectMenuOptionBuilder()

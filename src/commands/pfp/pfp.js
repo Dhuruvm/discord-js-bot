@@ -320,7 +320,7 @@ function setupCollector(message, state) {
     // Check if user is authorized
     if (interaction.user.id !== state.userId) {
       return interaction.reply({
-        content: "❌ This is not your search! Use the command yourself.",
+        content: "<:error:1424072711671382076> This is not your search! Use the command yourself.",
         ephemeral: true,
       });
     }
@@ -379,7 +379,7 @@ function setupCollector(message, state) {
     } catch (error) {
       console.error("Collector error:", error);
       await interaction.reply({
-        content: `❌ An error occurred: ${error.message}`,
+        content: `<:error:1424072711671382076> An error occurred: ${error.message}`,
         ephemeral: true,
       });
     }
@@ -490,7 +490,7 @@ async function handleSave(interaction, state) {
 
   if (!result.image) {
     return interaction.followUp({
-      content: "❌ No image available to download.",
+      content: "<:error:1424072711671382076> No image available to download.",
       ephemeral: true,
     });
   }
@@ -506,7 +506,7 @@ async function handleSave(interaction, state) {
 
     if (!buffer) {
       return interaction.followUp({
-        content: "❌ Failed to process image. Please try another one.",
+        content: "<:error:1424072711671382076> Failed to process image. Please try another one.",
         ephemeral: true,
       });
     }
@@ -515,14 +515,14 @@ async function handleSave(interaction, state) {
     const attachment = new AttachmentBuilder(buffer, { name: filename });
 
     await interaction.followUp({
-      content: `✅ Here's your ${state.params.type === "pfp" ? "profile picture" : "banner"}!`,
+      content: `<:success:1424072640829722745> Here's your ${state.params.type === "pfp" ? "profile picture" : "banner"}!`,
       files: [attachment],
       ephemeral: true,
     });
   } catch (error) {
     console.error("Save error:", error);
     await interaction.followUp({
-      content: `❌ Failed to download: ${error.message}`,
+      content: `<:error:1424072711671382076> Failed to download: ${error.message}`,
       ephemeral: true,
     });
   }

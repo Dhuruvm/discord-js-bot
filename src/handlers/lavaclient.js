@@ -18,9 +18,9 @@ module.exports = (client) => {
         autoResolveYoutubeTracks: false,
         loaders: [SpotifyItemType.Album, SpotifyItemType.Artist, SpotifyItemType.Playlist, SpotifyItemType.Track],
       });
-      console.log("✅ Spotify integration connected successfully");
+      console.log("<:success:1424072640829722745> Spotify integration connected successfully");
     } catch (error) {
-      console.error("❌ Spotify integration failed:", error.message);
+      console.error("<:error:1424072711671382076> Spotify integration failed:", error.message);
     }
   }
 
@@ -44,7 +44,7 @@ module.exports = (client) => {
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
 
   lavaclient.on("nodeConnect", (node) => {
-    client.logger.success(`✅ Lavalink connected successfully - Node "${node.id}" is ready`);
+    client.logger.success(`<:success:1424072640829722745> Lavalink connected successfully - Node "${node.id}" is ready`);
   });
 
   lavaclient.on("nodeDisconnect", (node, reason) => {
@@ -52,7 +52,7 @@ module.exports = (client) => {
   });
 
   lavaclient.on("nodeError", (node, error) => {
-    client.logger.error(`❌ Lavalink node "${node.id}" error: ${error.message}`);
+    client.logger.error(`<:error:1424072711671382076> Lavalink node "${node.id}" error: ${error.message}`);
   });
 
   lavaclient.on("trackStart", async (player, track) => {

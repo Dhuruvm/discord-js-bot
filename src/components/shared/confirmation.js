@@ -71,7 +71,7 @@ class ConfirmationHandler {
       );
 
       await btnInteraction.editReply({
-        content: confirmed ? "✅ Confirmed" : "❌ Cancelled",
+        content: confirmed ? "<:success:1424072640829722745> Confirmed" : "<:error:1424072711671382076> Cancelled",
         embeds: [],
         components: [disabledRow],
       });

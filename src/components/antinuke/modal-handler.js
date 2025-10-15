@@ -16,7 +16,7 @@ module.exports = async (interaction) => {
 
     if (isNaN(limit) || isNaN(timeframe) || limit < 1 || timeframe < 1) {
       return interaction.followUp({
-        content: "❌ Invalid values! Please enter valid numbers.",
+        content: "<:error:1424072711671382076> Invalid values! Please enter valid numbers.",
         ephemeral: true
       });
     }
@@ -50,7 +50,7 @@ module.exports = async (interaction) => {
 
     if (!["BAN", "KICK", "STRIP_ROLES"].includes(punishment)) {
       return interaction.followUp({
-        content: "❌ Invalid punishment type! Use: BAN, KICK, or STRIP_ROLES",
+        content: "<:error:1424072711671382076> Invalid punishment type! Use: BAN, KICK, or STRIP_ROLES",
         ephemeral: true
       });
     }
@@ -79,7 +79,7 @@ module.exports = async (interaction) => {
     // Validate user ID
     if (!/^\d{17,19}$/.test(userId)) {
       return interaction.followUp({
-        content: "❌ Invalid user ID! Please provide a valid Discord user ID.",
+        content: "<:error:1424072711671382076> Invalid user ID! Please provide a valid Discord user ID.",
         ephemeral: true
       });
     }
@@ -93,7 +93,7 @@ module.exports = async (interaction) => {
 
       if (settings.antinuke.whitelist.includes(userId)) {
         return interaction.followUp({
-          content: `❌ **${user.tag}** is already whitelisted!`,
+          content: `<:error:1424072711671382076> **${user.tag}** is already whitelisted!`,
           ephemeral: true
         });
       }
@@ -105,12 +105,12 @@ module.exports = async (interaction) => {
       await interaction.editReply(response);
 
       return interaction.followUp({
-        content: `✅ Added **${user.tag}** to the antinuke whitelist!`,
+        content: `<:success:1424072640829722745> Added **${user.tag}** to the antinuke whitelist!`,
         ephemeral: true
       });
     } catch (error) {
       return interaction.followUp({
-        content: "❌ Could not find that user! Please check the ID and try again.",
+        content: "<:error:1424072711671382076> Could not find that user! Please check the ID and try again.",
         ephemeral: true
       });
     }
@@ -131,7 +131,7 @@ module.exports = async (interaction) => {
     const channel = interaction.guild.channels.cache.get(channelId);
     if (!channel || !channel.isTextBased()) {
       return interaction.followUp({
-        content: "❌ Invalid channel! Please provide a valid text channel.",
+        content: "<:error:1424072711671382076> Invalid channel! Please provide a valid text channel.",
         ephemeral: true
       });
     }
@@ -146,7 +146,7 @@ module.exports = async (interaction) => {
     await interaction.editReply(response);
 
     return interaction.followUp({
-      content: `✅ Set antinuke log channel to ${channel}`,
+      content: `<:success:1424072640829722745> Set antinuke log channel to ${channel}`,
       ephemeral: true
     });
   }

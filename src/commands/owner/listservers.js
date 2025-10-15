@@ -297,7 +297,7 @@ module.exports = {
             await server.leave();
             
             const successContainer = ContainerBuilder.success(
-              "✅ Left Server",
+              "<:success:1424072640829722745> Left Server",
               `Successfully left **${serverName}**`,
               0x00FF00
             );

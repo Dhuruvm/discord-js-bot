@@ -43,7 +43,7 @@ module.exports = {
     const target = message.mentions.users.first();
     
     if (!target) {
-      return message.safeReply("❌ You need to mention someone to tell them to fuck off!");
+      return message.safeReply("<:error:1424072711671382076> You need to mention someone to tell them to fuck off!");
     }
 
     if (target.id === message.author.id) {

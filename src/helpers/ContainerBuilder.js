@@ -177,11 +177,11 @@ class ContainerBuilder {
   }
 
   static success(title, message, accentColor = 0xFFFFFF, buttons = []) {
-    return ContainerBuilder.quickMessage(`✅ ${title}`, message, [], accentColor, buttons);
+    return ContainerBuilder.quickMessage(`<:success:1424072640829722745> ${title}`, message, [], accentColor, buttons);
   }
 
   static error(title, message, accentColor = 0xFFFFFF, buttons = []) {
-    return ContainerBuilder.quickMessage(`❌ ${title}`, message, [], accentColor, buttons);
+    return ContainerBuilder.quickMessage(`<:error:1424072711671382076> ${title}`, message, [], accentColor, buttons);
   }
 
   static warning(title, message, accentColor = 0xFFFFFF, buttons = []) {

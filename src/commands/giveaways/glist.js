@@ -26,7 +26,7 @@ module.exports = {
     );
 
     if (giveaways.length === 0) {
-      return message.safeReply("❌ There are no active giveaways in this server!");
+      return message.safeReply("<:error:1424072711671382076> There are no active giveaways in this server!");
     }
 
     const embed = new EmbedBuilder()
@@ -53,7 +53,7 @@ module.exports = {
     );
 
     if (giveaways.length === 0) {
-      return interaction.followUp("❌ There are no active giveaways in this server!");
+      return interaction.followUp("<:error:1424072711671382076> There are no active giveaways in this server!");
     }
 
     const embed = new EmbedBuilder()

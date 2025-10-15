@@ -19,7 +19,7 @@ function createSilentAudioStream() {
 async function joinAndLockVC(member, guild) {
   // Check if user is in a voice channel
   if (!member.voice.channel) {
-    return "❌ You must be in a voice channel first!";
+    return "<:error:1424072711671382076> You must be in a voice channel first!";
   }
 
   const voiceChannel = member.voice.channel;
@@ -27,7 +27,7 @@ async function joinAndLockVC(member, guild) {
 
   // Check bot permissions
   if (!voiceChannel.permissionsFor(botMember).has(["Connect", "Speak"])) {
-    return "❌ I don't have permission to join your voice channel!";
+    return "<:error:1424072711671382076> I don't have permission to join your voice channel!";
   }
 
   try {
@@ -104,10 +104,10 @@ async function joinAndLockVC(member, guild) {
       player: player,
     });
 
-    return `✅ **Bot joined and locked in:** ${voiceChannel.name}\n\nI'm now locked in this voice channel with auto-reconnect enabled. Use \`fuckoff\` to unlock.`;
+    return `<:success:1424072640829722745> **Bot joined and locked in:** ${voiceChannel.name}\n\nI'm now locked in this voice channel with auto-reconnect enabled. Use \`fuckoff\` to unlock.`;
   } catch (error) {
     console.error("Failed to join voice channel:", error);
-    return `❌ Failed to join voice channel: ${error.message}`;
+    return `<:error:1424072711671382076> Failed to join voice channel: ${error.message}`;
   }
 }
 

@@ -183,7 +183,7 @@ module.exports = {
         return interaction.editReply(
           ContainerBuilder.success(
             "User Whitelisted",
-            `✅ Added **${user.tag}** to the antinuke whitelist.\n\nThis user can now perform administrative actions without triggering antinuke.`,
+            `<:success:1424072640829722745> Added **${user.tag}** to the antinuke whitelist.\n\nThis user can now perform administrative actions without triggering antinuke.`,
             0x00FF00
           )
         );
@@ -202,7 +202,7 @@ module.exports = {
         return interaction.editReply(
           ContainerBuilder.success(
             "User Removed",
-            `✅ Removed **${user.tag}** from the antinuke whitelist.`,
+            `<:success:1424072640829722745> Removed **${user.tag}** from the antinuke whitelist.`,
             0x00FF00
           )
         );
@@ -248,7 +248,7 @@ async function getStatusDisplay(guild) {
   components.push(ContainerBuilder.createTextDisplay("# 🛡️ Antinuke Status"));
   components.push(ContainerBuilder.createSeparator());
 
-  const mainStatus = antinuke.enabled ? "✅ **ENABLED**" : "❌ **DISABLED**";
+  const mainStatus = antinuke.enabled ? "<:success:1424072640829722745> **ENABLED**" : "<:error:1424072711671382076> **DISABLED**";
   components.push(ContainerBuilder.createTextDisplay(`**System Status:** ${mainStatus}`));
 
   if (antinuke.log_channel) {
@@ -277,7 +277,7 @@ async function getStatusDisplay(guild) {
 
   modules.forEach(module => {
     const enabled = antinuke[module.key]?.enabled;
-    const status = enabled ? "✅" : "❌";
+    const status = enabled ? "<:success:1424072640829722745>" : "<:error:1424072711671382076>";
     const limit = antinuke[module.key]?.limit;
     const extra = limit ? ` (${limit}/10s)` : "";
     components.push(ContainerBuilder.createTextDisplay(`${status} **${module.name}**${extra}`));

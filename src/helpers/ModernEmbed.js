@@ -10,8 +10,8 @@ try {
 } catch (error) {
   console.error("Failed to load emojis.json:", error);
   EMOJIS = {
-    success: "✅",
-    error: "❌",
+    success: "<:success:1424072640829722745>",
+    error: "<:error:1424072711671382076>",
     warning: "⚠️",
     info: "ℹ️"
   };
@@ -315,7 +315,7 @@ class ModernEmbed {
   static success(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`${EMOJIS.success || "✅"} ${title}`, description)
+      .setHeader(`${EMOJIS.success || "<:success:1424072640829722745>"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);
@@ -333,7 +333,7 @@ class ModernEmbed {
   static error(title, description, footer, components = null) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setHeader(`${EMOJIS.error || "❌"} ${title}`, description)
+      .setHeader(`${EMOJIS.error || "<:error:1424072711671382076>"} ${title}`, description)
       .setTimestamp();
     
     if (footer) embed.setFooter(footer);
@@ -348,7 +348,7 @@ class ModernEmbed {
   static simpleError(message) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setDescription(`${EMOJIS.error || "❌"} | ${message}`);
+      .setDescription(`${EMOJIS.error || "<:error:1424072711671382076>"} | ${message}`);
     
     return embed.toMessage();
   }
@@ -360,7 +360,7 @@ class ModernEmbed {
   static simpleSuccess(message) {
     const embed = new ModernEmbed()
       .setColor(0xFFFFFF)
-      .setDescription(`${EMOJIS.success || "✅"} | ${message}`);
+      .setDescription(`${EMOJIS.success || "<:success:1424072640829722745>"} | ${message}`);
     
     return embed.toMessage();
   }

@@ -307,7 +307,7 @@ async function handleEmbedDone({ interaction, data, client }) {
   });
 
   await interaction.followUp({
-    content: "✅ Embed created successfully!",
+    content: "<:success:1424072640829722745> Embed created successfully!",
     ephemeral: true,
   });
 

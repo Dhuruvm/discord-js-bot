@@ -152,7 +152,7 @@ module.exports = async (client, guild) => {
               if (guildToLeave) {
                 const confirmContainer = ContainerBuilder.warning(
                   "⚠️ Confirm Leave Server",
-                  `Are you sure you want to leave **${guildToLeave.name}**?\n\nReact with ✅ to confirm or ❌ to cancel.\n\n**This action cannot be undone!**`,
+                  `Are you sure you want to leave **${guildToLeave.name}**?\n\nReact with <:success:1424072640829722745> to confirm or <:error:1424072711671382076> to cancel.\n\n**This action cannot be undone!**`,
                   0xFFA500
                 );
                 
@@ -160,17 +160,17 @@ module.exports = async (client, guild) => {
                   flags: confirmContainer.flags,
                   components: confirmContainer.components,
                 });
-                await interaction.message.react('✅');
-                await interaction.message.react('❌');
+                await interaction.message.react('<:success:1424072640829722745>');
+                await interaction.message.react('<:error:1424072711671382076>');
 
                 const reactionCollector = interaction.message.createReactionCollector({
-                  filter: (reaction, user) => ['✅', '❌'].includes(reaction.emoji.name) && user.id === ownerId,
+                  filter: (reaction, user) => ['<:success:1424072640829722745>', '<:error:1424072711671382076>'].includes(reaction.emoji.name) && user.id === ownerId,
                   max: 1,
                   time: 30000
                 });
 
                 reactionCollector.on('collect', async (reaction) => {
-                  if (reaction.emoji.name === '✅') {
+                  if (reaction.emoji.name === '<:success:1424072640829722745>') {
                     await guildToLeave.leave();
                     const successContainer = ContainerBuilder.success(
                       "Left Server",

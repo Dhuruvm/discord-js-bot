@@ -14,7 +14,7 @@ async function createSetupPanel(guild) {
   components.push(ContainerBuilder.createTextDisplay("# 🛡️ Antinuke Control Panel"));
   components.push(ContainerBuilder.createSeparator());
   
-  const status = antinuke.enabled ? "✅ **ACTIVE**" : "❌ **INACTIVE**";
+  const status = antinuke.enabled ? "<:success:1424072640829722745> **ACTIVE**" : "<:error:1424072711671382076> **INACTIVE**";
   components.push(ContainerBuilder.createTextDisplay(`**Protection Status:** ${status}`));
   
   if (antinuke.log_channel) {
@@ -34,7 +34,7 @@ async function createSetupPanel(guild) {
       .setCustomId("antinuke_toggle")
       .setLabel(antinuke.enabled ? "Disable Protection" : "Enable Protection")
       .setStyle(antinuke.enabled ? ButtonStyle.Danger : ButtonStyle.Success)
-      .setEmoji(antinuke.enabled ? "🛑" : "✅"),
+      .setEmoji(antinuke.enabled ? "🛑" : "<:success:1424072640829722745>"),
     new ButtonBuilder()
       .setCustomId("antinuke_configure")
       .setLabel("Configure Modules")

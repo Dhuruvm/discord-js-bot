@@ -16,7 +16,7 @@ module.exports = {
 
   async messageRun(message, args) {
     if (!jailedBots.has(message.guild.id)) {
-      return message.safeReply("❌ Bot is not jailed in this server!");
+      return message.safeReply("<:error:1424072711671382076> Bot is not jailed in this server!");
     }
 
     const jailInfo = jailedBots.get(message.guild.id);
@@ -41,12 +41,12 @@ module.exports = {
     
     jailedBots.delete(message.guild.id);
 
-    return message.safeReply(`✅ **Bot has been released from:** ${jailInfo.channelName}`);
+    return message.safeReply(`<:success:1424072640829722745> **Bot has been released from:** ${jailInfo.channelName}`);
   },
 
   async interactionRun(interaction) {
     if (!jailedBots.has(interaction.guild.id)) {
-      return interaction.followUp("❌ Bot is not jailed in this server!");
+      return interaction.followUp("<:error:1424072711671382076> Bot is not jailed in this server!");
     }
 
     const jailInfo = jailedBots.get(interaction.guild.id);
@@ -71,6 +71,6 @@ module.exports = {
     
     jailedBots.delete(interaction.guild.id);
 
-    return interaction.followUp(`✅ **Bot has been released from:** ${jailInfo.channelName}`);
+    return interaction.followUp(`<:success:1424072640829722745> **Bot has been released from:** ${jailInfo.channelName}`);
   },
 };

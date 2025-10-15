@@ -117,7 +117,7 @@ async function addDeveloper({ client, guild }, userId) {
     
     const embed = new EmbedBuilder()
       .setColor("Green")
-      .setDescription(`✅ Successfully added <@${userId}> as a developer!`)
+      .setDescription(`<:success:1424072640829722745> Successfully added <@${userId}> as a developer!`)
       .setTimestamp();
     
     return { embeds: [embed] };
@@ -144,7 +144,7 @@ async function removeDeveloper({ client }, userId) {
     
     const embed = new EmbedBuilder()
       .setColor("Orange")
-      .setDescription(`✅ Successfully removed <@${userId}> from developers!`)
+      .setDescription(`<:success:1424072640829722745> Successfully removed <@${userId}> from developers!`)
       .setTimestamp();
     
     return { embeds: [embed] };

@@ -31,7 +31,7 @@ module.exports = {
     const messageId = args[0];
     
     if (!messageId) {
-      return message.safeReply("❌ Please provide a valid message ID!");
+      return message.safeReply("<:error:1424072711671382076> Please provide a valid message ID!");
     }
 
     const giveaway = message.client.giveawaysManager.giveaways.find(
@@ -39,19 +39,19 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return message.safeReply(`❌ Could not find a giveaway with message ID: \`${messageId}\``);
+      return message.safeReply(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return message.safeReply("❌ This giveaway has already ended!");
+      return message.safeReply("<:error:1424072711671382076> This giveaway has already ended!");
     }
 
     try {
       await giveaway.end();
-      return message.safeReply("✅ Giveaway ended successfully!");
+      return message.safeReply("<:success:1424072640829722745> Giveaway ended successfully!");
     } catch (error) {
       message.client.logger.error("Giveaway End", error);
-      return message.safeReply(`❌ An error occurred: ${error.message}`);
+      return message.safeReply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 
@@ -63,19 +63,19 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return interaction.followUp(`❌ Could not find a giveaway with message ID: \`${messageId}\``);
+      return interaction.followUp(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return interaction.followUp("❌ This giveaway has already ended!");
+      return interaction.followUp("<:error:1424072711671382076> This giveaway has already ended!");
     }
 
     try {
       await giveaway.end();
-      return interaction.followUp("✅ Giveaway ended successfully!");
+      return interaction.followUp("<:success:1424072640829722745> Giveaway ended successfully!");
     } catch (error) {
       interaction.client.logger.error("Giveaway End", error);
-      return interaction.followUp(`❌ An error occurred: ${error.message}`);
+      return interaction.followUp(`<:error:1424072711671382076> An error occurred: ${error.message}`);
     }
   },
 };

@@ -155,7 +155,7 @@ async function testButtons(source, isInteraction) {
     };
 
     await i.reply({
-      content: `✅ You clicked the **${labels[i.customId]}**!`,
+      content: `<:success:1424072640829722745> You clicked the **${labels[i.customId]}**!`,
       ephemeral: true,
     });
   });
@@ -220,7 +220,7 @@ async function testSelectMenu(source, isInteraction) {
     };
 
     await i.reply({
-      content: `✅ You selected the **${labels[value]}** option!`,
+      content: `<:success:1424072640829722745> You selected the **${labels[value]}** option!`,
       ephemeral: true,
     });
   });
@@ -238,7 +238,7 @@ async function testSelectMenu(source, isInteraction) {
 async function testModal(source, isInteraction) {
   if (!isInteraction) {
     return source.channel.send({
-      content: "❌ Modal tests can only be run with slash commands. Use `/test modal`",
+      content: "<:error:1424072711671382076> Modal tests can only be run with slash commands. Use `/test modal`",
     });
   }
 
@@ -297,7 +297,7 @@ async function testModal(source, isInteraction) {
       const feedback = submitted.fields.getTextInputValue("feedback_input");
 
       const resultEmbed = new EmbedBuilder()
-        .setTitle("✅ Modal Submitted")
+        .setTitle("<:success:1424072640829722745> Modal Submitted")
         .setDescription("Here's what you entered:")
         .addFields(
           { name: "Name", value: name },

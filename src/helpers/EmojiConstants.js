@@ -1,6 +1,6 @@
 module.exports = {
-  SUCCESS: "✅",
-  ERROR: "❌",
+  SUCCESS: "<:success:1424072640829722745>",
+  ERROR: "<:error:1424072711671382076>",
   WARNING: "⚠️",
   INFO: "ℹ️",
   LOADING: "⏳",
