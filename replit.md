@@ -4,6 +4,25 @@
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14. It features a modular command system supporting both prefix and slash commands, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
 ## Recent Changes (October 2025)
+### Giveaway System Redesign (October 15, 2025)
+- **Recoded to Standalone Commands**: Replaced modal-based subcommand system with direct command syntax like typical Discord bots
+- **New Commands**:
+  - `!gstart <duration> <winners> <prize> [#channel]` - Start a giveaway with direct arguments
+  - `!gend <message_id>` - End an active giveaway
+  - `!greroll <message_id>` - Reroll ended giveaway to pick new winners
+  - `!gpause <message_id>` - Pause an active giveaway
+  - `!gresume <message_id>` - Resume a paused giveaway
+  - `!glist` - List all active giveaways with details
+  - `!gedit <message_id> <add_time/new_prize/new_winners> <value>` - Edit giveaway settings
+- **Features**:
+  - Both prefix and slash command support
+  - Clear error messages and validation
+  - Proper permission checks (ManageMessages required)
+  - No modals - all arguments provided directly in command
+  - Compatible with existing discord-giveaways manager
+  - Min-value validation for winner counts
+- **Old System**: Previous modal-based `!giveaway start` command disabled
+
 ### Pinterest Profile Picture & Banner Command (October 14, 2025)
 - **!pfp command**: Search Pinterest for high-quality profile pictures and banners with full interactive UI
 - **Pinterest API Integration**: 
