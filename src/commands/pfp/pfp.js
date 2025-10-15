@@ -24,7 +24,7 @@ module.exports = {
     enabled: true,
     usage: "<query> [--gender male|female|neutral] [--type pfp|banner] [--format gif|image] [--style <style>]",
     minArgsCount: 1,
-    aliases: ["pinterest", "avatar", "banner"],
+    aliases: ["pinterest", "banner"],
   },
   slashCommand: {
     enabled: true,
