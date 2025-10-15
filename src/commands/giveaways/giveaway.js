@@ -30,7 +30,7 @@ module.exports = {
   category: "GIVEAWAY",
   command: {
     enabled: false,
-    aliases: ["gaway", "giveaways"],
+    aliases: [],
     minArgsCount: 1,
     subcommands: [
       {
