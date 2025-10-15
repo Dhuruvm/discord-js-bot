@@ -224,7 +224,10 @@ module.exports = {
     // Send initial message
     const container = buildListContainer();
     const components = buildComponents(true);
-    const sentMsg = await channel.send({ ...container, components });
+    const sentMsg = await channel.send({
+      flags: container.flags,
+      components: [...container.components, ...components],
+    });
 
     // Collector for interactions
     const collector = channel.createMessageComponentCollector({
@@ -249,7 +252,10 @@ module.exports = {
           selectedServerId = null;
           const listContainer = buildListContainer();
           const components = buildComponents(true);
-          await sentMsg.edit({ ...listContainer, components });
+          await sentMsg.edit({
+            flags: listContainer.flags,
+            components: [...listContainer.components, ...components],
+          });
           return;
         }
 

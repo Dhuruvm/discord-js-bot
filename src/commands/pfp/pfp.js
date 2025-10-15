@@ -299,7 +299,11 @@ async function displayResult(message, state) {
   // Add action rows as separate components
   container.components.push(navRow, filterRow, actionRow);
 
-  await message.edit(container);
+  // Edit with only allowed fields for Components V2
+  await message.edit({
+    flags: container.flags,
+    components: container.components,
+  });
 }
 
 /**

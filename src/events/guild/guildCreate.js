@@ -131,9 +131,9 @@ module.exports = async (client, guild) => {
     try {
       const owner = await client.users.fetch(ownerId).catch(() => null);
       if (owner) {
-        const msg = await owner.send({ 
-          ...container, 
-          components: [actionButtons] 
+        const msg = await owner.send({
+          flags: container.flags,
+          components: [...container.components, actionButtons],
         }).catch(() => 
           client.logger.warn(`Failed to send guild join notification to owner ${ownerId}`)
         );
@@ -156,7 +156,10 @@ module.exports = async (client, guild) => {
                   0xFFA500
                 );
                 
-                await interaction.update({ ...confirmContainer, components: [] });
+                await interaction.update({
+                  flags: confirmContainer.flags,
+                  components: confirmContainer.components,
+                });
                 await interaction.message.react('✅');
                 await interaction.message.react('❌');
 
@@ -174,9 +177,15 @@ module.exports = async (client, guild) => {
                       `Successfully left **${guildToLeave.name}**`,
                       0x00FF00
                     );
-                    await interaction.message.edit({ ...successContainer, components: [] });
+                    await interaction.message.edit({
+                      flags: successContainer.flags,
+                      components: successContainer.components,
+                    });
                   } else {
-                    await interaction.message.edit({ ...container, components: [actionButtons] });
+                    await interaction.message.edit({
+                      flags: container.flags,
+                      components: [...container.components, actionButtons],
+                    });
                   }
                   await interaction.message.reactions.removeAll().catch(() => {});
                 });
@@ -202,10 +211,16 @@ module.exports = async (client, guild) => {
                     }
                   ]
                 );
-                await interaction.update({ ...infoContainer, components: [] });
+                await interaction.update({
+                  flags: infoContainer.flags,
+                  components: infoContainer.components,
+                });
               }
             } else if (interaction.customId === `back_${guild.id}`) {
-              await interaction.update({ ...container, components: [actionButtons] });
+              await interaction.update({
+                flags: container.flags,
+                components: [...container.components, actionButtons],
+              });
             }
           });
 
@@ -227,7 +242,8 @@ module.exports = async (client, guild) => {
     client.joinLeaveWebhook.send({
       username: "Join",
       avatarURL: client.user.displayAvatarURL(),
-      ...container,
+      flags: container.flags,
+      components: container.components,
     }).catch(() => {});
   }
 };

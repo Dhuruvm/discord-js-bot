@@ -123,7 +123,8 @@ module.exports = async (client, guild) => {
     client.joinLeaveWebhook.send({
       username: "Leave",
       avatarURL: client.user.displayAvatarURL(),
-      ...container,
+      flags: container.flags,
+      components: container.components,
     }).catch(() => {});
   }
 };
