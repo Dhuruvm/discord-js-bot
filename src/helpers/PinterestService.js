@@ -12,6 +12,9 @@ class PinterestService {
     this.appId = process.env.PINTEREST_APP_ID;
     this.appSecret = process.env.PINTEREST_APP_SECRET;
     
+    // Check if credentials are configured
+    this.isConfigured = !!(this.accessToken && this.appId && this.appSecret);
+    
     // Cache system (10 minute TTL)
     this.cache = new Map();
     this.cacheTTL = 10 * 60 * 1000; // 10 minutes
@@ -71,6 +74,12 @@ class PinterestService {
       return cached;
     }
     
+    // Check if credentials are configured
+    if (!this.isConfigured) {
+      debug("Pinterest credentials not configured, using fallback");
+      return this.getFallbackResults(query, type);
+    }
+    
     try {
       // Rate limit check
       await this.waitForRateLimit();
@@ -87,10 +96,15 @@ class PinterestService {
       
       if (!response.ok) {
         if (response.status === 429) {
-          error("Pinterest API rate limit exceeded");
+          debug("Pinterest API rate limit exceeded");
           return this.getFallbackResults(query, type);
         }
-        throw new Error(`Pinterest API error: ${response.status}`);
+        if (response.status === 401) {
+          debug("Pinterest API authentication failed - using fallback");
+          return this.getFallbackResults(query, type);
+        }
+        debug(`Pinterest API error: ${response.status}`);
+        return this.getFallbackResults(query, type);
       }
       
       const data = await response.json();
@@ -103,7 +117,7 @@ class PinterestService {
       
       return pins;
     } catch (ex) {
-      error("searchPins", ex);
+      debug("Pinterest search error, using fallback:", ex.message);
       // Return fallback results
       return this.getFallbackResults(query, type);
     }

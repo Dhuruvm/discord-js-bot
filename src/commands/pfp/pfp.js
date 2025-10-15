@@ -296,10 +296,10 @@ async function displayResult(message, state) {
     .addContainer({ accentColor: 0xE60023, components })
     .build();
 
-  await message.edit({
-    ...container,
-    components: [navRow, filterRow, actionRow],
-  });
+  // Add action rows as separate components
+  container.components.push(navRow, filterRow, actionRow);
+
+  await message.edit(container);
 }
 
 /**
