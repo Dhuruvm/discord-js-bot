@@ -1,28 +1,28 @@
 const {
+  EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  ComponentType,
+  ApplicationCommandOptionType,
   AttachmentBuilder,
 } = require("discord.js");
+const { EMBED_COLORS } = require("@root/config.js");
+const { getBuffer } = require("@helpers/HttpUtils");
 const PinterestService = require("@helpers/PinterestService");
-const ImageProcessor = require("@helpers/ImageProcessor");
-const ContainerBuilder = require("@helpers/ContainerBuilder");
+const emojis = require("@root/emojis.json");
 
 /**
  * @type {import("@structures/Command")}
  */
 module.exports = {
   name: "pfp",
-  description: "Search Pinterest for high-quality profile pictures and banners",
+  description: "Search Pinterest for profile pictures and banners",
   category: "PFP",
   botPermissions: ["SendMessages", "EmbedLinks", "AttachFiles"],
+  cooldown: 5,
   command: {
     enabled: true,
-    usage: "<query> [--gender male|female|neutral] [--type pfp|banner] [--format gif|image] [--style <style>]",
+    usage: "<query> [--gender male|female|neutral] [--type pfp|banner] [--format gif|image]",
     minArgsCount: 1,
     aliases: ["pinterest", "banner"],
   },
@@ -32,13 +32,13 @@ module.exports = {
       {
         name: "query",
         description: "Search query for images",
-        type: 3,
+        type: ApplicationCommandOptionType.String,
         required: true,
       },
       {
         name: "gender",
         description: "Gender filter",
-        type: 3,
+        type: ApplicationCommandOptionType.String,
         required: false,
         choices: [
           { name: "Male", value: "male" },
@@ -49,7 +49,7 @@ module.exports = {
       {
         name: "type",
         description: "Image type",
-        type: 3,
+        type: ApplicationCommandOptionType.String,
         required: false,
         choices: [
           { name: "Profile Picture", value: "pfp" },
@@ -59,7 +59,7 @@ module.exports = {
       {
         name: "format",
         description: "Image format",
-        type: 3,
+        type: ApplicationCommandOptionType.String,
         required: false,
         choices: [
           { name: "Image", value: "image" },
@@ -68,15 +68,14 @@ module.exports = {
       },
       {
         name: "style",
-        description: "Additional style keywords",
-        type: 3,
+        description: "Additional style keywords (e.g., aesthetic, anime, dark)",
+        type: ApplicationCommandOptionType.String,
         required: false,
       },
     ],
   },
 
   async messageRun(message, args) {
-    // Parse command arguments
     const params = parseArgs(args);
     await runPFPSearch(message, params, false);
   },
@@ -91,14 +90,13 @@ module.exports = {
       format: interaction.options.getString("format") || "image",
       style: interaction.options.getString("style") || "",
     };
+    
     await runPFPSearch(interaction, params, true);
   },
 };
 
 /**
  * Parse command arguments
- * @param {string[]} args
- * @returns {Object} Parsed parameters
  */
 function parseArgs(args) {
   const params = {
@@ -146,36 +144,30 @@ function parseArgs(args) {
 }
 
 /**
- * Run Pinterest search and display results
- * @param {import('discord.js').Message | import('discord.js').ChatInputCommandInteraction} source
- * @param {Object} params
- * @param {boolean} isInteraction
+ * Run Pinterest search
  */
 async function runPFPSearch(source, params, isInteraction) {
-  // Send loading message
+  const loadingEmbed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setDescription(`${emojis.loading} Searching Pinterest...`);
+
   const loadingMsg = isInteraction
-    ? await source.editReply({ content: "🔍 Searching Pinterest..." })
-    : await source.channel.send({ content: "🔍 Searching Pinterest..." });
+    ? await source.editReply({ embeds: [loadingEmbed] })
+    : await source.channel.send({ embeds: [loadingEmbed] });
 
   try {
     // Search Pinterest
     const results = await PinterestService.searchPins(params);
 
     if (!results || results.length === 0) {
-      const errorPayload = ContainerBuilder.error(
-        "No Results Found",
-        `No images found for "${params.query}". Try different keywords or check your filters.`,
-        0xFF0000
-      );
-      // Strip legacy fields for Components V2
-      const cleanPayload = {
-        flags: errorPayload.flags,
-        components: errorPayload.components
-      };
-      return loadingMsg.edit(cleanPayload);
+      const errorEmbed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${emojis.error} No results found for "${params.query}". Try different keywords.`);
+      
+      return loadingMsg.edit({ embeds: [errorEmbed] });
     }
 
-    // Initialize carousel state
+    // Initialize state
     const state = {
       currentIndex: 0,
       results: results,
@@ -183,67 +175,61 @@ async function runPFPSearch(source, params, isInteraction) {
       userId: isInteraction ? source.user.id : source.author.id,
     };
 
-    // Display first result and setup collector once
     await displayResult(loadingMsg, state);
     setupCollector(loadingMsg, state);
   } catch (error) {
-    console.error("Error in runPFPSearch:", error);
-    const errorPayload = ContainerBuilder.error(
-      "Search Failed",
-      `An error occurred while searching: ${error.message}`,
-      0xFF0000
-    );
-    // Strip legacy fields for Components V2
-    const cleanPayload = {
-      flags: errorPayload.flags,
-      components: errorPayload.components
-    };
-    return loadingMsg.edit(cleanPayload);
+    console.error("Pinterest search error:", error);
+    
+    const errorEmbed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${emojis.error} Search failed: ${error.message}`);
+    
+    return loadingMsg.edit({ embeds: [errorEmbed] });
   }
 }
 
 /**
- * Display a result with interactive controls
- * @param {import('discord.js').Message} message
- * @param {Object} state
+ * Display search result
  */
 async function displayResult(message, state) {
   const result = state.results[state.currentIndex];
   const { params } = state;
 
-  // Build container (must have 1-5 components)
-  const components = [];
+  // Build embed
+  const embed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setTitle(result.title || "Pinterest Result")
+    .setURL(result.link)
+    .setDescription(
+      result.isFallback
+        ? `${emojis.warning} Pinterest API unavailable. Click the title to search manually.`
+        : result.description || "No description available"
+    )
+    .addFields([
+      {
+        name: "Type",
+        value: params.type === "pfp" ? "Profile Picture" : "Banner",
+        inline: true,
+      },
+      {
+        name: "Format",
+        value: params.format === "gif" ? "GIF" : "Image",
+        inline: true,
+      },
+      {
+        name: "Gender",
+        value: params.gender,
+        inline: true,
+      },
+    ])
+    .setFooter({ 
+      text: `Result ${state.currentIndex + 1} / ${state.results.length}` 
+    })
+    .setTimestamp();
 
-  // Image preview (using MediaGallery)
   if (result.image && !result.isFallback) {
-    components.push(ContainerBuilder.createMediaGallery([{
-      media: { url: result.image }
-    }]));
+    embed.setImage(result.image);
   }
-
-  // Title
-  components.push(
-    ContainerBuilder.createTextDisplay(
-      `## 🎨 ${result.title || "Pinterest Result"}`
-    )
-  );
-
-  // Description
-  const description = result.isFallback
-    ? "⚠️ Pinterest API unavailable. Click the link to search manually."
-    : result.description || "No description available";
-
-  components.push(ContainerBuilder.createTextDisplay(description));
-
-  // Separator
-  components.push(ContainerBuilder.createSeparator());
-
-  // Info (combine all info into one text display to stay under 5 components)
-  components.push(
-    ContainerBuilder.createTextDisplay(
-      `**Type:** ${params.type === "pfp" ? "Profile Picture" : "Banner"} • **Format:** ${params.format === "gif" ? "GIF" : "Image"} • **Gender:** ${params.gender}\n**Result:** ${state.currentIndex + 1} / ${state.results.length}`
-    )
-  );
 
   // Navigation buttons
   const navRow = new ActionRowBuilder().addComponents(
@@ -251,44 +237,39 @@ async function displayResult(message, state) {
       .setCustomId("pfp_prev")
       .setLabel("Previous")
       .setEmoji("◀️")
-      .setStyle(ButtonStyle.Secondary)
+      .setStyle(ButtonStyle.Primary)
       .setDisabled(state.currentIndex === 0),
     new ButtonBuilder()
       .setCustomId("pfp_next")
       .setLabel("Next")
       .setEmoji("▶️")
-      .setStyle(ButtonStyle.Secondary)
+      .setStyle(ButtonStyle.Primary)
       .setDisabled(state.currentIndex >= state.results.length - 1)
   );
 
-  // Filter toggles
+  // Filter buttons
   const filterRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId("pfp_gender")
       .setLabel(`Gender: ${params.gender}`)
       .setEmoji("👤")
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId("pfp_type")
-      .setLabel(`${params.type === "pfp" ? "PFP" : "Banner"}`)
+      .setLabel(params.type === "pfp" ? "PFP" : "Banner")
       .setEmoji(params.type === "pfp" ? "🖼️" : "🎞️")
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
       .setCustomId("pfp_format")
-      .setLabel(`${params.format === "gif" ? "GIF" : "Image"}`)
+      .setLabel(params.format === "gif" ? "GIF" : "Image")
       .setEmoji(params.format === "gif" ? "🎬" : "📷")
-      .setStyle(ButtonStyle.Primary)
+      .setStyle(ButtonStyle.Secondary)
   );
 
   // Action buttons
   const actionRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId("pfp_query")
-      .setLabel("Custom Query")
-      .setEmoji("🔍")
-      .setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder()
-      .setCustomId("pfp_save")
+      .setCustomId("pfp_download")
       .setLabel("Download")
       .setEmoji("💾")
       .setStyle(ButtonStyle.Success)
@@ -299,27 +280,14 @@ async function displayResult(message, state) {
       .setURL(result.link)
   );
 
-  // Build and send
-  const container = new ContainerBuilder()
-    .addContainer({ accentColor: 0xE60023, components })
-    .build();
-
-  // Add action rows as separate components
-  container.components.push(navRow, filterRow, actionRow);
-
-  // Edit with only allowed fields for Components V2
-  // Must use explicit field assignment to avoid Discord API rejection
-  const editPayload = {};
-  editPayload.flags = container.flags;
-  editPayload.components = container.components;
-  
-  await message.edit(editPayload);
+  await message.edit({
+    embeds: [embed],
+    components: [navRow, filterRow, actionRow],
+  });
 }
 
 /**
- * Setup interaction collector (called once)
- * @param {import('discord.js').Message} message
- * @param {Object} state
+ * Setup interaction collector
  */
 function setupCollector(message, state) {
   const collector = message.createMessageComponentCollector({
@@ -327,18 +295,15 @@ function setupCollector(message, state) {
   });
 
   collector.on("collect", async (interaction) => {
-    // Check if user is authorized
     if (interaction.user.id !== state.userId) {
       return interaction.reply({
-        content: "<:error:1424072711671382076> This is not your search! Use the command yourself.",
+        content: `${emojis.error} This is not your search!`,
         ephemeral: true,
       });
     }
 
-    const customId = interaction.customId;
-
     try {
-      switch (customId) {
+      switch (interaction.customId) {
         case "pfp_prev":
           state.currentIndex = Math.max(0, state.currentIndex - 1);
           await interaction.deferUpdate();
@@ -346,197 +311,133 @@ function setupCollector(message, state) {
           break;
 
         case "pfp_next":
-          state.currentIndex = Math.min(
-            state.results.length - 1,
-            state.currentIndex + 1
-          );
+          state.currentIndex = Math.min(state.results.length - 1, state.currentIndex + 1);
           await interaction.deferUpdate();
           await displayResult(message, state);
           break;
 
         case "pfp_gender":
-          // Cycle through genders
           const genders = ["neutral", "male", "female"];
-          const currentGenderIndex = genders.indexOf(state.params.gender);
-          state.params.gender = genders[(currentGenderIndex + 1) % genders.length];
+          const currentIdx = genders.indexOf(state.params.gender);
+          state.params.gender = genders[(currentIdx + 1) % genders.length];
           await interaction.deferUpdate();
           await refreshSearch(message, state);
           break;
 
         case "pfp_type":
-          // Toggle type
           state.params.type = state.params.type === "pfp" ? "banner" : "pfp";
           await interaction.deferUpdate();
           await refreshSearch(message, state);
           break;
 
         case "pfp_format":
-          // Toggle format
           state.params.format = state.params.format === "image" ? "gif" : "image";
           await interaction.deferUpdate();
           await refreshSearch(message, state);
           break;
 
-        case "pfp_query":
-          // Show modal for custom query
-          await showQueryModal(interaction, message, state);
-          break;
-
-        case "pfp_save":
-          await handleSave(interaction, state);
+        case "pfp_download":
+          await handleDownload(interaction, state);
           break;
       }
     } catch (error) {
       console.error("Collector error:", error);
       await interaction.reply({
-        content: `<:error:1424072711671382076> An error occurred: ${error.message}`,
+        content: `${emojis.error} An error occurred: ${error.message}`,
         ephemeral: true,
       });
     }
   });
 
-  collector.on("end", async () => {
-    try {
-      const disabledRows = [
-        new ActionRowBuilder().addComponents(
-          message.components[0].components.map((btn) =>
-            ButtonBuilder.from(btn).setDisabled(true)
-          )
-        ),
-        new ActionRowBuilder().addComponents(
-          message.components[1].components.map((btn) =>
-            ButtonBuilder.from(btn).setDisabled(true)
-          )
-        ),
-        new ActionRowBuilder().addComponents(
-          message.components[2].components.map((btn) => {
-            const button = ButtonBuilder.from(btn);
-            if (btn.style !== ButtonStyle.Link) {
-              button.setDisabled(true);
-            }
-            return button;
-          })
-        ),
-      ];
-      await message.edit({ components: disabledRows });
-    } catch (error) {
-      // Message might be deleted
-    }
+  collector.on("end", () => {
+    const components = message.components.map(row => {
+      const newRow = new ActionRowBuilder();
+      row.components.forEach(component => {
+        if (component.data.style === ButtonStyle.Link) {
+          newRow.addComponents(ButtonBuilder.from(component));
+        } else {
+          newRow.addComponents(ButtonBuilder.from(component).setDisabled(true));
+        }
+      });
+      return newRow;
+    });
+    
+    message.edit({ components }).catch(() => {});
   });
 }
 
 /**
- * Refresh search with new parameters
- * @param {import('discord.js').Message} message
- * @param {Object} state
+ * Refresh search with new filters
  */
 async function refreshSearch(message, state) {
-  const results = await PinterestService.searchPins(state.params);
+  const loadingEmbed = new EmbedBuilder()
+    .setColor(EMBED_COLORS.BOT_EMBED)
+    .setDescription(`${emojis.loading} Refreshing results...`);
 
-  if (!results || results.length === 0) {
-    const errorPayload = ContainerBuilder.error(
-      "No Results",
-      "No images found with these filters. Try different options.",
-      0xFF0000
-    );
-    // Strip legacy fields for Components V2
-    const cleanPayload = {
-      flags: errorPayload.flags,
-      components: errorPayload.components
-    };
-    await message.edit(cleanPayload);
-    return;
-  }
-
-  state.results = results;
-  state.currentIndex = 0;
-  await displayResult(message, state);
-}
-
-/**
- * Show custom query modal
- * @param {import('discord.js').ButtonInteraction} interaction
- * @param {import('discord.js').Message} message
- * @param {Object} state
- */
-async function showQueryModal(interaction, message, state) {
-  const modal = new ModalBuilder()
-    .setCustomId("pfp_query_modal")
-    .setTitle("Custom Search Query");
-
-  const queryInput = new TextInputBuilder()
-    .setCustomId("query_input")
-    .setLabel("Enter your search query")
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g., aesthetic anime, nature landscape...")
-    .setValue(state.params.query)
-    .setRequired(true);
-
-  const row = new ActionRowBuilder().addComponents(queryInput);
-  modal.addComponents(row);
-
-  await interaction.showModal(modal);
+  await message.edit({ embeds: [loadingEmbed], components: [] });
 
   try {
-    const submitted = await interaction.awaitModalSubmit({
-      time: 60000,
-      filter: (i) =>
-        i.customId === "pfp_query_modal" && i.user.id === state.userId,
-    });
+    const results = await PinterestService.searchPins(state.params);
 
-    state.params.query = submitted.fields.getTextInputValue("query_input");
-    await submitted.deferUpdate();
-    await refreshSearch(message, state);
+    if (!results || results.length === 0) {
+      const errorEmbed = new EmbedBuilder()
+        .setColor(EMBED_COLORS.ERROR)
+        .setDescription(`${emojis.error} No results with these filters.`);
+      
+      return message.edit({ embeds: [errorEmbed] });
+    }
+
+    state.results = results;
+    state.currentIndex = 0;
+    await displayResult(message, state);
   } catch (error) {
-    // Modal timed out
+    console.error("Refresh error:", error);
+    
+    const errorEmbed = new EmbedBuilder()
+      .setColor(EMBED_COLORS.ERROR)
+      .setDescription(`${emojis.error} Failed to refresh: ${error.message}`);
+    
+    await message.edit({ embeds: [errorEmbed] });
   }
 }
 
 /**
- * Handle save/download
- * @param {import('discord.js').ButtonInteraction} interaction
- * @param {Object} state
+ * Handle image download
  */
-async function handleSave(interaction, state) {
+async function handleDownload(interaction, state) {
   await interaction.deferReply({ ephemeral: true });
 
   const result = state.results[state.currentIndex];
 
-  if (!result.image) {
+  if (!result.image || result.isFallback) {
     return interaction.followUp({
-      content: "<:error:1424072711671382076> No image available to download.",
+      content: `${emojis.error} No image available to download.`,
       ephemeral: true,
     });
   }
 
   try {
-    // Process image based on type
-    let buffer;
-    if (state.params.type === "pfp") {
-      buffer = await ImageProcessor.processForPFP(result.image);
-    } else {
-      buffer = await ImageProcessor.processForBanner(result.image);
-    }
+    const response = await getBuffer(result.image);
 
-    if (!buffer) {
+    if (!response.success) {
       return interaction.followUp({
-        content: "<:error:1424072711671382076> Failed to process image. Please try another one.",
+        content: `${emojis.error} Failed to download image.`,
         ephemeral: true,
       });
     }
 
-    const filename = `${state.params.type}_${Date.now()}.png`;
-    const attachment = new AttachmentBuilder(buffer, { name: filename });
+    const filename = `${state.params.type}_${Date.now()}.${result.image.endsWith('.gif') ? 'gif' : 'png'}`;
+    const attachment = new AttachmentBuilder(response.buffer, { name: filename });
 
     await interaction.followUp({
-      content: `<:success:1424072640829722745> Here's your ${state.params.type === "pfp" ? "profile picture" : "banner"}!`,
+      content: `${emojis.success} Here's your ${state.params.type === "pfp" ? "profile picture" : "banner"}!`,
       files: [attachment],
       ephemeral: true,
     });
   } catch (error) {
-    console.error("Save error:", error);
+    console.error("Download error:", error);
     await interaction.followUp({
-      content: `<:error:1424072711671382076> Failed to download: ${error.message}`,
+      content: `${emojis.error} Download failed: ${error.message}`,
       ephemeral: true,
     });
   }
