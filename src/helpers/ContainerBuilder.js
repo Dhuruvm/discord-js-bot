@@ -191,6 +191,96 @@ class ContainerBuilder {
   static info(title, message, accentColor = 0xFFFFFF, buttons = []) {
     return ContainerBuilder.quickMessage(`ℹ️ ${title}`, message, [], accentColor, buttons);
   }
+
+  /**
+   * Create a professional bot info card matching Discord's clean design
+   * @param {Object} options - Configuration options
+   * @param {string} options.title - Main title (e.g., "About BotName")
+   * @param {string} options.subtitle - Subtitle text (e.g., "Managed and Created by...")
+   * @param {string} options.thumbnail - Bot avatar URL
+   * @param {Array} options.statisticsFields - Array of {label, value} for statistics section
+   * @param {Array} options.systemFields - Array of {label, value} for system section
+   * @param {Array} options.buttons - Array of button configs {label, url, emoji}
+   * @returns {Object} Container payload
+   */
+  static botInfoCard({ title, subtitle, thumbnail, statisticsFields = [], systemFields = [], buttons = [] }) {
+    const components = [];
+
+    // Add thumbnail (bot avatar) at top right
+    if (thumbnail) {
+      components.push(ContainerBuilder.createThumbnail(thumbnail));
+    }
+
+    // Add main title
+    if (title) {
+      components.push(ContainerBuilder.createTextDisplay(`# ${title}`));
+    }
+
+    // Add subtitle
+    if (subtitle) {
+      components.push(ContainerBuilder.createTextDisplay(subtitle));
+    }
+
+    // Add separator before sections
+    if (statisticsFields.length > 0 || systemFields.length > 0) {
+      components.push(ContainerBuilder.createSeparator());
+    }
+
+    // Add Statistics section with accent border
+    if (statisticsFields.length > 0) {
+      const statsHeader = ContainerBuilder.createTextDisplay(`### Statistics`);
+      components.push(statsHeader);
+      
+      const statsText = statisticsFields
+        .map(field => `${field.label}: **${field.value}**`)
+        .join('\n');
+      components.push(ContainerBuilder.createTextDisplay(statsText));
+    }
+
+    // Add spacing between sections
+    if (statisticsFields.length > 0 && systemFields.length > 0) {
+      components.push(ContainerBuilder.createSeparator());
+    }
+
+    // Add System section with accent border
+    if (systemFields.length > 0) {
+      const systemHeader = ContainerBuilder.createTextDisplay(`### System`);
+      components.push(systemHeader);
+      
+      const systemText = systemFields
+        .map(field => `${field.label}: **${field.value}**`)
+        .join('\n');
+      components.push(ContainerBuilder.createTextDisplay(systemText));
+    }
+
+    const result = new ContainerBuilder()
+      .addContainer({ 
+        accentColor: 0x2F3136, // Dark Discord background
+        components 
+      })
+      .build();
+
+    // Add buttons as separate action row
+    if (buttons.length > 0) {
+      const buttonComponents = buttons.map(btn => {
+        const button = new ButtonBuilder()
+          .setLabel(btn.label)
+          .setURL(btn.url)
+          .setStyle(ButtonStyle.Link);
+        
+        if (btn.emoji) {
+          button.setEmoji(btn.emoji);
+        }
+        
+        return button.toJSON();
+      });
+      
+      const actionRow = ContainerBuilder.createActionRow(buttonComponents);
+      result.components.push(actionRow);
+    }
+
+    return result;
+  }
 }
 
 module.exports = ContainerBuilder;

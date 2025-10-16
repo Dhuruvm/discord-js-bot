@@ -162,13 +162,17 @@ async function runPFPSearch(source, params, isInteraction) {
     const results = await PinterestService.searchPins(params);
 
     if (!results || results.length === 0) {
-      return loadingMsg.edit(
-        ContainerBuilder.error(
-          "No Results Found",
-          `No images found for "${params.query}". Try different keywords or check your filters.`,
-          0xFF0000
-        )
+      const errorPayload = ContainerBuilder.error(
+        "No Results Found",
+        `No images found for "${params.query}". Try different keywords or check your filters.`,
+        0xFF0000
       );
+      // Strip legacy fields for Components V2
+      const cleanPayload = {
+        flags: errorPayload.flags,
+        components: errorPayload.components
+      };
+      return loadingMsg.edit(cleanPayload);
     }
 
     // Initialize carousel state
@@ -184,13 +188,17 @@ async function runPFPSearch(source, params, isInteraction) {
     setupCollector(loadingMsg, state);
   } catch (error) {
     console.error("Error in runPFPSearch:", error);
-    return loadingMsg.edit(
-      ContainerBuilder.error(
-        "Search Failed",
-        `An error occurred while searching: ${error.message}`,
-        0xFF0000
-      )
+    const errorPayload = ContainerBuilder.error(
+      "Search Failed",
+      `An error occurred while searching: ${error.message}`,
+      0xFF0000
     );
+    // Strip legacy fields for Components V2
+    const cleanPayload = {
+      flags: errorPayload.flags,
+      components: errorPayload.components
+    };
+    return loadingMsg.edit(cleanPayload);
   }
 }
 
@@ -300,10 +308,12 @@ async function displayResult(message, state) {
   container.components.push(navRow, filterRow, actionRow);
 
   // Edit with only allowed fields for Components V2
-  await message.edit({
-    flags: container.flags,
-    components: container.components,
-  });
+  // Must use explicit field assignment to avoid Discord API rejection
+  const editPayload = {};
+  editPayload.flags = container.flags;
+  editPayload.components = container.components;
+  
+  await message.edit(editPayload);
 }
 
 /**
@@ -424,13 +434,17 @@ async function refreshSearch(message, state) {
   const results = await PinterestService.searchPins(state.params);
 
   if (!results || results.length === 0) {
-    await message.edit(
-      ContainerBuilder.error(
-        "No Results",
-        "No images found with these filters. Try different options.",
-        0xFF0000
-      )
+    const errorPayload = ContainerBuilder.error(
+      "No Results",
+      "No images found with these filters. Try different options.",
+      0xFF0000
     );
+    // Strip legacy fields for Components V2
+    const cleanPayload = {
+      flags: errorPayload.flags,
+      components: errorPayload.components
+    };
+    await message.edit(cleanPayload);
     return;
   }
 
