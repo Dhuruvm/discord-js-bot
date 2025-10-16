@@ -86,6 +86,55 @@ This project is a comprehensive, multipurpose Discord bot built with Discord.js 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Replit Setup Guide
+
+### Required Configuration
+Before running the bot, you **must** configure the following environment variables:
+
+1. **Required Variables** (Bot will not start without these):
+   - `BOT_TOKEN`: Your Discord bot token from the [Discord Developer Portal](https://discord.com/developers/applications)
+   - `MONGO_CONNECTION`: MongoDB connection string (use MongoDB Atlas or other MongoDB service)
+
+2. **Optional Features**:
+   - `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET`: For Spotify music integration
+   - `WEATHERSTACK_KEY`: For weather command ([Get API key](https://weatherstack.com))
+   - `STRANGE_API_KEY`: For image manipulation commands ([Get API key](https://strangeapi.fun/docs))
+   - `PINTEREST_ACCESS_TOKEN`, `PINTEREST_APP_ID`, `PINTEREST_APP_SECRET`: For !pfp command ([Get credentials](https://developers.pinterest.com))
+   - `ERROR_LOGS`: Discord webhook URL for error logging
+   - `JOIN_LEAVE_LOGS`: Discord webhook URL for server join/leave notifications
+
+3. **Dashboard** (Optional - currently disabled in config.js):
+   - `BOT_SECRET`: Your Discord bot secret
+   - `SESSION_PASSWORD`: Random secure password for session management
+
+### Setting Environment Variables
+You can configure the bot in two ways:
+1. **Replit Secrets** (Recommended): Use Replit's built-in Secrets feature
+2. **Create .env file**: Copy `.env.example` to `.env` and fill in your values
+
+### Running the Bot
+The bot is configured to run automatically with the "Discord Bot" workflow which:
+1. Checks and fixes npm vulnerabilities
+2. Starts Lavalink music server (if Lavalink.jar is present)
+3. Starts the Discord bot
+4. Handles automatic restarts on crashes
+
+Simply click the "Run" button or the workflow will start automatically!
+
+### Important Notes
+- **Lavalink**: The Lavalink.jar file is included for music functionality. If missing, music will be limited.
+- **Java Requirement**: Lavalink requires Java to run. Replit has Java pre-installed.
+- **MongoDB**: You'll need an external MongoDB instance (MongoDB Atlas free tier works great).
+- **Dashboard**: Currently disabled by default. Enable in `config.js` if needed.
+
+### Troubleshooting
+- If the bot doesn't start, check that `BOT_TOKEN` and `MONGO_CONNECTION` are set
+- For music issues, ensure Lavalink started successfully (check logs)
+- For Spotify music, make sure both Spotify credentials are set
+
+## User Preferences
+Preferred communication style: Simple, everyday language.
+
 ## System Architecture
 
 ### Core Framework
