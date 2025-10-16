@@ -1,21 +1,66 @@
+# Operating System Files
 .DS_Store
-.vscode/
-node_modules/
-*.log
-*.tar.gz
-.env
-api.json
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
+# IDE Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm
 .yarn-integrity
+.pnp
+.pnp.js
 
+# Build Artifacts
 dist/
 build/
 .cache/
+*.tgz
+*.tar.gz
 
+# Environment & Configuration
+.env
+api.json
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+.npm
 *.pid
 *.seed
 *.pid.lock
+
+# Testing
+coverage/
+.nyc_output
+.grunt
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Replit
+.replit
+.config/
+.upm/
+.cache/
+.breakpoints
+
+# Temporary Files
+tmp/
+temp/
