@@ -29,7 +29,7 @@ function getAvatar(user) {
   const embed = new EmbedBuilder()
     .setTitle(`Avatar of ${user.username}`)
     .setColor(EMBED_COLORS.BOT_EMBED)
-    .setImage(x256)
+    .setThumbnail(x256)
     .setDescription(
       `Links: • [x64](${x64}) ` +
         `• [x128](${x128}) ` +
