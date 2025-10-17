@@ -6,6 +6,18 @@ This project is a comprehensive, multipurpose Discord bot built with Discord.js 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 17, 2025)
+
+### Command Bug Fixes
+- **Fixed gamble command error**: Corrected `var2.equals === var3` to `var2 === var3` in the reward calculation function. The `.equals` property doesn't exist on strings, which was causing the "Expected a number primitive" error.
+- **Improved bank command validation**: Simplified argument parsing in deposit/withdraw subcommands by removing unnecessary `args.length &&` check. The `isNaN()` validation already handles invalid input properly.
+
+### Dashboard Development Mode
+- **Added DASHBOARD_DEV_MODE**: New environment variable to run the dashboard without Discord OAuth2 authentication for development/testing purposes.
+- When `DASHBOARD_DEV_MODE=true` and `BOT_SECRET` is not set, the dashboard creates a mock user session instead of requiring OAuth.
+- Dashboard continues to work normally with full OAuth when `BOT_SECRET` is provided.
+- Configuration documented in `.env.example` file.
+
 ## System Architecture
 
 ### Core Framework
