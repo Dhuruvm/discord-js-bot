@@ -12,6 +12,8 @@ const {
 } = require("discord.js");
 const { getCommandUsage, getSlashUsage } = require("@handlers/command");
 const emojis = require("@root/emojis.json");
+const mongoose = require("mongoose");
+const GuildModel = mongoose.model("guild");
 
 const IDLE_TIMEOUT = 120;
 
@@ -129,7 +131,7 @@ async function getHelpMenu(context, prefix) {
   const ContainerBuilder = require("@helpers/ContainerBuilder");
 
   // Get developers from global settings
-  const globalSettings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+  const globalSettings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
   const developers = globalSettings?.developers || [];
   
   // Build developer list
