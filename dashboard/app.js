@@ -24,13 +24,28 @@ module.exports.launch = async (client) => {
   const db = await mongoose.initializeMongoose();
 
   // Validate required environment variables
-  const requiredEnvVars = ['BOT_TOKEN', 'MONGO_CONNECTION', 'SESSION_PASSWORD', 'BOT_SECRET'];
+  const isDevelopmentMode = process.env.DASHBOARD_DEV_MODE === "true";
+  let requiredEnvVars = ['BOT_TOKEN', 'MONGO_CONNECTION', 'SESSION_PASSWORD'];
+  
+  if (!isDevelopmentMode) {
+    requiredEnvVars.push('BOT_SECRET');
+  }
+  
   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    client.logger.error(`❌ Dashboard cannot start - Missing required environment variables: ${missingVars.join(', ')}`);
-    client.logger.error('Please set these secrets in the Replit Secrets tab');
-    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    if (isDevelopmentMode) {
+      client.logger.warn(`⚠️  Dashboard running in development mode - Missing: ${missingVars.join(', ')}`);
+      client.logger.warn('Authentication features will be limited. Set DASHBOARD_DEV_MODE=false for full functionality.');
+    } else {
+      client.logger.error(`❌ Dashboard cannot start - Missing required environment variables: ${missingVars.join(', ')}`);
+      client.logger.error('Please set these secrets in the Replit Secrets tab or enable DASHBOARD_DEV_MODE=true for development.');
+      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+    }
+  }
+  
+  if (isDevelopmentMode && !process.env.BOT_SECRET) {
+    client.logger.info('🔧 Dashboard running in DEVELOPMENT MODE - OAuth disabled');
   }
 
   /* App configuration */

@@ -7,6 +7,19 @@ const fetch = require("node-fetch"),
 // Gets login page
 router.get("/login", async function (req, res) {
   if (!req.user || !req.user.id || !req.user.guilds) {
+    // Check if in development mode without BOT_SECRET
+    if (process.env.DASHBOARD_DEV_MODE === "true" && !process.env.BOT_SECRET) {
+      req.client.logger.info("Dashboard in dev mode - skipping OAuth");
+      req.session.user = {
+        id: "000000000000000000",
+        username: "Developer",
+        discriminator: "0000",
+        avatar: null,
+        guilds: []
+      };
+      return res.redirect("/selector");
+    }
+    
     // check if client user is ready
     if (!req.client.user?.id) {
       req.client.logger.debug("Client is not ready! Redirecting to /login");

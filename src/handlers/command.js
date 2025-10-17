@@ -82,7 +82,7 @@ module.exports = {
     try {
       await cmd.messageRun(message, args, data);
     } catch (ex) {
-      message.client.logger.error("messageRun", ex);
+      message.client.logger.error(`messageRun [${cmd.name}]`, ex);
       message.safeReply("An error occurred while running this command");
     } finally {
       if (cmd.cooldown > 0) applyCooldown(message.author.id, cmd);
@@ -154,7 +154,7 @@ module.exports = {
       await cmd.interactionRun(interaction, { settings });
     } catch (ex) {
       await interaction.followUp("Oops! An error occurred while running the command");
-      interaction.client.logger.error("interactionRun", ex);
+      interaction.client.logger.error(`interactionRun [${cmd.name}]`, ex);
     } finally {
       if (cmd.cooldown > 0) applyCooldown(interaction.user.id, cmd);
     }

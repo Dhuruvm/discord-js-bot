@@ -110,14 +110,14 @@ module.exports = {
 
     //
     else if (sub === "deposit") {
-      const coins = args.length && parseInt(args[1]);
+      const coins = parseInt(args[1]);
       if (isNaN(coins)) return message.safeReply("Provide a valid number of coins you wish to deposit");
       response = await deposit(message.author, coins);
     }
 
     //
     else if (sub === "withdraw") {
-      const coins = args.length && parseInt(args[1]);
+      const coins = parseInt(args[1]);
       if (isNaN(coins)) return message.safeReply("Provide a valid number of coins you wish to withdraw");
       response = await withdraw(message.author, coins);
     }
