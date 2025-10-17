@@ -3,6 +3,8 @@ const { SUPPORT_SERVER, DASHBOARD, DEVELOPER, OWNER_IDS } = require("@root/confi
 const { timeformat } = require("@helpers/Utils");
 const ContainerBuilder = require("@helpers/ContainerBuilder");
 const os = require("os");
+const mongoose = require("mongoose");
+const GuildModel = mongoose.model("guild");
 
 /**
  * @param {import('@structures/BotClient')} client
@@ -28,10 +30,8 @@ module.exports = async (client) => {
   // Get developers from database
   let developers = [];
   try {
-    if (client.database && client.database.schemas && client.database.schemas.Guild) {
-      const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
-      developers = settings?.developers || [];
-    }
+    const settings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
+    developers = settings?.developers || [];
   } catch (error) {
     client.logger.error("Error fetching developers:", error);
   }

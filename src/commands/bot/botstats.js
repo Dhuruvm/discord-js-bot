@@ -3,6 +3,8 @@ const { timeformat } = require("@helpers/Utils");
 const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const os = require("os");
+const mongoose = require("mongoose");
+const GuildModel = mongoose.model("guild");
 
 /**
  * @type {import("@structures/Command")}
@@ -46,7 +48,7 @@ async function getBotStats(client) {
   const founderId = "1354287041772392478";
   
   // Get developers from global settings
-  const globalSettings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+  const globalSettings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
   const developers = globalSettings?.developers || [];
   
   // Build developer list

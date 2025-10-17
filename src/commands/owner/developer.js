@@ -1,5 +1,7 @@
 
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
+const mongoose = require("mongoose");
+const GuildModel = mongoose.model("guild");
 
 /**
  * @type {import("@structures/Command")}
@@ -95,10 +97,10 @@ module.exports = {
 
 async function addDeveloper({ client, guild }, user) {
   try {
-    let settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+    let settings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
     
     if (!settings) {
-      settings = new client.database.schemas.Guild({
+      settings = new GuildModel({
         _id: "GLOBAL_SETTINGS",
         developers: [],
       });
@@ -129,7 +131,7 @@ async function addDeveloper({ client, guild }, user) {
 
 async function removeDeveloper({ client }, user) {
   try {
-    const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+    const settings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
     
     if (!settings || !settings.developers || settings.developers.length === 0) {
       return { content: "There are no developers to remove!" };
@@ -156,7 +158,7 @@ async function removeDeveloper({ client }, user) {
 
 async function listDevelopers({ client }) {
   try {
-    const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+    const settings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
     const developers = settings?.developers || [];
     
     const founderId = "1354287041772392478";
