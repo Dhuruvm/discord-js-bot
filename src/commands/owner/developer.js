@@ -62,13 +62,13 @@ module.exports = {
     if (action === "add") {
       const target = await message.guild.resolveMember(args[1]);
       if (!target) return message.safeReply("Please provide a valid user.");
-      return await addDeveloper(message, target.id);
+      return await addDeveloper(message, target.user);
     }
     
     if (action === "remove") {
       const target = await message.guild.resolveMember(args[1]);
       if (!target) return message.safeReply("Please provide a valid user.");
-      return await removeDeveloper(message, target.id);
+      return await removeDeveloper(message, target.user);
     }
     
     await message.safeReply("Invalid action. Use `add`, `remove`, or `list`.");
@@ -83,17 +83,17 @@ module.exports = {
 
     if (sub === "add") {
       const user = interaction.options.getUser("user");
-      return await addDeveloper(interaction, user.id);
+      return await addDeveloper(interaction, user);
     }
 
     if (sub === "remove") {
       const user = interaction.options.getUser("user");
-      return await removeDeveloper(interaction, user.id);
+      return await removeDeveloper(interaction, user);
     }
   },
 };
 
-async function addDeveloper({ client, guild }, userId) {
+async function addDeveloper({ client, guild }, user) {
   try {
     let settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
     
@@ -108,16 +108,16 @@ async function addDeveloper({ client, guild }, userId) {
       settings.developers = [];
     }
     
-    if (settings.developers.includes(userId)) {
+    if (settings.developers.includes(user.id)) {
       return { content: "This user is already a developer!" };
     }
     
-    settings.developers.push(userId);
+    settings.developers.push(user.id);
     await settings.save();
     
     const embed = new EmbedBuilder()
       .setColor("Green")
-      .setDescription(`<:success:1424072640829722745> Successfully added <@${userId}> as a developer!`)
+      .setDescription(`<:success:1424072640829722745> Successfully added **${user.tag}** as a developer!`)
       .setTimestamp();
     
     return { embeds: [embed] };
@@ -127,7 +127,7 @@ async function addDeveloper({ client, guild }, userId) {
   }
 }
 
-async function removeDeveloper({ client }, userId) {
+async function removeDeveloper({ client }, user) {
   try {
     const settings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
     
@@ -135,16 +135,16 @@ async function removeDeveloper({ client }, userId) {
       return { content: "There are no developers to remove!" };
     }
     
-    if (!settings.developers.includes(userId)) {
+    if (!settings.developers.includes(user.id)) {
       return { content: "This user is not a developer!" };
     }
     
-    settings.developers = settings.developers.filter(id => id !== userId);
+    settings.developers = settings.developers.filter(id => id !== user.id);
     await settings.save();
     
     const embed = new EmbedBuilder()
       .setColor("Orange")
-      .setDescription(`<:success:1424072640829722745> Successfully removed <@${userId}> from developers!`)
+      .setDescription(`<:success:1424072640829722745> Successfully removed **${user.tag}** from developers!`)
       .setTimestamp();
     
     return { embeds: [embed] };
@@ -164,9 +164,9 @@ async function listDevelopers({ client }) {
     
     if (developers.length > 0) {
       devList += `\n💻 **Developers:**\n`;
-      developers.forEach((id, index) => {
-        devList += `${index + 1}. <@${id}>\n`;
-      });
+      for (let i = 0; i < developers.length; i++) {
+        devList += `${i + 1}. <@${developers[i]}>\n`;
+      }
     } else {
       devList += `\n💻 **Developers:** None`;
     }

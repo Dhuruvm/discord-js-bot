@@ -128,6 +128,27 @@ async function getHelpMenu(context, prefix) {
   const prefixText = prefix || '!';
   const ContainerBuilder = require("@helpers/ContainerBuilder");
 
+  // Get developers from global settings
+  const globalSettings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+  const developers = globalSettings?.developers || [];
+  
+  // Build developer list
+  let developerText = "Falooda";
+  if (developers.length > 0) {
+    const devNames = [];
+    for (const devId of developers) {
+      try {
+        const user = await client.users.fetch(devId);
+        devNames.push(user.username);
+      } catch (err) {
+        // Skip if user can't be fetched
+      }
+    }
+    if (devNames.length > 0) {
+      developerText = `Falooda, ${devNames.join(', ')}`;
+    }
+  }
+
   const mainText = ContainerBuilder.createTextDisplay(
     `## ${client?.user?.username || 'Bot'} Command Menu\n\n` +
     `### Command Information\n` +
@@ -136,7 +157,7 @@ async function getHelpMenu(context, prefix) {
     `*Or view the commands on our* [**Website**](${SUPPORT_SERVER})\n\n` +
     `### Need Extra Help?\n` +
     `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n` +
-    `> Developer: [**Falooda**](https://discord.com/users/${OWNER_IDS[0]})`
+    `> Developers: **${developerText}**`
   );
 
   // Categories to exclude from help dropdown

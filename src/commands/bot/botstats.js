@@ -43,12 +43,32 @@ async function getBotStats(client) {
   const latency = `${client.ws.ping}ms`;
 
   // Get developer info
-  const { DEVELOPER } = require("@root/config.js");
   const founderId = "1354287041772392478";
+  
+  // Get developers from global settings
+  const globalSettings = await client.database.schemas.Guild.findOne({ _id: "GLOBAL_SETTINGS" });
+  const developers = globalSettings?.developers || [];
+  
+  // Build developer list
+  let developerText = "[Falooda](https://discord.com/users/1354287041772392478)";
+  if (developers.length > 0) {
+    const devLinks = [];
+    for (const devId of developers) {
+      try {
+        const user = await client.users.fetch(devId);
+        devLinks.push(`[${user.username}](https://discord.com/users/${devId})`);
+      } catch (err) {
+        // Skip if user can't be fetched
+      }
+    }
+    if (devLinks.length > 0) {
+      developerText = `[Falooda](https://discord.com/users/1354287041772392478), ${devLinks.join(', ')}`;
+    }
+  }
   
   // Create title and subtitle
   const title = `About ${client.user.username}`;
-  const subtitle = `Managed and Created by **[${DEVELOPER}](https://discord.com/users/${founderId})**`;
+  const subtitle = `Managed and Created by **${developerText}**`;
 
   // Statistics section - matching screenshot format
   const statisticsFields = [
