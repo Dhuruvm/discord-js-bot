@@ -23,13 +23,15 @@ module.exports.launch = async (client) => {
 
   const db = await mongoose.initializeMongoose();
 
-  // Load configuration from api.json
-  const apiConfig = require("../api.json");
-  Object.keys(apiConfig).forEach(key => {
-    if (!process.env[key]) {
-      process.env[key] = apiConfig[key];
-    }
-  });
+  // Validate required environment variables
+  const requiredEnvVars = ['BOT_TOKEN', 'MONGO_CONNECTION', 'SESSION_PASSWORD', 'BOT_SECRET'];
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    client.logger.error(`❌ Dashboard cannot start - Missing required environment variables: ${missingVars.join(', ')}`);
+    client.logger.error('Please set these secrets in the Replit Secrets tab');
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
 
   /* App configuration */
   app
