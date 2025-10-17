@@ -8,7 +8,7 @@ const {
 } = require("discord.js");
 const { EMBED_COLORS } = require("@root/config.js");
 const { getBuffer } = require("@helpers/HttpUtils");
-const PinterestService = require("@helpers/PinterestService");
+const PinterestScraper = require("@helpers/PinterestScraper");
 const emojis = require("@root/emojis.json");
 
 /**
@@ -156,13 +156,13 @@ async function runPFPSearch(source, params, isInteraction) {
     : await source.channel.send({ embeds: [loadingEmbed] });
 
   try {
-    // Search Pinterest
-    const results = await PinterestService.searchPins(params);
+    // Search Pinterest using scraper
+    const results = await PinterestScraper.searchAndStore(params.gender, params.type);
 
     if (!results || results.length === 0) {
       const errorEmbed = new EmbedBuilder()
         .setColor(EMBED_COLORS.ERROR)
-        .setDescription(`${emojis.error} No results found for "${params.query}". Try different keywords.`);
+        .setDescription(`${emojis.error} No results found. Try again later or check different filters.`);
       
       return loadingMsg.edit({ embeds: [errorEmbed] });
     }
@@ -377,7 +377,7 @@ async function refreshSearch(message, state) {
   await message.edit({ embeds: [loadingEmbed], components: [] });
 
   try {
-    const results = await PinterestService.searchPins(state.params);
+    const results = await PinterestScraper.searchAndStore(state.params.gender, state.params.type);
 
     if (!results || results.length === 0) {
       const errorEmbed = new EmbedBuilder()

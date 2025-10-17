@@ -35,7 +35,8 @@ build/
 api.json
 
 # Logs
-logs/
+logs
+pinterest_storage/
 *.log
 lerna-debug.log*
 .npm
