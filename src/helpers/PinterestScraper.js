@@ -222,9 +222,26 @@ class PinterestScraper {
   }
 
   /**
+   * Search with custom query
+   */
+  async searchCustomQuery(query, limit = 5) {
+    const category = "custom";
+    const cacheKey = `custom_${this.generateHash(query)}`;
+    
+    debug(`Scraping Pinterest for custom query: ${query}`);
+    const pins = await this.scrapePinterest(query, cacheKey);
+    
+    if (pins.length > 0) {
+      return pins.slice(0, limit);
+    }
+    
+    return this.getFallbackResults(query).slice(0, limit);
+  }
+
+  /**
    * Search and store pins
    */
-  async searchAndStore(gender = "neutral", type = "pfp") {
+  async searchAndStore(gender = "neutral", type = "pfp", limit = 5) {
     let category = "matching"; // default
 
     if (type === "pfp") {
@@ -248,7 +265,8 @@ class PinterestScraper {
       }
     }
 
-    return pins.length > 0 ? pins : this.getFallbackResults(query);
+    const results = pins.length > 0 ? pins : this.getFallbackResults(query);
+    return results.slice(0, limit);
   }
 
   /**
