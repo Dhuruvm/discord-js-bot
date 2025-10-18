@@ -17,17 +17,18 @@ class InteractionUtils {
       .setTitle(title);
 
     const rows = inputs.map(input => {
-      return new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId(input.customId)
-          .setLabel(input.label)
-          .setStyle(input.style || TextInputStyle.Short)
-          .setRequired(input.required ?? false)
-          .setPlaceholder(input.placeholder || "")
-          .setValue(input.value || "")
-          .setMinLength(input.minLength || undefined)
-          .setMaxLength(input.maxLength || undefined)
-      );
+      const textInput = new TextInputBuilder()
+        .setCustomId(input.customId)
+        .setLabel(input.label)
+        .setStyle(input.style || TextInputStyle.Short)
+        .setRequired(input.required ?? false);
+
+      if (input.placeholder) textInput.setPlaceholder(input.placeholder);
+      if (input.value) textInput.setValue(input.value);
+      if (input.minLength) textInput.setMinLength(input.minLength);
+      if (input.maxLength) textInput.setMaxLength(input.maxLength);
+
+      return new ActionRowBuilder().addComponents(textInput);
     });
 
     modal.addComponents(...rows);

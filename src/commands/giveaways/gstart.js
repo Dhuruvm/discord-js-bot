@@ -3,6 +3,7 @@ const {
   ComponentType,
   ButtonStyle,
   PermissionFlagsBits,
+  TextInputStyle,
 } = require("discord.js");
 const ems = require("enhanced-ms");
 const InteractionUtils = require("@helpers/InteractionUtils");
@@ -92,7 +93,7 @@ async function showMainSetupModal(interaction) {
     {
       customId: "prize",
       label: "Prize",
-      style: 1, // Short
+      style: TextInputStyle.Short,
       placeholder: "What are you giving away?",
       required: true,
       minLength: 1,
@@ -101,7 +102,7 @@ async function showMainSetupModal(interaction) {
     {
       customId: "duration",
       label: "Duration",
-      style: 1, // Short
+      style: TextInputStyle.Short,
       placeholder: "e.g., 1h, 1d, 1w, 30m",
       required: true,
       value: "1d",
@@ -109,7 +110,7 @@ async function showMainSetupModal(interaction) {
     {
       customId: "winners",
       label: "Number of Winners",
-      style: 1, // Short
+      style: TextInputStyle.Short,
       placeholder: "How many winners?",
       required: true,
       value: "1",
@@ -117,14 +118,14 @@ async function showMainSetupModal(interaction) {
     {
       customId: "channel_id",
       label: "Channel ID (optional)",
-      style: 1, // Short
+      style: TextInputStyle.Short,
       placeholder: "Leave empty for current channel",
       required: false,
     },
     {
       customId: "host_id",
       label: "Host User ID (optional)",
-      style: 1, // Short
+      style: TextInputStyle.Short,
       placeholder: "Leave empty to be the host",
       required: false,
     },

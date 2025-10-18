@@ -269,7 +269,7 @@ const waiter = (msg, userId, prefix) => {
 
     const disabledComponents = currentComponents.map(row => {
       const newRow = new ActionRowBuilder();
-      const rowJson = row.toJSON();
+      const rowJson = typeof row.toJSON === 'function' ? row.toJSON() : row;
       rowJson.components.forEach(componentData => {
         if (componentData.type === 2 && componentData.style === 5) {
           newRow.addComponents(ButtonBuilder.from(componentData));
