@@ -158,18 +158,15 @@ async function getHelpMenu(context, prefix) {
 
   const mainText = ContainerBuilder.createTextDisplay(
     `# ${emojis.bot} ${client?.user?.username || 'Bot'} Command Menu\n\n` +
-    `╭─────────────────────────────────────────╮\n` +
-    `│ ${emojis.info} **Command Information**\n` +
-    `│ Select a category from the menu below\n` +
-    `│ to view all available commands\n` +
-    `╰─────────────────────────────────────────╯\n\n` +
-    `${emojis.arrow_right} *Prefix: \`${prefixText}\`*\n` +
-    `${emojis.link} *[Website](${SUPPORT_SERVER})*\n\n` +
-    `╭─────────────────────────────────────────╮\n` +
-    `│ ${emojis.support} **Need Help?**\n` +
-    `│ Visit our [Support Server](${SUPPORT_SERVER})\n` +
-    `│ ${emojis.crown} Developers: **${developerText}**\n` +
-    `╰─────────────────────────────────────────╯`
+    `**Command Information**\n` +
+    `${emojis.info} Select a category from the menu below\n` +
+    `${emojis.info} to view all available commands\n\n` +
+    `**Settings**\n` +
+    `${emojis.arrow_right} Prefix: \`${prefixText}\`\n` +
+    `${emojis.link} [Website](${SUPPORT_SERVER})\n\n` +
+    `**Support**\n` +
+    `${emojis.support} Need assistance? Visit our [Support Server](${SUPPORT_SERVER})\n` +
+    `${emojis.crown} Developers: **${developerText}**`
   );
 
   // Categories to exclude from help dropdown
@@ -349,7 +346,7 @@ function getCategoryEmbed(client, category, prefix) {
       const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1); // ApplicationCommandOptionType.Subcommand
       if (subcommands.length > 0) {
         return subcommands.map(sub => 
-          `╰─ \`${cmdPrefix}${cmd.name} ${sub.name}\` — ${sub.description}`
+          `• \`${cmdPrefix}${cmd.name} ${sub.name}\` — ${sub.description}`
         ).join('\n');
       }
     }
@@ -358,19 +355,17 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command?.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `╰─ \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`;
+        return `• \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`;
       }).join('\n');
     }
     
     // Single command
-    return `╰─ \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`;
+    return `• \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`;
   }).join('\n');
 
   const categoryText = ContainerBuilder.createTextDisplay(
     `## ${mapping.name} Commands\n\n` +
-    `╭─────────────────────────╮\n` +
-    `${commandsList}\n` +
-    `╰─────────────────────────╯\n\n` +
+    `${commandsList}\n\n` +
     `${emojis.info} *Use \`${prefix || '!'}help <command>\` for detailed information*\n` +
     `${emojis.sparkles} *Powered by Blackbit Studio*`
   );

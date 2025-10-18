@@ -88,18 +88,6 @@ async function gamble(user, betAmount) {
   const slot2 = getEmoji();
   const slot3 = getEmoji();
 
-  const str = `
-    **Gamble Amount:** ${betAmount}${ECONOMY.CURRENCY}
-    **Multiplier:** 2x
-    ╔══════════╗
-    ║ ${getEmoji()} ║ ${getEmoji()} ║ ${getEmoji()} ‎‎‎‎║
-    ╠══════════╣
-    ║ ${slot1} ║ ${slot2} ║ ${slot3} ⟸
-    ╠══════════╣
-    ║ ${getEmoji()} ║ ${getEmoji()} ║ ${getEmoji()} ║
-    ╚══════════╝
-    `;
-
   const reward = calculateReward(betAmount, slot1, slot2, slot3);
   const result = (reward > 0 ? `You won: ${reward}` : `You lost: ${betAmount}`) + ECONOMY.CURRENCY;
   const balance = reward - betAmount;
@@ -107,12 +95,22 @@ async function gamble(user, betAmount) {
   userDb.coins += balance;
   await userDb.save();
 
+  const str = `**Slot Machine Results**\n\n` +
+    `🎰 [ ${getEmoji()} ] [ ${getEmoji()} ] [ ${getEmoji()} ]\n` +
+    `➜ **[ ${slot1} ] [ ${slot2} ] [ ${slot3} ]** ⟸\n` +
+    `🎰 [ ${getEmoji()} ] [ ${getEmoji()} ] [ ${getEmoji()} ]\n\n` +
+    `**Gamble Details**\n` +
+    `• Bet Amount: ${betAmount}${ECONOMY.CURRENCY}\n` +
+    `• Multiplier: 2x\n` +
+    `• ${result}\n\n` +
+    `**Wallet Balance**\n` +
+    `${userDb?.coins}${ECONOMY.CURRENCY}`;
+
   const embed = new EmbedBuilder()
     .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
     .setColor(EMBED_COLORS.TRANSPARENT)
     .setThumbnail("https://i.pinimg.com/originals/9a/f1/4e/9af14e0ae92487516894faa9ea2c35dd.gif")
-    .setDescription(str)
-    .setFooter({ text: `${result}\nUpdated Wallet balance: ${userDb?.coins}${ECONOMY.CURRENCY}` });
+    .setDescription(str);
 
   return { embeds: [embed] };
 }

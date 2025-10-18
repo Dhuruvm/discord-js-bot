@@ -157,10 +157,8 @@ module.exports = {
       );
 
       return message.safeReply(
-        `${emojis.clipboard} **Preset Winners:**\n` +
-        `╭─────────────────────────╮\n` +
-        `${winners.map((w, i) => `│ ${i + 1}. ${w}`).join("\n")}\n` +
-        `╰─────────────────────────╯`
+        `${emojis.clipboard} **Preset Winners:**\n\n` +
+        `${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`
       );
     } else {
       return message.safeReply(`${emojis.error} Invalid subcommand! Use: \`gwin add/remove/list <message_id> [@user]\``);
@@ -240,10 +238,8 @@ module.exports = {
       );
 
       return interaction.followUp(
-        `${emojis.clipboard} **Preset Winners:**\n` +
-        `╭─────────────────────────╮\n` +
-        `${winners.map((w, i) => `│ ${i + 1}. ${w}`).join("\n")}\n` +
-        `╰─────────────────────────╯`
+        `${emojis.clipboard} **Preset Winners:**\n\n` +
+        `${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`
       );
     }
   },

@@ -241,12 +241,10 @@ function startBot() {
 
 async function main() {
   console.clear();
-  console.log('\n' + colors.bright + colors.cyan + '╔════════════════════════════════════════════════════╗' + colors.reset);
-  console.log(colors.bright + colors.cyan + '║                                                    ║' + colors.reset);
-  console.log(colors.bright + colors.cyan + '║       Discord Bot + Lavalink Music System         ║' + colors.reset);
-  console.log(colors.bright + colors.cyan + '║              Professional Launcher                 ║' + colors.reset);
-  console.log(colors.bright + colors.cyan + '║                                                    ║' + colors.reset);
-  console.log(colors.bright + colors.cyan + '╚════════════════════════════════════════════════════╝' + colors.reset + '\n');
+  console.log('\n' + colors.bright + colors.cyan + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + colors.reset);
+  console.log(colors.bright + colors.cyan + '  Discord Bot + Lavalink Music System' + colors.reset);
+  console.log(colors.cyan + '  Professional Launcher' + colors.reset);
+  console.log(colors.bright + colors.cyan + '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━' + colors.reset + '\n');
 
   // Auto-fix vulnerabilities
   await autoFixVulnerabilities();
