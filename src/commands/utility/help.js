@@ -60,7 +60,7 @@ module.exports = {
       if (direction === 'OWNER' && !OWNER_IDS.includes(message.author.id)) {
         return message.channel.send(`${emojis.error} No command or category found matching your input`);
       }
-      
+
       const categoryResponse = getCategoryEmbed(message.client, direction, data.prefix);
       const backRow = getBackButton();
 
@@ -138,7 +138,7 @@ async function getHelpMenu(context, prefix) {
   // Get developers from global settings
   const globalSettings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
   const developers = globalSettings?.developers || [];
-  
+
   // Build developer list
   let developerText = `**[Falooda](${SUPPORT_SERVER})**`;
   if (developers.length > 0) {
@@ -159,11 +159,10 @@ async function getHelpMenu(context, prefix) {
   const mainText = ContainerBuilder.createTextDisplay(
     `# ${client?.user?.username || 'Bot'} Command Menu\n\n` +
     `**Command Information**\n` +
-    `Select a category from the menu below to view available commands\n\n` +
-    `*View ${client?.user?.username || 'Bot'} commands using the menu below.*\n\n` +
-    `*Or view the commands on our [Website](${SUPPORT_SERVER})*\n\n` +
+    `Select a category from the menu below to view available commands.\n\n` +
+    `Use \`${prefixText}exp <command>\` to get detailed command information and examples.\n\n` +
     `**Need Extra Help?**\n` +
-    `Visit our **[Support Server](${SUPPORT_SERVER})** to get started\n` +
+    `Visit our **[Support Server](${SUPPORT_SERVER})**\n\n` +
     `Developer: **${developerText}**`
   );
 
@@ -338,7 +337,7 @@ function getCategoryEmbed(client, category, prefix) {
 
   const commandsList = commands.map(cmd => {
     const cmdPrefix = prefix || '!';
-    
+
     // Check for slash command subcommands first
     if (cmd.slashCommand?.enabled && cmd.slashCommand?.options) {
       const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1); // ApplicationCommandOptionType.Subcommand
@@ -348,7 +347,7 @@ function getCategoryEmbed(client, category, prefix) {
         ).join('\n');
       }
     }
-    
+
     // Check for message command subcommands
     if (cmd.command?.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
@@ -356,7 +355,7 @@ function getCategoryEmbed(client, category, prefix) {
         return `• \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`;
       }).join('\n');
     }
-    
+
     // Single command
     return `• \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`;
   }).join('\n');
