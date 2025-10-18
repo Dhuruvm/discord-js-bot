@@ -8,6 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 18, 2025)
 
+### Emoji System & UI Improvements
+- **Centralized Emoji System**: Fixed `EmojiManager.js` to correctly load emojis from root `emojis.json` file instead of non-existent `src/data/emojis.json`
+- **Added Helper Methods**: Added convenient getter methods to EmojiManager: `getSuccess()`, `getError()`, `getWarning()`, `getInfo()`, `getLoading()`
+- **Replaced Hardcoded Emojis**: Updated `gwin` command to use emojis from `emojis.json` instead of hardcoded custom emoji IDs
+- **Beautiful Sidebar Formatting**: Added clean box-drawing characters (╭─╯│) to create professional sidebars in help menu and command outputs
+- **Help Command Prefix Fix**: Replaced all hardcoded "/" slashes with the actual server prefix for consistency across all command displays
+- **Enhanced Command Lists**: Improved command display with "—" separator and better formatting in category views
+
+### Giveaway System Fixes
+- **Fixed gstart Interaction Error**: Corrected "Unknown Message" error by using `btnInteraction.editReply()` instead of trying to edit the original message after `deferUpdate()`
+- **Fixed gwin Slash Commands**: Ensured `gwin` uses `interaction.followUp()` correctly after framework's auto-defer for ephemeral slash commands
+- **Modal Input Fix**: Previously corrected "Expected a number primitive" error in giveaway setup
+- **Improved gwin Output**: Added sidebar formatting to preset winners list for better visual organization
+
 ### Music System Fixes & Enhancements
 - **Installed Java JDK**: Added Java runtime to enable Lavalink music server, resolving "spawn java ENOENT" errors.
 - **Enhanced Music Player UI**: Completely redesigned music player with professional visuals:
@@ -19,11 +33,6 @@ Preferred communication style: Simple, everyday language.
   - Professional queue display with total duration
 - **Music Player Controls**: All interactive buttons (play/pause, next/previous, shuffle, loop, queue) fully functional via `src/components/music/player-controls.js`.
 - **Lavalink Status**: Music server now starts successfully and connects without errors.
-
-### Giveaway System Fixes
-- **Fixed Modal Input Error**: Corrected "Expected a number primitive" error in giveaway setup by properly using `TextInputStyle` enum instead of numeric values.
-- **Fixed InteractionUtils**: Updated `createModal` method to conditionally set optional parameters (placeholder, value, minLength, maxLength) only when they exist, preventing empty value errors.
-- **Giveaway Setup**: The `/gstart` and `!gstart` commands now work correctly without errors.
 
 ### Help Command Fix
 - **Fixed Component Serialization**: Added type checking for `row.toJSON()` to handle both ActionRowBuilder objects and plain JSON objects, preventing crashes when help menu times out.
