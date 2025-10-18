@@ -8,16 +8,33 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 18, 2025)
 
-### Critical Bug Fixes - Giveaway, Bug Report, and PFP Commands
+### Critical Bug Fixes - Complete Command System Overhaul
+- **Fixed gwin Command Interaction Failures**: Completely resolved "interaction failed" errors in slash command implementation
+  - Added proper `deferReply({ ephemeral: true })` at the start of interactionRun
+  - Changed all `followUp()` calls to `editReply()` for consistency with deferred interactions
+  - All three subcommands (add, remove, list) now work flawlessly without timing out
+  
+- **Fixed Bug Report System Integration**: Resolved button interaction routing through InteractionRouter
+  - Initialized InteractionRouter in BotClient constructor
+  - Added InteractionRouter initialization in ready.js event
+  - Updated interactionCreate.js to route namespaced interactions (with `:`) to InteractionRouter
+  - Fixed duplicate imports in bug-report modal-handler.js
+  - Bug report button and modal submission now work correctly for both flows
+  
+- **Enhanced PFP Command Error Handling**: Added comprehensive error handling to prevent crashes
+  - Added try/catch wrappers in menu collector to handle button interaction errors
+  - Added error handling in custom query modal flow with proper user feedback
+  - Enhanced searchAndDisplay with nested error handling and null checks
+  - Improved collector cleanup with null/undefined guards
+  - All edge cases now handled gracefully with user-friendly error messages
+
+### Previous Critical Bug Fixes - Giveaway, Bug Report, and PFP Commands
 - **Fixed gwin Winner Selection Logic**: Completely rewrote the `_getWinners` method in giveaway handler to ensure exactly the correct number of winners is always selected
   - Now properly handles preset winners with bot exclusion
   - Requests extra random winners to account for potential duplicates
   - Filters out preset winners from random selection to avoid duplicates
   - Implements fallback logic to get additional winners if needed
   - Always returns exactly `winnersCount` winners (preset winners first, then random)
-- **Fixed Bug Report Modal Interaction**: Corrected modal custom ID mismatch in `/reportbug` command
-  - Changed modal ID from `bug:report:modal` to `bug:submit` to match InteractionRouter handler
-  - Bug report submissions now work correctly for both button and slash command flows
 - **Enhanced PFP Command Query Validation**: Added input validation for numeric-only queries
   - Rejects queries shorter than 2 characters with helpful error message
   - Automatically enhances numeric-only queries (e.g., "123" becomes "aesthetic 123 pfp") for better search results
