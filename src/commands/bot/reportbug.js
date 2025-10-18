@@ -21,7 +21,36 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    await message.safeReply("Please use the slash command `/reportbug` to report a bug. This will open a form for you to fill out.");
+    const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+    const ContainerBuilder = require("@helpers/ContainerBuilder");
+
+    const bugReportText = ContainerBuilder.createTextDisplay(
+      `# Report a Bug\n\n` +
+      `Click the button below to open the bug report form.\n\n` +
+      `**What to include in your report:**\n` +
+      `• A clear title describing the bug\n` +
+      `• Detailed description of what happened\n` +
+      `• Steps to reproduce the issue\n` +
+      `• What you expected to happen\n` +
+      `• Any additional information (screenshots, error messages, etc.)`
+    );
+
+    const button = new ButtonBuilder()
+      .setCustomId("bug:report")
+      .setLabel("Open Bug Report Form")
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji("🐛");
+
+    const row = new ActionRowBuilder().addComponents(button);
+
+    const response = new ContainerBuilder()
+      .addContainer({
+        accentColor: 0xFFFFFF,
+        components: [bugReportText, row]
+      })
+      .build();
+
+    await message.safeReply(response);
   },
 
   async interactionRun(interaction) {
