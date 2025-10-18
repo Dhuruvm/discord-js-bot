@@ -255,7 +255,7 @@ class ContainerBuilder {
 
     const result = new ContainerBuilder()
       .addContainer({ 
-        accentColor: 0x2F3136, // Dark Discord background
+        accentColor: 0xFFFFFF, // White
         components 
       })
       .build();
