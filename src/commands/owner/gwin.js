@@ -170,11 +170,11 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return interaction.followUp(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
+      return interaction.reply(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return interaction.followUp("<:error:1424072711671382076> Cannot modify preset winners for an ended giveaway!");
+      return interaction.reply("<:error:1424072711671382076> Cannot modify preset winners for an ended giveaway!");
     }
 
     if (subCmd === "add") {
@@ -189,7 +189,7 @@ module.exports = {
       }
 
       if (giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.followUp(`<:error:1424072711671382076> ${user.tag} is already a preset winner!`);
+        return interaction.reply(`<:error:1424072711671382076> ${user.tag} is already a preset winner!`);
       }
 
       giveaway.extraData.presetWinners.push(user.id);
@@ -198,16 +198,16 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.followUp(`<:success:1424072640829722745> Added ${user.tag} as a preset winner for the giveaway!`);
+        return interaction.reply(`<:success:1424072640829722745> Added ${user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Add", error);
-        return interaction.followUp(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return interaction.reply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
       }
     } else if (subCmd === "remove") {
       const user = interaction.options.getUser("user");
 
       if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.followUp(`<:error:1424072711671382076> ${user.tag} is not a preset winner!`);
+        return interaction.reply(`<:error:1424072711671382076> ${user.tag} is not a preset winner!`);
       }
 
       giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== user.id);
@@ -216,14 +216,14 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.followUp(`<:success:1424072640829722745> Removed ${user.tag} from preset winners!`);
+        return interaction.reply(`<:success:1424072640829722745> Removed ${user.tag} from preset winners!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Remove", error);
-        return interaction.followUp(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return interaction.reply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
       }
     } else if (subCmd === "list") {
       if (!giveaway.extraData?.presetWinners || giveaway.extraData.presetWinners.length === 0) {
-        return interaction.followUp("📋 No preset winners for this giveaway.");
+        return interaction.reply("📋 No preset winners for this giveaway.");
       }
 
       const winners = await Promise.all(
@@ -233,7 +233,7 @@ module.exports = {
         })
       );
 
-      return interaction.followUp(`📋 **Preset Winners:**\n${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`);
+      return interaction.reply(`📋 **Preset Winners:**\n${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`);
     }
   },
 };

@@ -286,13 +286,13 @@ async function showGiveawayConfirmation(interaction, data) {
   }
 
   await btnInteraction.deferUpdate();
-  await startGiveaway(interaction, data, msg);
+  await startGiveaway(interaction, data, btnInteraction);
 }
 
 /**
  * Start the giveaway
  */
-async function startGiveaway(interaction, data, confirmMsg) {
+async function startGiveaway(interaction, data, btnInteraction) {
   try {
     const options = {
       duration: data.duration,
@@ -328,13 +328,13 @@ async function startGiveaway(interaction, data, confirmMsg) {
       color: EMBED_COLORS.SUCCESS,
     });
 
-    await confirmMsg.edit({
+    await btnInteraction.editReply({
       embeds: [successEmbed],
       components: [],
     });
   } catch (error) {
     console.error("Giveaway start error:", error);
-    await confirmMsg.edit({
+    await btnInteraction.editReply({
       embeds: [InteractionUtils.createErrorEmbed(`Failed to start giveaway: ${error.message}`)],
       components: [],
     });
