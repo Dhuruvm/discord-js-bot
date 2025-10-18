@@ -11,7 +11,8 @@ module.exports = {
   description: "Report a bug to the bot developers",
   category: "BOT",
   command: {
-    enabled: false,
+    enabled: true,
+    aliases: ["bug", "bugreport"],
   },
   slashCommand: {
     enabled: true,
@@ -20,7 +21,7 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    await message.safeReply("This command can only be used as a slash command: `/reportbug`");
+    await message.safeReply("Please use the slash command `/reportbug` to report a bug. This will open a form for you to fill out.");
   },
 
   async interactionRun(interaction) {

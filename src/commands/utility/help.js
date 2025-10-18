@@ -140,7 +140,7 @@ async function getHelpMenu(context, prefix) {
   const developers = globalSettings?.developers || [];
   
   // Build developer list
-  let developerText = "Falooda";
+  let developerText = `**[Falooda](${SUPPORT_SERVER})**`;
   if (developers.length > 0) {
     const devNames = [];
     for (const devId of developers) {
@@ -152,7 +152,7 @@ async function getHelpMenu(context, prefix) {
       }
     }
     if (devNames.length > 0) {
-      developerText = `Falooda, ${devNames.join(', ')}`;
+      developerText = `**[Falooda](${SUPPORT_SERVER})**, ${devNames.join(', ')}`;
     }
   }
 
@@ -167,8 +167,8 @@ async function getHelpMenu(context, prefix) {
     `Developer: **${developerText}**`
   );
 
-  // Categories to exclude from help dropdown
-  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE', 'OWNER'];
+  // Categories to exclude from help dropdown (OWNER will be conditionally added)
+  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE'];
 
   // Build menu options in specific order, filtering based on ownership
   const menuOptions = categoryOrder

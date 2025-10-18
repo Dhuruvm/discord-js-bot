@@ -115,15 +115,6 @@ async function getBotStats(client) {
     );
   }
 
-  if (DASHBOARD.enabled) {
-    buttons.push(
-      new ButtonBuilder()
-        .setLabel("Dashboard")
-        .setURL(DASHBOARD.baseURL)
-        .setStyle(ButtonStyle.Link)
-    );
-  }
-
   const buttonRow = new ActionRowBuilder().addComponents(buttons.slice(0, 5));
 
   return { embeds: [embed], components: [buttonRow] };
