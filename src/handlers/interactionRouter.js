@@ -84,16 +84,20 @@ class InteractionRouter {
         client: this.client,
       });
     } catch (error) {
-      this.client.logger.error("InteractionRouter Component Error", error);
+      this.client.logger.error(`InteractionRouter Component Error [${interaction.customId}]`, error);
       
       // Try to respond with error
-      const errorMessage = "An error occurred while processing your interaction.";
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: errorMessage, ephemeral: true }).catch(() => {});
-      } else if (interaction.deferred) {
-        await interaction.editReply({ content: errorMessage }).catch(() => {});
-      } else {
-        await interaction.followUp({ content: errorMessage, ephemeral: true }).catch(() => {});
+      const errorMessage = "An error occurred while processing your interaction. Please try again or use `/reportbug` to report this issue.";
+      try {
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: errorMessage, ephemeral: true });
+        } else if (interaction.deferred) {
+          await interaction.editReply({ content: errorMessage });
+        } else {
+          await interaction.followUp({ content: errorMessage, ephemeral: true });
+        }
+      } catch (replyError) {
+        this.client.logger.error("Failed to send error response", replyError);
       }
     }
   }
@@ -127,16 +131,20 @@ class InteractionRouter {
         client: this.client,
       });
     } catch (error) {
-      this.client.logger.error("InteractionRouter Modal Error", error);
+      this.client.logger.error(`InteractionRouter Modal Error [${interaction.customId}]`, error);
       
       // Try to respond with error
-      const errorMessage = "An error occurred while processing your submission.";
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: errorMessage, ephemeral: true }).catch(() => {});
-      } else if (interaction.deferred) {
-        await interaction.editReply({ content: errorMessage }).catch(() => {});
-      } else {
-        await interaction.followUp({ content: errorMessage, ephemeral: true }).catch(() => {});
+      const errorMessage = "An error occurred while processing your submission. Please try again or use `/reportbug` to report this issue.";
+      try {
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ content: errorMessage, ephemeral: true });
+        } else if (interaction.deferred) {
+          await interaction.editReply({ content: errorMessage });
+        } else {
+          await interaction.followUp({ content: errorMessage, ephemeral: true });
+        }
+      } catch (replyError) {
+        this.client.logger.error("Failed to send error response", replyError);
       }
     }
   }

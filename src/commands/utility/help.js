@@ -161,6 +161,8 @@ async function getHelpMenu(context, prefix) {
     `**Command Information**\n` +
     `Select a category from the menu below to view available commands.\n\n` +
     `Use \`${prefixText}exp <command>\` to get detailed command information and examples.\n\n` +
+    `**Found a Bug?**\n` +
+    `Report issues using \`${prefixText}reportbug\` to help us improve the bot.\n\n` +
     `**Need Extra Help?**\n` +
     `Visit our **[Support Server](${SUPPORT_SERVER})**\n\n` +
     `Developer: **${developerText}**`

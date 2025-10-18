@@ -78,11 +78,17 @@ module.exports = class Logger {
    */
   static error(content, ex) {
     if (ex) {
-      pinoLogger.error(ex, `${content}: ${ex?.message}`);
+      pinoLogger.error(ex, `${content}: ${ex?.message || 'Unknown error'}`);
     } else {
       pinoLogger.error(content);
     }
-    if (webhookLogger) sendWebhook(content, ex);
+    if (webhookLogger) {
+      try {
+        sendWebhook(content, ex);
+      } catch (err) {
+        pinoLogger.warn('Failed to send error webhook:', err);
+      }
+    }
   }
 
   /**
