@@ -44,7 +44,7 @@ module.exports = (client) => {
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
 
   lavaclient.on("nodeConnect", (node) => {
-    // Silently connect - only works with local node
+    client.logger.log(`Lavalink node "${node.id}" connected`);
   });
 
   lavaclient.on("nodeDisconnect", (node, reason) => {
