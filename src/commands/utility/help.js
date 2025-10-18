@@ -152,14 +152,19 @@ async function getHelpMenu(context, prefix) {
   }
 
   const mainText = ContainerBuilder.createTextDisplay(
-    `## ${client?.user?.username || 'Bot'} Command Menu\n\n` +
-    `### Command Information\n` +
-    `**Select a category from the menu below to view available commands**\n\n` +
-    `*View ${client?.user?.username || 'bot'} commands using the menu below.*\n\n` +
-    `*Or view the commands on our* [**Website**](${SUPPORT_SERVER})\n\n` +
-    `### Need Extra Help?\n` +
-    `> Visit our [**Support Server**](${SUPPORT_SERVER}) to get started\n` +
-    `> Developers: **${developerText}**`
+    `# ${emojis.bot} ${client?.user?.username || 'Bot'} Command Menu\n\n` +
+    `╭─────────────────────────────────────────╮\n` +
+    `│ ${emojis.info} **Command Information**\n` +
+    `│ Select a category from the menu below\n` +
+    `│ to view all available commands\n` +
+    `╰─────────────────────────────────────────╯\n\n` +
+    `${emojis.arrow_right} *Prefix: \`${prefixText}\`*\n` +
+    `${emojis.link} *[Website](${SUPPORT_SERVER})*\n\n` +
+    `╭─────────────────────────────────────────╮\n` +
+    `│ ${emojis.support} **Need Help?**\n` +
+    `│ Visit our [Support Server](${SUPPORT_SERVER})\n` +
+    `│ ${emojis.crown} Developers: **${developerText}**\n` +
+    `╰─────────────────────────────────────────╯`
   );
 
   // Categories to exclude from help dropdown
@@ -332,12 +337,14 @@ function getCategoryEmbed(client, category, prefix) {
   }
 
   const commandsList = commands.map(cmd => {
+    const cmdPrefix = prefix || '!';
+    
     // Check for slash command subcommands first
     if (cmd.slashCommand?.enabled && cmd.slashCommand?.options) {
       const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1); // ApplicationCommandOptionType.Subcommand
       if (subcommands.length > 0) {
         return subcommands.map(sub => 
-          `- \`/${cmd.name} ${sub.name}\` - ${sub.description}`
+          `╰─ \`${cmdPrefix}${cmd.name} ${sub.name}\` — ${sub.description}`
         ).join('\n');
       }
     }
@@ -346,18 +353,21 @@ function getCategoryEmbed(client, category, prefix) {
     if (cmd.command?.subcommands && cmd.command.subcommands.length > 0) {
       return cmd.command.subcommands.map(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `- \`${prefix || '!'}${cmd.name} ${trigger}\``;
+        return `╰─ \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`;
       }).join('\n');
     }
     
     // Single command
-    const slashPrefix = cmd.slashCommand?.enabled ? '/' : (prefix || '!');
-    return `- \`${slashPrefix}${cmd.name}\` - ${cmd.description}`;
+    return `╰─ \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`;
   }).join('\n');
 
   const categoryText = ContainerBuilder.createTextDisplay(
-    `## ${mapping.name}\n\n${commandsList}\n\n` +
-    `*Use ${prefix || '!'}help <command> for more info • Powered by Blackbit Studio*`
+    `## ${mapping.name} Commands\n\n` +
+    `╭─────────────────────────╮\n` +
+    `${commandsList}\n` +
+    `╰─────────────────────────╯\n\n` +
+    `${emojis.info} *Use \`${prefix || '!'}help <command>\` for detailed information*\n` +
+    `${emojis.sparkles} *Powered by Blackbit Studio*`
   );
 
   const payload = new ContainerBuilder()

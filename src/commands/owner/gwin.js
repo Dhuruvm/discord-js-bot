@@ -1,4 +1,5 @@
 const { ApplicationCommandOptionType } = require("discord.js");
+const emojis = require("@root/emojis.json");
 
 /**
  * @type {import("@structures/Command")}
@@ -76,7 +77,7 @@ module.exports = {
     const messageId = args[1];
 
     if (!messageId) {
-      return message.safeReply("<:error:1424072711671382076> Please provide a giveaway message ID!");
+      return message.safeReply(`${emojis.error} Please provide a giveaway message ID!`);
     }
 
     const giveaway = message.client.giveawaysManager.giveaways.find(
@@ -84,18 +85,18 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return message.safeReply(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
+      return message.safeReply(`${emojis.error} Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return message.safeReply("<:error:1424072711671382076> Cannot modify preset winners for an ended giveaway!");
+      return message.safeReply(`${emojis.error} Cannot modify preset winners for an ended giveaway!`);
     }
 
     if (subCmd === "add") {
       const user = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
       
       if (!user) {
-        return message.safeReply("<:error:1424072711671382076> Please provide a valid user mention or ID!");
+        return message.safeReply(`${emojis.error} Please provide a valid user mention or ID!`);
       }
 
       // Initialize preset winners array if it doesn't exist
@@ -107,7 +108,7 @@ module.exports = {
       }
 
       if (giveaway.extraData.presetWinners.includes(user.id)) {
-        return message.safeReply(`<:error:1424072711671382076> ${user.user.tag} is already a preset winner!`);
+        return message.safeReply(`${emojis.error} ${user.user.tag} is already a preset winner!`);
       }
 
       giveaway.extraData.presetWinners.push(user.id);
@@ -116,20 +117,20 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return message.safeReply(`<:success:1424072640829722745> Added ${user.user.tag} as a preset winner for the giveaway!`);
+        return message.safeReply(`${emojis.success} Added ${user.user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         message.client.logger.error("Giveaway Preset Winner Add", error);
-        return message.safeReply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return message.safeReply(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "remove") {
       const user = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
       
       if (!user) {
-        return message.safeReply("<:error:1424072711671382076> Please provide a valid user mention or ID!");
+        return message.safeReply(`${emojis.error} Please provide a valid user mention or ID!`);
       }
 
       if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(user.id)) {
-        return message.safeReply(`<:error:1424072711671382076> ${user.user.tag} is not a preset winner!`);
+        return message.safeReply(`${emojis.error} ${user.user.tag} is not a preset winner!`);
       }
 
       giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== user.id);
@@ -138,14 +139,14 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return message.safeReply(`<:success:1424072640829722745> Removed ${user.user.tag} from preset winners!`);
+        return message.safeReply(`${emojis.success} Removed ${user.user.tag} from preset winners!`);
       } catch (error) {
         message.client.logger.error("Giveaway Preset Winner Remove", error);
-        return message.safeReply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return message.safeReply(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "list") {
       if (!giveaway.extraData?.presetWinners || giveaway.extraData.presetWinners.length === 0) {
-        return message.safeReply("📋 No preset winners for this giveaway.");
+        return message.safeReply(`${emojis.clipboard} No preset winners for this giveaway.`);
       }
 
       const winners = await Promise.all(
@@ -155,9 +156,14 @@ module.exports = {
         })
       );
 
-      return message.safeReply(`📋 **Preset Winners:**\n${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`);
+      return message.safeReply(
+        `${emojis.clipboard} **Preset Winners:**\n` +
+        `╭─────────────────────────╮\n` +
+        `${winners.map((w, i) => `│ ${i + 1}. ${w}`).join("\n")}\n` +
+        `╰─────────────────────────╯`
+      );
     } else {
-      return message.safeReply("<:error:1424072711671382076> Invalid subcommand! Use: `gwin add/remove/list <message_id> [@user]`");
+      return message.safeReply(`${emojis.error} Invalid subcommand! Use: \`gwin add/remove/list <message_id> [@user]\``);
     }
   },
 
@@ -170,11 +176,11 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return interaction.reply(`<:error:1424072711671382076> Could not find a giveaway with message ID: \`${messageId}\``);
+      return interaction.followUp(`${emojis.error} Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return interaction.reply("<:error:1424072711671382076> Cannot modify preset winners for an ended giveaway!");
+      return interaction.followUp(`${emojis.error} Cannot modify preset winners for an ended giveaway!`);
     }
 
     if (subCmd === "add") {
@@ -189,7 +195,7 @@ module.exports = {
       }
 
       if (giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.reply(`<:error:1424072711671382076> ${user.tag} is already a preset winner!`);
+        return interaction.followUp(`${emojis.error} ${user.tag} is already a preset winner!`);
       }
 
       giveaway.extraData.presetWinners.push(user.id);
@@ -198,16 +204,16 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.reply(`<:success:1424072640829722745> Added ${user.tag} as a preset winner for the giveaway!`);
+        return interaction.followUp(`${emojis.success} Added ${user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Add", error);
-        return interaction.reply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return interaction.followUp(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "remove") {
       const user = interaction.options.getUser("user");
 
       if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.reply(`<:error:1424072711671382076> ${user.tag} is not a preset winner!`);
+        return interaction.followUp(`${emojis.error} ${user.tag} is not a preset winner!`);
       }
 
       giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== user.id);
@@ -216,14 +222,14 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.reply(`<:success:1424072640829722745> Removed ${user.tag} from preset winners!`);
+        return interaction.followUp(`${emojis.success} Removed ${user.tag} from preset winners!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Remove", error);
-        return interaction.reply(`<:error:1424072711671382076> An error occurred: ${error.message}`);
+        return interaction.followUp(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "list") {
       if (!giveaway.extraData?.presetWinners || giveaway.extraData.presetWinners.length === 0) {
-        return interaction.reply("📋 No preset winners for this giveaway.");
+        return interaction.followUp(`${emojis.clipboard} No preset winners for this giveaway.`);
       }
 
       const winners = await Promise.all(
@@ -233,7 +239,12 @@ module.exports = {
         })
       );
 
-      return interaction.reply(`📋 **Preset Winners:**\n${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`);
+      return interaction.followUp(
+        `${emojis.clipboard} **Preset Winners:**\n` +
+        `╭─────────────────────────╮\n` +
+        `${winners.map((w, i) => `│ ${i + 1}. ${w}`).join("\n")}\n` +
+        `╰─────────────────────────╯`
+      );
     }
   },
 };

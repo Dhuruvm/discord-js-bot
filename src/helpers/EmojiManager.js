@@ -1,8 +1,7 @@
-
 const fs = require("fs");
 const path = require("path");
 
-const EMOJI_FILE = path.join(__dirname, "../data/emojis.json");
+const EMOJI_FILE = path.join(__dirname, "../../emojis.json");
 
 class EmojiManager {
   constructor() {
@@ -53,6 +52,26 @@ class EmojiManager {
   reload() {
     this.emojis = this.loadEmojis();
     return true;
+  }
+
+  getSuccess() {
+    return this.emojis.success || "✅";
+  }
+
+  getError() {
+    return this.emojis.error || "❌";
+  }
+
+  getWarning() {
+    return this.emojis.warning || "⚠️";
+  }
+
+  getInfo() {
+    return this.emojis.info || "ℹ️";
+  }
+
+  getLoading() {
+    return this.emojis.loading || "⏳";
   }
 }
 
