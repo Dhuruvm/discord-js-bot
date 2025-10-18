@@ -92,6 +92,67 @@ class MongooseGiveaways extends GiveawaysManager {
     return allWinners.slice(0, winnersCount);
   }
 
+  /**
+   * Override _pickWinners to include preset winners (primary method used by discord-giveaways)
+   */
+  async _pickWinners(giveaway) {
+    // Get preset winner IDs if they exist
+    const presetWinnerIds = giveaway.extraData?.presetWinners || [];
+    
+    // Fetch the channel and guild for resolving members
+    const channel = await this.client.channels.fetch(giveaway.channelId).catch(() => null);
+    if (!channel || !channel.guild) {
+      // Fallback to regular winners if we can't access the guild
+      return await super._pickWinners(giveaway);
+    }
+    
+    const guild = channel.guild;
+    const winnersCount = giveaway.winnerCount;
+    
+    // Resolve preset winner IDs to GuildMember objects
+    const presetWinnerMembers = [];
+    for (const userId of presetWinnerIds) {
+      try {
+        const member = await guild.members.fetch(userId);
+        if (member && !member.user.bot) {
+          presetWinnerMembers.push(member);
+        }
+      } catch (err) {
+        // Skip invalid/unavailable members
+        this.client.logger.debug(`Could not fetch preset winner ${userId}`);
+      }
+    }
+    
+    // Limit preset winners to the requested count
+    const validPresetWinners = presetWinnerMembers.slice(0, winnersCount);
+    
+    // Calculate how many random winners we still need
+    const randomWinnersNeeded = Math.max(0, winnersCount - validPresetWinners.length);
+    
+    // If we don't need any random winners, return preset winners only
+    if (randomWinnersNeeded === 0) {
+      return validPresetWinners;
+    }
+    
+    // Get random winners using the parent method
+    let randomWinners = await super._pickWinners(giveaway);
+    
+    // Filter out preset winners from random winners to avoid duplicates
+    const presetWinnerUserIds = new Set(validPresetWinners.map(m => m.user.id));
+    const filteredRandomWinners = randomWinners.filter(member => 
+      !presetWinnerUserIds.has(member.user.id)
+    );
+    
+    // Take exactly the number of random winners we need
+    const selectedRandomWinners = filteredRandomWinners.slice(0, randomWinnersNeeded);
+    
+    // Combine preset and random winners
+    const allWinners = [...validPresetWinners, ...selectedRandomWinners];
+    
+    // Return exactly winnersCount winners (preset winners first)
+    return allWinners.slice(0, winnersCount);
+  }
+
   async getAllGiveaways() {
     return await Model.find().lean().exec();
   }
