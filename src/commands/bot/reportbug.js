@@ -55,7 +55,7 @@ module.exports = {
 
   async interactionRun(interaction) {
     const modal = new ModalBuilder()
-      .setCustomId("bug:report:modal")
+      .setCustomId("bug:submit")
       .setTitle("Report a Bug");
 
     const bugTitleInput = new TextInputBuilder()

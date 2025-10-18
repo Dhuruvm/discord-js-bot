@@ -41,7 +41,7 @@ class MongooseGiveaways extends GiveawaysManager {
     for (const userId of presetWinnerIds) {
       try {
         const member = await guild.members.fetch(userId);
-        if (member) {
+        if (member && !member.user.bot) {
           presetWinnerMembers.push(member);
         }
       } catch (err) {
@@ -50,21 +50,46 @@ class MongooseGiveaways extends GiveawaysManager {
       }
     }
     
+    // Limit preset winners to the requested count
+    const validPresetWinners = presetWinnerMembers.slice(0, winnersCount);
+    
     // Calculate how many random winners we still need
-    const randomWinnersNeeded = Math.max(0, winnersCount - presetWinnerMembers.length);
+    const randomWinnersNeeded = Math.max(0, winnersCount - validPresetWinners.length);
     
-    // Get random winners using the parent class method
-    const randomWinners = await super._getWinners(giveaway, randomWinnersNeeded);
+    // If we don't need any random winners, return preset winners only
+    if (randomWinnersNeeded === 0) {
+      return validPresetWinners;
+    }
     
-    // Filter out any preset winners that might have been randomly selected
-    // Compare by user ID to ensure proper duplicate removal
-    const presetWinnerUserIds = presetWinnerMembers.map(m => m.user.id);
+    // Get more random winners than needed to account for potential duplicates
+    const extraWinners = Math.ceil(randomWinnersNeeded * 1.5);
+    const randomWinners = await super._getWinners(giveaway, extraWinners);
+    
+    // Filter out preset winners from random winners to avoid duplicates
+    const presetWinnerUserIds = new Set(validPresetWinners.map(m => m.user.id));
     const filteredRandomWinners = randomWinners.filter(member => 
-      !presetWinnerUserIds.includes(member.user.id)
+      !presetWinnerUserIds.has(member.user.id)
     );
     
-    // Combine and return all winners (preset winners first)
-    return [...presetWinnerMembers, ...filteredRandomWinners].slice(0, winnersCount);
+    // Take exactly the number of random winners we need
+    const selectedRandomWinners = filteredRandomWinners.slice(0, randomWinnersNeeded);
+    
+    // Combine preset and random winners
+    const allWinners = [...validPresetWinners, ...selectedRandomWinners];
+    
+    // If we still don't have enough winners, get more random ones
+    if (allWinners.length < winnersCount && filteredRandomWinners.length < randomWinnersNeeded) {
+      const additionalNeeded = winnersCount - allWinners.length;
+      const moreWinners = await super._getWinners(giveaway, additionalNeeded * 2);
+      const moreFiltered = moreWinners.filter(member => 
+        !presetWinnerUserIds.has(member.user.id) && 
+        !allWinners.find(w => w.user.id === member.user.id)
+      );
+      allWinners.push(...moreFiltered.slice(0, additionalNeeded));
+    }
+    
+    // Return exactly winnersCount winners (preset winners first)
+    return allWinners.slice(0, winnersCount);
   }
 
   async getAllGiveaways() {

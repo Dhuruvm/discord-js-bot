@@ -155,6 +155,21 @@ async function showCustomQueryModal(interaction) {
  * Search and display results
  */
 async function searchAndDisplay(source, query, isInteraction) {
+  // Validate query - ensure it's not just numbers or too short
+  const cleanQuery = query.trim();
+  
+  if (cleanQuery.length < 2) {
+    const errorEmbed = InteractionUtils.createErrorEmbed("Search query is too short. Please enter at least 2 characters.");
+    if (isInteraction) {
+      return source.editReply({ embeds: [errorEmbed], components: [] });
+    }
+    return source.channel.send({ embeds: [errorEmbed] });
+  }
+  
+  // If query is only numbers, add context to make it searchable
+  const isOnlyNumbers = /^\d+$/.test(cleanQuery);
+  const searchQuery = isOnlyNumbers ? `aesthetic ${cleanQuery} pfp` : cleanQuery;
+  
   const loadingEmbed = InteractionUtils.createLoadingEmbed("Searching Pinterest for unique images...");
   
   const msg = isInteraction
@@ -162,7 +177,7 @@ async function searchAndDisplay(source, query, isInteraction) {
     : await source.channel.send({ embeds: [loadingEmbed] });
 
   try {
-    const results = await PinterestScraper.searchCustomQuery(query, 5);
+    const results = await PinterestScraper.searchCustomQuery(searchQuery, 5);
 
     if (!results || results.length === 0) {
       return msg.edit({ embeds: [InteractionUtils.createErrorEmbed("No results found. Try a different query.")] });
