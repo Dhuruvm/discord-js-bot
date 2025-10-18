@@ -20,10 +20,10 @@ module.exports = {
 
   async messageRun(message, args) {
     const ping = Math.floor(message.client.ws.ping);
-    const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
+    const status = ping < 100 ? 'Excellent' : ping < 200 ? 'Good' : 'Poor';
 
     const response = ContainerBuilder.quickMessage(
-      "🏓 Pong!",
+      "Pong",
       `Latency measurements for ${message.client.user.username}`,
       [
         { name: "Bot Latency", value: `\`${Math.floor(message.createdTimestamp - message.createdTimestamp)}ms\``, inline: true },
@@ -37,10 +37,10 @@ module.exports = {
 
   async interactionRun(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
-    const status = ping < 100 ? 'Excellent 🟢' : ping < 200 ? 'Good 🟡' : 'Poor 🔴';
+    const status = ping < 100 ? 'Excellent' : ping < 200 ? 'Good' : 'Poor';
 
     const response = ContainerBuilder.quickMessage(
-      "🏓 Pong!",
+      "Pong",
       `Latency measurements for ${interaction.client.user.username}`,
       [
         { name: "Bot Latency", value: `\`${Math.floor(interaction.createdTimestamp - interaction.createdTimestamp)}ms\``, inline: true },

@@ -33,7 +33,7 @@ module.exports = {
 
 function getInviteMessage(client) {
   const payload = ContainerBuilder.quickMessage(
-    `🔗 Invite ${client.user.username}`,
+    `Invite ${client.user.username}`,
     "Click the buttons below to invite me to your server or join our community!",
     [],
     0xFFFFFF
@@ -44,7 +44,6 @@ function getInviteMessage(client) {
   buttons.push(
     new ButtonBuilder()
       .setLabel("Invite Bot")
-      .setEmoji("🔗")
       .setURL(client.getInvite())
       .setStyle(ButtonStyle.Link)
   );
@@ -53,7 +52,6 @@ function getInviteMessage(client) {
     buttons.push(
       new ButtonBuilder()
         .setLabel("Support Server")
-        .setEmoji("💬")
         .setURL(SUPPORT_SERVER)
         .setStyle(ButtonStyle.Link)
     );
@@ -63,7 +61,6 @@ function getInviteMessage(client) {
     buttons.push(
       new ButtonBuilder()
         .setLabel("Dashboard")
-        .setEmoji("🌐")
         .setURL(DASHBOARD.baseURL)
         .setStyle(ButtonStyle.Link)
     );
