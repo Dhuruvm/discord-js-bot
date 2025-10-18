@@ -46,11 +46,11 @@ async function getBotStats(client) {
 
   // Get developer info
   const founderId = "1354287041772392478";
-  
+
   // Get developers from global settings
   const globalSettings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
   const developers = globalSettings?.developers || [];
-  
+
   // Build developer list
   let developerText = "[Falooda](https://discord.com/users/1354287041772392478)";
   if (developers.length > 0) {
@@ -67,7 +67,7 @@ async function getBotStats(client) {
       developerText = `[Falooda](https://discord.com/users/1354287041772392478), ${devLinks.join(', ')}`;
     }
   }
-  
+
   // Create title and subtitle
   const title = `About ${client.user.username}`;
   const subtitle = `Managed and Created by **${developerText}**`;
@@ -88,7 +88,7 @@ async function getBotStats(client) {
 
   // Buttons with emojis
   const buttons = [];
-  
+
   buttons.push({
     label: "Invite",
     url: client.getInvite(),
