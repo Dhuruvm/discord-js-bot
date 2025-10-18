@@ -157,16 +157,14 @@ async function getHelpMenu(context, prefix) {
   }
 
   const mainText = ContainerBuilder.createTextDisplay(
-    `# ${emojis.bot} ${client?.user?.username || 'Bot'} Command Menu\n\n` +
+    `# ${client?.user?.username || 'Bot'} Command Menu\n\n` +
     `**Command Information**\n` +
-    `${emojis.info} Select a category from the menu below\n` +
-    `${emojis.info} to view all available commands\n\n` +
-    `**Settings**\n` +
-    `${emojis.arrow_right} Prefix: \`${prefixText}\`\n` +
-    `${emojis.link} [Website](${SUPPORT_SERVER})\n\n` +
-    `**Support**\n` +
-    `${emojis.support} Need assistance? Visit our [Support Server](${SUPPORT_SERVER})\n` +
-    `${emojis.crown} Developers: **${developerText}**`
+    `Select a category from the menu below to view available commands\n\n` +
+    `*View ${client?.user?.username || 'Bot'} commands using the menu below.*\n\n` +
+    `*Or view the commands on our [Website](${SUPPORT_SERVER})*\n\n` +
+    `**Need Extra Help?**\n` +
+    `Visit our **[Support Server](${SUPPORT_SERVER})** to get started\n` +
+    `Developer: **${developerText}**`
   );
 
   // Categories to exclude from help dropdown
@@ -366,8 +364,8 @@ function getCategoryEmbed(client, category, prefix) {
   const categoryText = ContainerBuilder.createTextDisplay(
     `## ${mapping.name} Commands\n\n` +
     `${commandsList}\n\n` +
-    `${emojis.info} *Use \`${prefix || '!'}help <command>\` for detailed information*\n` +
-    `${emojis.sparkles} *Powered by Blackbit Studio*`
+    `*Use \`${prefix || '!'}help <command>\` for detailed information*\n\n` +
+    `*Powered by Blackbit Studio*`
   );
 
   const payload = new ContainerBuilder()

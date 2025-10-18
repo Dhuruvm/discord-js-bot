@@ -150,6 +150,7 @@ class InteractionRouter {
     this.registerTicketHandlers();
     this.registerGiveawayHandlers();
     this.registerSuggestionHandlers();
+    this.registerBugReportHandlers();
     
     this.client.logger.success(`Interaction Router initialized with ${this.handlers.size} component handlers and ${this.modalHandlers.size} modal handlers`);
   }
@@ -221,6 +222,14 @@ class InteractionRouter {
     this.registerComponent("suggestion", "delete", async ({ interaction }) => {
       await interaction.deferUpdate();
     });
+  }
+
+  /**
+   * Register bug report handlers
+   */
+  registerBugReportHandlers() {
+    const bugReportHandler = require("@src/components/bug-report/modal-handler");
+    this.registerModal("bug", "report", bugReportHandler);
   }
 }
 
