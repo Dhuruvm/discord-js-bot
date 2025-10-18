@@ -105,17 +105,27 @@ async function showMainMenu(source, isInteraction) {
   });
 
   collector.on("collect", async (interaction) => {
-    if (interaction.customId === "pfp_boy") {
-      await interaction.deferUpdate();
-      await searchAndDisplay(interaction, "aesthetic boy real pfp", true);
-      collector.stop();
-    } else if (interaction.customId === "pfp_girl") {
-      await interaction.deferUpdate();
-      await searchAndDisplay(interaction, "aesthetic girl real pfp", true);
-      collector.stop();
-    } else if (interaction.customId === "pfp_custom") {
-      await showCustomQueryModal(interaction);
-      collector.stop();
+    try {
+      if (interaction.customId === "pfp_boy") {
+        await interaction.deferUpdate();
+        await searchAndDisplay(interaction, "aesthetic boy real pfp", true);
+        collector.stop();
+      } else if (interaction.customId === "pfp_girl") {
+        await interaction.deferUpdate();
+        await searchAndDisplay(interaction, "aesthetic girl real pfp", true);
+        collector.stop();
+      } else if (interaction.customId === "pfp_custom") {
+        await showCustomQueryModal(interaction);
+        collector.stop();
+      }
+    } catch (error) {
+      console.error("PFP menu collector error:", error);
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: `❌ An error occurred: ${error.message}`,
+          ephemeral: true,
+        }).catch(() => {});
+      }
     }
   });
 
@@ -128,26 +138,36 @@ async function showMainMenu(source, isInteraction) {
  * Show custom query modal
  */
 async function showCustomQueryModal(interaction) {
-  const modal = InteractionUtils.createModal("pfp_custom_modal", "Custom PFP Search", [
-    {
-      customId: "query",
-      label: "Enter your search query",
-      style: TextInputStyle.Short,
-      placeholder: "e.g., anime aesthetic, dark gothic, nature...",
-      required: true,
-      minLength: 2,
-      maxLength: 100,
-    },
-  ]);
+  try {
+    const modal = InteractionUtils.createModal("pfp_custom_modal", "Custom PFP Search", [
+      {
+        customId: "query",
+        label: "Enter your search query",
+        style: TextInputStyle.Short,
+        placeholder: "e.g., anime aesthetic, dark gothic, nature...",
+        required: true,
+        minLength: 2,
+        maxLength: 100,
+      },
+    ]);
 
-  await interaction.showModal(modal);
+    await interaction.showModal(modal);
 
-  const modalSubmit = await InteractionUtils.awaitModalSubmit(interaction, "pfp_custom_modal", 120000);
-  
-  if (modalSubmit) {
-    const query = modalSubmit.fields.getTextInputValue("query");
-    await modalSubmit.deferUpdate();
-    await searchAndDisplay(modalSubmit, query, true);
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(interaction, "pfp_custom_modal", 120000);
+    
+    if (modalSubmit) {
+      const query = modalSubmit.fields.getTextInputValue("query");
+      await modalSubmit.deferUpdate();
+      await searchAndDisplay(modalSubmit, query, true);
+    }
+  } catch (error) {
+    console.error("PFP custom modal error:", error);
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: `❌ Failed to show search modal: ${error.message}`,
+        ephemeral: true,
+      }).catch(() => {});
+    }
   }
 }
 
@@ -155,48 +175,61 @@ async function showCustomQueryModal(interaction) {
  * Search and display results
  */
 async function searchAndDisplay(source, query, isInteraction) {
-  // Validate query - ensure it's not just numbers or too short
-  const cleanQuery = query.trim();
-  
-  if (cleanQuery.length < 2) {
-    const errorEmbed = InteractionUtils.createErrorEmbed("Search query is too short. Please enter at least 2 characters.");
-    if (isInteraction) {
-      return source.editReply({ embeds: [errorEmbed], components: [] });
-    }
-    return source.channel.send({ embeds: [errorEmbed] });
-  }
-  
-  // If query is only numbers, add context to make it searchable
-  const isOnlyNumbers = /^\d+$/.test(cleanQuery);
-  const searchQuery = isOnlyNumbers ? `aesthetic ${cleanQuery} pfp` : cleanQuery;
-  
-  const loadingEmbed = InteractionUtils.createLoadingEmbed("Searching Pinterest for unique images...");
-  
-  const msg = isInteraction
-    ? await source.editReply({ embeds: [loadingEmbed], components: [] })
-    : await source.channel.send({ embeds: [loadingEmbed] });
-
   try {
-    const results = await PinterestScraper.searchCustomQuery(searchQuery, 5);
+    // Validate query - ensure it's not just numbers or too short
+    const cleanQuery = query.trim();
+    
+    if (cleanQuery.length < 2) {
+      const errorEmbed = InteractionUtils.createErrorEmbed("Search query is too short. Please enter at least 2 characters.");
+      if (isInteraction) {
+        return source.editReply({ embeds: [errorEmbed], components: [] }).catch(() => {});
+      }
+      return source.channel.send({ embeds: [errorEmbed] }).catch(() => {});
+    }
+    
+    // If query is only numbers, add context to make it searchable
+    const isOnlyNumbers = /^\d+$/.test(cleanQuery);
+    const searchQuery = isOnlyNumbers ? `aesthetic ${cleanQuery} pfp` : cleanQuery;
+    
+    const loadingEmbed = InteractionUtils.createLoadingEmbed("Searching Pinterest for unique images...");
+    
+    const msg = isInteraction
+      ? await source.editReply({ embeds: [loadingEmbed], components: [] }).catch(() => null)
+      : await source.channel.send({ embeds: [loadingEmbed] }).catch(() => null);
 
-    if (!results || results.length === 0) {
-      return msg.edit({ embeds: [InteractionUtils.createErrorEmbed("No results found. Try a different query.")] });
+    if (!msg) {
+      console.error("Failed to send loading message");
+      return;
     }
 
-    const state = {
-      results,
-      query,
-      currentIndex: 0,
-      userId: isInteraction ? source.user.id : source.author.id,
-    };
+    try {
+      const results = await PinterestScraper.searchCustomQuery(searchQuery, 5);
 
-    await displayResult(msg, state);
-    setupCollector(msg, state);
+      if (!results || results.length === 0) {
+        return msg.edit({ 
+          embeds: [InteractionUtils.createErrorEmbed("No results found. Try a different query.")],
+          components: []
+        }).catch(() => {});
+      }
+
+      const state = {
+        results,
+        query,
+        currentIndex: 0,
+        userId: isInteraction ? source.user.id : source.author.id,
+      };
+
+      await displayResult(msg, state);
+      setupCollector(msg, state);
+    } catch (error) {
+      console.error("PFP search error:", error);
+      return msg.edit({
+        embeds: [InteractionUtils.createErrorEmbed(`Search failed: ${error.message}`)],
+        components: []
+      }).catch(() => {});
+    }
   } catch (error) {
-    console.error("PFP search error:", error);
-    return msg.edit({
-      embeds: [InteractionUtils.createErrorEmbed(`Search failed: ${error.message}`)],
-    });
+    console.error("PFP searchAndDisplay error:", error);
   }
 }
 
@@ -289,15 +322,19 @@ function setupCollector(message, state) {
       }
     } catch (error) {
       console.error("Collector error:", error);
-      await interaction.reply({
-        content: `❌ An error occurred: ${error.message}`,
-        ephemeral: true,
-      });
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: `❌ An error occurred: ${error.message}`,
+          ephemeral: true,
+        }).catch(() => {});
+      }
     }
   });
 
   collector.on("end", () => {
-    message.edit({ components: InteractionUtils.disableComponents(message.components) }).catch(() => {});
+    if (message && message.components) {
+      message.edit({ components: InteractionUtils.disableComponents(message.components) }).catch(() => {});
+    }
   });
 }
 

@@ -1,8 +1,6 @@
 const { OWNER_IDS } = require("@root/config.js");
 const emojis = require("@root/emojis.json");
 const ContainerBuilder = require("@helpers/ContainerBuilder");
-const { OWNER_IDS } = require("@root/config.js");
-const emojis = require("@root/emojis.json");
 
 /**
  * Handle bug report modal submissions

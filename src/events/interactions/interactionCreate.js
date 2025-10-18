@@ -28,6 +28,11 @@ module.exports = async (client, interaction) => {
 
   // Buttons
   else if (interaction.isButton()) {
+    // Route namespaced interactions (e.g., bug:report, pfp:action) to InteractionRouter
+    if (interaction.customId.includes(':') && client.interactionRouter) {
+      return client.interactionRouter.routeComponent(interaction);
+    }
+
     // Handle music player controls
     if (interaction.customId.startsWith('music_') || interaction.customId.startsWith('queue_page_')) {
       const musicControlHandler = require("@src/components/music/player-controls");
@@ -130,6 +135,11 @@ module.exports = async (client, interaction) => {
 
   // Modals
   else if (interaction.type === InteractionType.ModalSubmit) {
+    // Route namespaced modal submissions (e.g., bug:submit) to InteractionRouter
+    if (interaction.customId.includes(':') && client.interactionRouter) {
+      return client.interactionRouter.routeModal(interaction);
+    }
+
     // Handle antinuke modals
     if (interaction.customId.startsWith('antinuke_')) {
       const antinukeModalHandler = require("@src/components/antinuke/modal-handler");

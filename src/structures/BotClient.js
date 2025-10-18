@@ -17,6 +17,7 @@ const lavaclient = require("../handlers/lavaclient");
 const giveawaysHandler = require("../handlers/giveaway");
 const { DiscordTogether } = require("discord-together");
 const EmojiManager = require("../helpers/EmojiManager");
+const InteractionRouter = require("../handlers/interactionRouter");
 
 module.exports = class BotClient extends Client {
   constructor() {
@@ -78,6 +79,9 @@ module.exports = class BotClient extends Client {
 
     // Discord Together
     this.discordTogether = new DiscordTogether(this);
+
+    // Interaction Router
+    this.interactionRouter = new InteractionRouter(this);
   }
 
   /**

@@ -166,6 +166,8 @@ module.exports = {
   },
 
   async interactionRun(interaction) {
+    await interaction.deferReply({ ephemeral: true });
+    
     const subCmd = interaction.options.getSubcommand();
     const messageId = interaction.options.getString("message_id");
 
@@ -174,11 +176,11 @@ module.exports = {
     );
 
     if (!giveaway) {
-      return interaction.followUp(`${emojis.error} Could not find a giveaway with message ID: \`${messageId}\``);
+      return interaction.editReply(`${emojis.error} Could not find a giveaway with message ID: \`${messageId}\``);
     }
 
     if (giveaway.ended) {
-      return interaction.followUp(`${emojis.error} Cannot modify preset winners for an ended giveaway!`);
+      return interaction.editReply(`${emojis.error} Cannot modify preset winners for an ended giveaway!`);
     }
 
     if (subCmd === "add") {
@@ -193,7 +195,7 @@ module.exports = {
       }
 
       if (giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.followUp(`${emojis.error} ${user.tag} is already a preset winner!`);
+        return interaction.editReply(`${emojis.error} ${user.tag} is already a preset winner!`);
       }
 
       giveaway.extraData.presetWinners.push(user.id);
@@ -202,16 +204,16 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.followUp(`${emojis.success} Added ${user.tag} as a preset winner for the giveaway!`);
+        return interaction.editReply(`${emojis.success} Added ${user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Add", error);
-        return interaction.followUp(`${emojis.error} An error occurred: ${error.message}`);
+        return interaction.editReply(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "remove") {
       const user = interaction.options.getUser("user");
 
       if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(user.id)) {
-        return interaction.followUp(`${emojis.error} ${user.tag} is not a preset winner!`);
+        return interaction.editReply(`${emojis.error} ${user.tag} is not a preset winner!`);
       }
 
       giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== user.id);
@@ -220,14 +222,14 @@ module.exports = {
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
-        return interaction.followUp(`${emojis.success} Removed ${user.tag} from preset winners!`);
+        return interaction.editReply(`${emojis.success} Removed ${user.tag} from preset winners!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Remove", error);
-        return interaction.followUp(`${emojis.error} An error occurred: ${error.message}`);
+        return interaction.editReply(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "list") {
       if (!giveaway.extraData?.presetWinners || giveaway.extraData.presetWinners.length === 0) {
-        return interaction.followUp(`${emojis.clipboard} No preset winners for this giveaway.`);
+        return interaction.editReply(`${emojis.clipboard} No preset winners for this giveaway.`);
       }
 
       const winners = await Promise.all(
@@ -237,7 +239,7 @@ module.exports = {
         })
       );
 
-      return interaction.followUp(
+      return interaction.editReply(
         `${emojis.clipboard} **Preset Winners:**\n\n` +
         `${winners.map((w, i) => `${i + 1}. ${w}`).join("\n")}`
       );

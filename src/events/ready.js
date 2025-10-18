@@ -34,6 +34,11 @@ module.exports = async (client) => {
   // Load reaction roles to cache
   await cacheReactionRoles(client);
 
+  // Initialize Interaction Router
+  if (client.interactionRouter) {
+    client.interactionRouter.initialize();
+  }
+
   for (const guild of client.guilds.cache.values()) {
     const settings = await getSettings(guild);
 
