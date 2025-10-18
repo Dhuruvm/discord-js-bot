@@ -243,7 +243,7 @@ class InteractionRouter {
     this.registerComponent("bug", "report", async ({ interaction }) => {
       try {
         const modal = new ModalBuilder()
-          .setCustomId("bug:report:modal")
+          .setCustomId("bug:submit")
           .setTitle("Report a Bug");
 
         const bugTitleInput = new TextInputBuilder()
@@ -306,8 +306,8 @@ class InteractionRouter {
       }
     });
     
-    // Handle modal submission with updated customId
-    this.registerModal("bug", "report:modal", bugReportHandler);
+    // Handle modal submission
+    this.registerModal("bug", "submit", bugReportHandler);
   }
 }
 
