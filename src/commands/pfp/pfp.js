@@ -33,9 +33,9 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    const query = args.join(" ");
-    if (query) {
-      await searchAndDisplay(message, query, false);
+    const query = String(args.join(" ") || "");
+    if (query.trim()) {
+      await searchAndDisplay(message, query.trim(), false);
     } else {
       await showMainMenu(message, false);
     }
@@ -156,7 +156,7 @@ async function showCustomQueryModal(interaction) {
     const modalSubmit = await InteractionUtils.awaitModalSubmit(interaction, "pfp_custom_modal", 120000);
     
     if (modalSubmit) {
-      const query = modalSubmit.fields.getTextInputValue("query");
+      const query = String(modalSubmit.fields.getTextInputValue("query") || "").trim();
       await modalSubmit.deferUpdate();
       await searchAndDisplay(modalSubmit, query, true);
     }
@@ -176,8 +176,9 @@ async function showCustomQueryModal(interaction) {
  */
 async function searchAndDisplay(source, query, isInteraction) {
   try {
-    // Validate query - ensure it's not just numbers or too short
-    const cleanQuery = query.trim();
+    // Ensure query is a string and validate
+    const queryStr = String(query || "");
+    const cleanQuery = queryStr.trim();
     
     if (cleanQuery.length < 2) {
       const errorEmbed = InteractionUtils.createErrorEmbed("Search query is too short. Please enter at least 2 characters.");

@@ -44,7 +44,7 @@ module.exports = (client) => {
   client.ws.on("VOICE_STATE_UPDATE", (data) => lavaclient.handleVoiceUpdate(data));
 
   lavaclient.on("nodeConnect", (node) => {
-    client.logger.success(`<:success:1424072640829722745> Lavalink connected successfully - Node "${node.id}" is ready`);
+    // Silently connect - only works with local node
   });
 
   lavaclient.on("nodeDisconnect", (node, reason) => {
@@ -107,7 +107,7 @@ module.exports = (client) => {
     }
 
     const embed = new EmbedBuilder()
-      .setColor("#2F3136")
+      .setColor("#FFFFFF")
       .setDescription(description)
       .setTimestamp()
       .setFooter({ text: `Interacted just now` });
@@ -184,7 +184,7 @@ module.exports = (client) => {
     const channel = client.channels.cache.get(player.channelId);
     if (channel) {
       const embed = new EmbedBuilder()
-        .setColor("#2F3136")
+        .setColor("#FFFFFF")
         .setDescription("📭 **Queue has ended**\n\nAll songs have been played!")
         .setTimestamp();
       
