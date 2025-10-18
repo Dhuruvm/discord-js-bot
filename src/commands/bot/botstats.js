@@ -1,7 +1,6 @@
-const { SUPPORT_SERVER, DASHBOARD } = require("@root/config");
-const { timeformat } = require("@helpers/Utils");
-const ContainerBuilder = require("@helpers/ContainerBuilder");
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { SUPPORT_SERVER, DASHBOARD, DEVELOPER, OWNER_IDS } = require("@root/config");
 const os = require("os");
 const mongoose = require("mongoose");
 const GuildModel = mongoose.model("guild");
@@ -37,89 +36,95 @@ module.exports = {
 };
 
 async function getBotStats(client) {
-  const guilds = client.guilds.cache.size;
-  const users = client.guilds.cache.reduce((size, g) => size + g.memberCount, 0);
-  const commands = client.commands.size + client.slashCommands.size;
-
   const platform = process.platform.replace(/win32/g, "Windows").replace(/linux/g, "Linux").replace(/darwin/g, "macOS");
   const latency = `${client.ws.ping}ms`;
 
-  // Get developer info
-  const founderId = "1354287041772392478";
+  // Get developers from database
+  let developers = [];
+  try {
+    const settings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
+    developers = settings?.developers || [];
+  } catch (error) {
+    client.logger.error("Error fetching developers:", error);
+  }
 
-  // Get developers from global settings
-  const globalSettings = await GuildModel.findOne({ _id: "GLOBAL_SETTINGS" });
-  const developers = globalSettings?.developers || [];
+  // Format founder
+  const founderId = OWNER_IDS[0] || "1354287041772392478";
+  let creatorText = DEVELOPER || "saw";
 
-  // Build developer list
-  let developerText = "[Falooda](https://discord.com/users/1354287041772392478)";
+  // Add additional developers if any
   if (developers.length > 0) {
-    const devLinks = [];
+    const devNames = [];
     for (const devId of developers) {
       try {
         const user = await client.users.fetch(devId);
-        devLinks.push(`[${user.username}](https://discord.com/users/${devId})`);
+        devNames.push(user.username);
       } catch (err) {
         // Skip if user can't be fetched
       }
     }
-    if (devLinks.length > 0) {
-      developerText = `[Falooda](https://discord.com/users/1354287041772392478), ${devLinks.join(', ')}`;
+    if (devNames.length > 0) {
+      creatorText = `${DEVELOPER || "saw"}, ${devNames.join(", ")}`;
     }
   }
 
-  // Create title and subtitle
-  const title = `About ${client.user.username}`;
-  const subtitle = `Managed and Created by **${developerText}**`;
+  const embed = new EmbedBuilder()
+    .setColor(0x2B2D31)
+    .setTitle(`About ${client.user.username}`)
+    .setDescription(`Managed and Created by **${creatorText}**`)
+    .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
+    .addFields(
+      {
+        name: "Statistics",
+        value: [
+          `> **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0).toLocaleString()}\``,
+          `> **Servers:** \`${client.guilds.cache.size}\``,
+          `> **Commands:** \`${client.commands.size}\``
+        ].join("\n"),
+        inline: false
+      },
+      {
+        name: "System",
+        value: [
+          `> **Latency:** \`${latency}\``,
+          `> **Language:** \`discord.js\``,
+          `> **System:** \`${platform}\``
+        ].join("\n"),
+        inline: false
+      }
+    )
+    .setFooter({ text: "Powered by Blackbit Studio" });
 
-  // Statistics section - matching screenshot format
-  const statisticsFields = [
-    { label: "Users", value: users.toLocaleString() },
-    { label: "Servers", value: guilds.toString() },
-    { label: "Commands", value: commands.toString() }
-  ];
-
-  // System section - matching screenshot format
-  const systemFields = [
-    { label: "Latency", value: latency },
-    { label: "Language", value: "discord.js" },
-    { label: "System", value: platform }
-  ];
-
-  // Buttons with emojis
   const buttons = [];
 
-  buttons.push({
-    label: "Invite",
-    url: client.getInvite(),
-    emoji: "🔗"
-  });
+  buttons.push(
+    new ButtonBuilder()
+      .setLabel("Invite")
+      .setEmoji("🔗")
+      .setURL(client.getInvite())
+      .setStyle(ButtonStyle.Link)
+  );
 
   if (SUPPORT_SERVER) {
-    buttons.push({
-      label: "Support",
-      url: SUPPORT_SERVER,
-      emoji: "💬"
-    });
+    buttons.push(
+      new ButtonBuilder()
+        .setLabel("Support")
+        .setEmoji("💬")
+        .setURL(SUPPORT_SERVER)
+        .setStyle(ButtonStyle.Link)
+    );
   }
 
   if (DASHBOARD.enabled) {
-    buttons.push({
-      label: "Dashboard",
-      url: DASHBOARD.baseURL,
-      emoji: "🌐"
-    });
+    buttons.push(
+      new ButtonBuilder()
+        .setLabel("Dashboard")
+        .setURL(DASHBOARD.baseURL)
+        .setStyle(ButtonStyle.Link)
+    );
   }
 
-  // Build the professional bot info card
-  const payload = ContainerBuilder.botInfoCard({
-    title,
-    subtitle,
-    thumbnail: client.user.displayAvatarURL({ size: 256 }),
-    statisticsFields,
-    systemFields,
-    buttons
-  });
+  const buttonRow = new ActionRowBuilder().addComponents(buttons.slice(0, 5));
 
-  return payload;
+  return { embeds: [embed], components: [buttonRow] };
 }
