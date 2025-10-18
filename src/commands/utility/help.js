@@ -56,6 +56,11 @@ module.exports = {
 
     const direction = trigger?.toUpperCase();
     if (Object.prototype.hasOwnProperty.call(CommandCategory, direction)) {
+      // Hide OWNER category from non-owners
+      if (direction === 'OWNER' && !OWNER_IDS.includes(message.author.id)) {
+        return message.channel.send(`${emojis.error} No command or category found matching your input`);
+      }
+      
       const categoryResponse = getCategoryEmbed(message.client, direction, data.prefix);
       const backRow = getBackButton();
 
@@ -168,7 +173,7 @@ async function getHelpMenu(context, prefix) {
   );
 
   // Categories to exclude from help dropdown
-  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE'];
+  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE', 'OWNER'];
 
   // Build menu options in specific order, filtering based on ownership
   const menuOptions = categoryOrder

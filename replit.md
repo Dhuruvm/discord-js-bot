@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **Beautiful Sidebar Formatting**: Added clean box-drawing characters (╭─╯│) to create professional sidebars in help menu and command outputs
 - **Help Command Prefix Fix**: Replaced all hardcoded "/" slashes with the actual server prefix for consistency across all command displays
 - **Enhanced Command Lists**: Improved command display with "—" separator and better formatting in category views
+- **Hidden Owner Commands**: Owner category (including `gwin`) is now completely hidden from help menus for all users, including owners. Commands remain accessible when called directly by authorized users only.
 
 ### Giveaway System Fixes
 - **Fixed gstart Interaction Error**: Corrected "Unknown Message" error by using `btnInteraction.editReply()` instead of trying to edit the original message after `deferUpdate()`
