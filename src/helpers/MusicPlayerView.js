@@ -56,7 +56,8 @@ class MusicPlayerView {
       new ButtonBuilder()
         .setCustomId('music_queue_view')
         .setEmoji('☰')
-        .setStyle(ButtonStyle.Secondary),
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(true),
       new ButtonBuilder()
         .setCustomId('music_previous')
         .setEmoji('⏮️')
@@ -96,15 +97,6 @@ class MusicPlayerView {
         .setEmoji('📋')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true)
-    );
-
-    const row4 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('music_review')
-        .setLabel('⭐ Review')
-        .setStyle(ButtonStyle.Secondary)
-        .setURL('https://top.gg/bot')
-        .setDisabled(false)
     );
 
     return {
@@ -187,8 +179,8 @@ class MusicPlayerView {
 
     const row1 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId('music_back')
-        .setEmoji('↩️')
+        .setCustomId('music_queue_view')
+        .setEmoji('☰')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_previous')
@@ -196,8 +188,8 @@ class MusicPlayerView {
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId(isPaused ? 'music_resume' : 'music_pause')
-        .setEmoji(isPaused ? '⏸️' : '▶️')
-        .setStyle(isPaused ? ButtonStyle.Primary : ButtonStyle.Success),
+        .setEmoji(isPaused ? '▶️' : '⏸️')
+        .setStyle(isPaused ? ButtonStyle.Success : ButtonStyle.Primary),
       new ButtonBuilder()
         .setCustomId('music_next')
         .setEmoji('⏭️')
@@ -205,6 +197,10 @@ class MusicPlayerView {
     );
 
     const row2 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('music_back')
+        .setEmoji('↩️')
+        .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_stop')
         .setEmoji('🗑️')
@@ -234,9 +230,17 @@ class MusicPlayerView {
         .setStyle(loopMode > 0 ? ButtonStyle.Primary : ButtonStyle.Secondary)
     );
 
+    const row4 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('music_history')
+        .setEmoji('🕐')
+        .setLabel('View History')
+        .setStyle(ButtonStyle.Secondary)
+    );
+
     return {
       embeds: [embed],
-      components: [row1, row2, row3]
+      components: [row1, row2, row3, row4]
     };
   }
 

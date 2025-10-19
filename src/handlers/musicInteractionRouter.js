@@ -51,10 +51,10 @@ module.exports = async (client) => {
       const { guild, member } = interaction;
       const player = client.musicManager?.getPlayer(guild.id);
       
+      const lastInteractionTime = interactionTimestamps.get(guild.id);
       interactionTimestamps.set(guild.id, Date.now());
       
       const requester = member.user.username;
-      const lastInteractionTime = interactionTimestamps.get(guild.id);
 
       if (customId === 'music_previous') {
         if (!player || !player.queue.current) {
