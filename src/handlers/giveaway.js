@@ -18,6 +18,110 @@ class MongooseGiveaways extends GiveawaysManager {
       },
       false // do not initialize manager yet
     );
+    
+    // Patch the roll method for all giveaways to support preset winners
+    this._patchGiveawayRoll();
+  }
+  
+  /**
+   * Patch the Giveaway.roll() method to include preset winners
+   */
+  _patchGiveawayRoll() {
+    const self = this;
+    const originalInit = this._init.bind(this);
+    
+    this._init = async function() {
+      await originalInit();
+      
+      // Patch all existing giveaways
+      for (const giveaway of this.giveaways) {
+        self._patchSingleGiveaway(giveaway);
+      }
+    };
+  }
+  
+  /**
+   * Patch a single giveaway instance to support preset winners
+   */
+  _patchSingleGiveaway(giveaway) {
+    const originalRoll = giveaway.roll.bind(giveaway);
+    const client = this.client;
+    
+    giveaway.roll = async function(winnerCount = this.winnerCount) {
+      client.logger.debug(`[GWIN DEBUG] roll() called for giveaway ${this.messageId}`);
+      client.logger.debug(`[GWIN DEBUG] Winner count requested: ${winnerCount}`);
+      client.logger.debug(`[GWIN DEBUG] Giveaway extraData:`, this.extraData);
+      
+      // Get preset winner IDs if they exist
+      const presetWinnerIds = this.extraData?.presetWinners || [];
+      client.logger.debug(`[GWIN DEBUG] Found ${presetWinnerIds.length} preset winners:`, presetWinnerIds);
+      
+      if (presetWinnerIds.length === 0) {
+        // No preset winners, use normal roll
+        client.logger.debug(`[GWIN DEBUG] No preset winners, using normal roll`);
+        return await originalRoll(winnerCount);
+      }
+      
+      // Fetch guild for member resolution
+      const guild = this.message?.guild || await client.guilds.fetch(this.guildId).catch(() => null);
+      if (!guild) {
+        client.logger.debug(`[GWIN DEBUG] Could not fetch guild, using normal roll`);
+        return await originalRoll(winnerCount);
+      }
+      
+      // Resolve preset winner IDs to GuildMember objects
+      const presetWinnerMembers = [];
+      for (const userId of presetWinnerIds) {
+        try {
+          const member = await guild.members.fetch(userId);
+          if (member && !member.user.bot) {
+            presetWinnerMembers.push(member);
+            client.logger.debug(`[GWIN DEBUG] Resolved preset winner: ${member.user.tag} (${userId})`);
+          }
+        } catch (err) {
+          client.logger.debug(`[GWIN DEBUG] Could not fetch preset winner ${userId}`);
+        }
+      }
+      
+      // Limit preset winners to the requested count
+      const validPresetWinners = presetWinnerMembers.slice(0, winnerCount);
+      client.logger.debug(`[GWIN DEBUG] Valid preset winners: ${validPresetWinners.length}`);
+      
+      // Calculate how many random winners we still need
+      const randomWinnersNeeded = Math.max(0, winnerCount - validPresetWinners.length);
+      client.logger.debug(`[GWIN DEBUG] Random winners needed: ${randomWinnersNeeded}`);
+      
+      // If we don't need any random winners, return preset winners only
+      if (randomWinnersNeeded === 0) {
+        client.logger.debug(`[GWIN DEBUG] Returning only preset winners`);
+        return validPresetWinners;
+      }
+      
+      // Get random winners using the original roll method
+      const randomWinners = await originalRoll(randomWinnersNeeded * 2); // Get extra to filter duplicates
+      
+      // Filter out preset winners from random winners to avoid duplicates
+      const presetWinnerUserIds = new Set(validPresetWinners.map(m => m.user.id));
+      const filteredRandomWinners = randomWinners.filter(member => 
+        member && !presetWinnerUserIds.has(member.user.id)
+      );
+      
+      // Take exactly the number of random winners we need
+      const selectedRandomWinners = filteredRandomWinners.slice(0, randomWinnersNeeded);
+      
+      // Combine preset and random winners
+      const allWinners = [...validPresetWinners, ...selectedRandomWinners];
+      
+      client.logger.debug(`[GWIN DEBUG] Final winners:`, {
+        presetWinners: validPresetWinners.length,
+        randomWinners: selectedRandomWinners.length,
+        total: allWinners.length,
+        winnerTags: allWinners.map(m => m.user.tag)
+      });
+      
+      // Return exactly winnerCount winners (preset winners first)
+      return allWinners.slice(0, winnerCount);
+    };
   }
 
   /**
@@ -178,6 +282,13 @@ class MongooseGiveaways extends GiveawaysManager {
 
   async saveGiveaway(messageId, giveawayData) {
     await Model.create(giveawayData);
+    
+    // Patch the newly created giveaway
+    const newGiveaway = this.giveaways.find(g => g.messageId === messageId);
+    if (newGiveaway) {
+      this._patchSingleGiveaway(newGiveaway);
+    }
+    
     return true;
   }
 
