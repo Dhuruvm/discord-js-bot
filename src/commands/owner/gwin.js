@@ -118,7 +118,7 @@ module.exports = {
         message.client.logger.debug(`[GWIN DEBUG] Current presetWinners array:`, giveaway.extraData.presetWinners);
         
         await giveaway.edit({
-          extraData: giveaway.extraData,
+          newExtraData: giveaway.extraData,
         });
         
         message.client.logger.debug(`[GWIN DEBUG] Giveaway edited successfully. Verifying save...`);
@@ -149,7 +149,7 @@ module.exports = {
 
       try {
         await giveaway.edit({
-          extraData: giveaway.extraData,
+          newExtraData: giveaway.extraData,
         });
         return message.safeReply(`${emojis.success} Removed ${user.user.tag} from preset winners!`);
       } catch (error) {
@@ -217,7 +217,7 @@ module.exports = {
         interaction.client.logger.debug(`[GWIN DEBUG] Current presetWinners array:`, giveaway.extraData.presetWinners);
         
         await giveaway.edit({
-          extraData: giveaway.extraData,
+          newExtraData: giveaway.extraData,
         });
         
         interaction.client.logger.debug(`[GWIN DEBUG] Giveaway edited successfully. Verifying save...`);
@@ -244,7 +244,7 @@ module.exports = {
 
       try {
         await giveaway.edit({
-          extraData: giveaway.extraData,
+          newExtraData: giveaway.extraData,
         });
         return interaction.editReply(`${emojis.success} Removed ${user.tag} from preset winners!`);
       } catch (error) {

@@ -185,7 +185,11 @@ class MongooseGiveaways extends GiveawaysManager {
     this.client.logger.debug(`[GWIN DEBUG] editGiveaway called for ${messageId}`);
     this.client.logger.debug(`[GWIN DEBUG] Data to save:`, JSON.stringify(giveawayData, null, 2));
     
-    const result = await Model.updateOne({ messageId }, giveawayData, { omitUndefined: true }).exec();
+    // Use $set to properly update nested objects like extraData
+    const result = await Model.updateOne(
+      { messageId }, 
+      { $set: giveawayData }
+    ).exec();
     
     this.client.logger.debug(`[GWIN DEBUG] Update result:`, result);
     
