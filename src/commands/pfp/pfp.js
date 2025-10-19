@@ -121,8 +121,9 @@ async function showMainMenu(source, isInteraction) {
     } catch (error) {
       console.error("PFP menu collector error:", error);
       if (!interaction.replied && !interaction.deferred) {
+        const errorMessage = error?.message || String(error) || "Unknown error";
         await interaction.reply({
-          content: `❌ An error occurred: ${error.message}`,
+          content: `❌ An error occurred: ${errorMessage}`,
           ephemeral: true,
         }).catch(() => {});
       }
@@ -163,8 +164,9 @@ async function showCustomQueryModal(interaction) {
   } catch (error) {
     console.error("PFP custom modal error:", error);
     if (!interaction.replied && !interaction.deferred) {
+      const errorMessage = error?.message || String(error) || "Unknown error";
       await interaction.reply({
-        content: `❌ Failed to show search modal: ${error.message}`,
+        content: `❌ Failed to show search modal: ${errorMessage}`,
         ephemeral: true,
       }).catch(() => {});
     }
@@ -215,7 +217,7 @@ async function searchAndDisplay(source, query, isInteraction) {
 
       const state = {
         results,
-        query,
+        query: searchQuery,
         currentIndex: 0,
         userId: isInteraction ? source.user.id : source.author.id,
       };
@@ -224,8 +226,9 @@ async function searchAndDisplay(source, query, isInteraction) {
       setupCollector(msg, state);
     } catch (error) {
       console.error("PFP search error:", error);
+      const errorMessage = error?.message || String(error) || "Unknown error occurred";
       return msg.edit({
-        embeds: [InteractionUtils.createErrorEmbed(`Search failed: ${error.message}`)],
+        embeds: [InteractionUtils.createErrorEmbed(`Search failed: ${errorMessage}`)],
         components: []
       }).catch(() => {});
     }
@@ -324,8 +327,9 @@ function setupCollector(message, state) {
     } catch (error) {
       console.error("Collector error:", error);
       if (!interaction.replied && !interaction.deferred) {
+        const errorMessage = error?.message || String(error) || "Unknown error";
         await interaction.reply({
-          content: `❌ An error occurred: ${error.message}`,
+          content: `❌ An error occurred: ${errorMessage}`,
           ephemeral: true,
         }).catch(() => {});
       }
@@ -374,8 +378,9 @@ async function handleDownload(interaction, state) {
     });
   } catch (error) {
     console.error("Download error:", error);
+    const errorMessage = error?.message || String(error) || "Unknown error";
     await interaction.followUp({
-      content: `❌ Download failed: ${error.message}`,
+      content: `❌ Download failed: ${errorMessage}`,
       ephemeral: true,
     });
   }
