@@ -93,9 +93,9 @@ module.exports = {
     }
 
     if (subCmd === "add") {
-      const user = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
+      const member = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
       
-      if (!user) {
+      if (!member || !member.user) {
         return message.safeReply(`${emojis.error} Please provide a valid user mention or ID!`);
       }
 
@@ -107,14 +107,14 @@ module.exports = {
         giveaway.extraData.presetWinners = [];
       }
 
-      if (giveaway.extraData.presetWinners.includes(user.id)) {
-        return message.safeReply(`${emojis.error} ${user.user.tag} is already a preset winner!`);
+      if (giveaway.extraData.presetWinners.includes(member.user.id)) {
+        return message.safeReply(`${emojis.error} ${member.user.tag} is already a preset winner!`);
       }
 
-      giveaway.extraData.presetWinners.push(user.id);
+      giveaway.extraData.presetWinners.push(member.user.id);
 
       try {
-        message.client.logger.debug(`[GWIN DEBUG] Adding preset winner ${user.id} for giveaway ${messageId}`);
+        message.client.logger.debug(`[GWIN DEBUG] Adding preset winner ${member.user.id} for giveaway ${messageId}`);
         message.client.logger.debug(`[GWIN DEBUG] Current presetWinners array:`, giveaway.extraData.presetWinners);
         
         await giveaway.edit({
@@ -129,29 +129,29 @@ module.exports = {
         );
         message.client.logger.debug(`[GWIN DEBUG] Verification - presetWinners after save:`, verifyGiveaway?.extraData?.presetWinners);
         
-        return message.safeReply(`${emojis.success} Added ${user.user.tag} as a preset winner for the giveaway!`);
+        return message.safeReply(`${emojis.success} Added ${member.user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         message.client.logger.error("Giveaway Preset Winner Add", error);
         return message.safeReply(`${emojis.error} An error occurred: ${error.message}`);
       }
     } else if (subCmd === "remove") {
-      const user = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
+      const member = await message.guild.members.fetch(args[2]?.replace(/[<@!>]/g, "")).catch(() => null);
       
-      if (!user) {
+      if (!member || !member.user) {
         return message.safeReply(`${emojis.error} Please provide a valid user mention or ID!`);
       }
 
-      if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(user.id)) {
-        return message.safeReply(`${emojis.error} ${user.user.tag} is not a preset winner!`);
+      if (!giveaway.extraData?.presetWinners || !giveaway.extraData.presetWinners.includes(member.user.id)) {
+        return message.safeReply(`${emojis.error} ${member.user.tag} is not a preset winner!`);
       }
 
-      giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== user.id);
+      giveaway.extraData.presetWinners = giveaway.extraData.presetWinners.filter(id => id !== member.user.id);
 
       try {
         await giveaway.edit({
           newExtraData: giveaway.extraData,
         });
-        return message.safeReply(`${emojis.success} Removed ${user.user.tag} from preset winners!`);
+        return message.safeReply(`${emojis.success} Removed ${member.user.tag} from preset winners!`);
       } catch (error) {
         message.client.logger.error("Giveaway Preset Winner Remove", error);
         return message.safeReply(`${emojis.error} An error occurred: ${error.message}`);
