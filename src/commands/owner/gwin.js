@@ -114,9 +114,21 @@ module.exports = {
       giveaway.extraData.presetWinners.push(user.id);
 
       try {
+        message.client.logger.debug(`[GWIN DEBUG] Adding preset winner ${user.id} for giveaway ${messageId}`);
+        message.client.logger.debug(`[GWIN DEBUG] Current presetWinners array:`, giveaway.extraData.presetWinners);
+        
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
+        
+        message.client.logger.debug(`[GWIN DEBUG] Giveaway edited successfully. Verifying save...`);
+        
+        // Verify the data was saved by fetching the giveaway again
+        const verifyGiveaway = message.client.giveawaysManager.giveaways.find(
+          (g) => g.messageId === messageId && g.guildId === message.guild.id
+        );
+        message.client.logger.debug(`[GWIN DEBUG] Verification - presetWinners after save:`, verifyGiveaway?.extraData?.presetWinners);
+        
         return message.safeReply(`${emojis.success} Added ${user.user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         message.client.logger.error("Giveaway Preset Winner Add", error);
@@ -201,9 +213,21 @@ module.exports = {
       giveaway.extraData.presetWinners.push(user.id);
 
       try {
+        interaction.client.logger.debug(`[GWIN DEBUG] Adding preset winner ${user.id} for giveaway ${messageId}`);
+        interaction.client.logger.debug(`[GWIN DEBUG] Current presetWinners array:`, giveaway.extraData.presetWinners);
+        
         await giveaway.edit({
           extraData: giveaway.extraData,
         });
+        
+        interaction.client.logger.debug(`[GWIN DEBUG] Giveaway edited successfully. Verifying save...`);
+        
+        // Verify the data was saved by fetching the giveaway again
+        const verifyGiveaway = interaction.client.giveawaysManager.giveaways.find(
+          (g) => g.messageId === messageId && g.guildId === interaction.guild.id
+        );
+        interaction.client.logger.debug(`[GWIN DEBUG] Verification - presetWinners after save:`, verifyGiveaway?.extraData?.presetWinners);
+        
         return interaction.editReply(`${emojis.success} Added ${user.tag} as a preset winner for the giveaway!`);
       } catch (error) {
         interaction.client.logger.error("Giveaway Preset Winner Add", error);

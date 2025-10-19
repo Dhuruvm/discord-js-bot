@@ -96,8 +96,20 @@ class MongooseGiveaways extends GiveawaysManager {
    * Override _pickWinners to include preset winners (primary method used by discord-giveaways)
    */
   async _pickWinners(giveaway) {
+    // DEBUG: Log the full giveaway object to see what data we have
+    this.client.logger.debug(`[GWIN DEBUG] _pickWinners called for giveaway ${giveaway.messageId}`);
+    this.client.logger.debug(`[GWIN DEBUG] Giveaway data:`, {
+      messageId: giveaway.messageId,
+      winnerCount: giveaway.winnerCount,
+      hasExtraData: !!giveaway.extraData,
+      extraData: giveaway.extraData,
+      presetWinners: giveaway.extraData?.presetWinners
+    });
+    
     // Get preset winner IDs if they exist
     const presetWinnerIds = giveaway.extraData?.presetWinners || [];
+    
+    this.client.logger.debug(`[GWIN DEBUG] Found ${presetWinnerIds.length} preset winners:`, presetWinnerIds);
     
     // Fetch the channel and guild for resolving members
     const channel = await this.client.channels.fetch(giveaway.channelId).catch(() => null);
@@ -149,6 +161,13 @@ class MongooseGiveaways extends GiveawaysManager {
     // Combine preset and random winners
     const allWinners = [...validPresetWinners, ...selectedRandomWinners];
     
+    this.client.logger.debug(`[GWIN DEBUG] Final winner selection:`, {
+      presetWinnersSelected: validPresetWinners.length,
+      randomWinnersSelected: selectedRandomWinners.length,
+      totalWinners: allWinners.length,
+      winnerIds: allWinners.map(m => m.user.id)
+    });
+    
     // Return exactly winnersCount winners (preset winners first)
     return allWinners.slice(0, winnersCount);
   }
@@ -163,7 +182,21 @@ class MongooseGiveaways extends GiveawaysManager {
   }
 
   async editGiveaway(messageId, giveawayData) {
-    await Model.updateOne({ messageId }, giveawayData, { omitUndefined: true }).exec();
+    this.client.logger.debug(`[GWIN DEBUG] editGiveaway called for ${messageId}`);
+    this.client.logger.debug(`[GWIN DEBUG] Data to save:`, JSON.stringify(giveawayData, null, 2));
+    
+    const result = await Model.updateOne({ messageId }, giveawayData, { omitUndefined: true }).exec();
+    
+    this.client.logger.debug(`[GWIN DEBUG] Update result:`, result);
+    
+    // Verify the save by reading back from database
+    const savedGiveaway = await Model.findOne({ messageId }).lean().exec();
+    this.client.logger.debug(`[GWIN DEBUG] Data in database after save:`, {
+      messageId: savedGiveaway?.messageId,
+      hasExtraData: !!savedGiveaway?.extraData,
+      extraData: savedGiveaway?.extraData
+    });
+    
     return true;
   }
 
