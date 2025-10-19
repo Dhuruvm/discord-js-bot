@@ -324,7 +324,6 @@ async function startGiveaway(interaction, data, btnInteraction) {
         { name: "Winners", value: data.winners.toString(), inline: true },
         { name: "Message ID", value: giveaway.messageId || "N/A", inline: false },
       ],
-      footer: "Use /gwin to add preset winners (owner only)",
       color: EMBED_COLORS.SUCCESS,
     });
 
