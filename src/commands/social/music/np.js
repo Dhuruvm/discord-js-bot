@@ -1,4 +1,4 @@
-const MusicPlayerBuilder = require("@helpers/MusicPlayerBuilder");
+const MusicPlayerView = require("@helpers/MusicPlayerView");
 
 /**
  * @type {import("@structures/Command")}
@@ -34,11 +34,11 @@ function nowPlaying({ client, guildId, member, author }) {
   const player = client.musicManager.getPlayer(guildId);
   
   if (!player || !player.queue.current) {
-    return MusicPlayerBuilder.createEmptyQueueDisplay();
+    return MusicPlayerView.createEmptyQueueDisplay();
   }
 
   const track = player.queue.current;
-  const requester = track.requester ? `@${track.requester}` : (member?.user?.username ? `@${member.user.username}` : (author ? `@${author.username}` : "@User"));
+  const requester = track.requester ? `${track.requester}` : (member?.user?.username ? `${member.user.username}` : (author ? `${author.username}` : "User"));
   
-  return MusicPlayerBuilder.createNowPlayingDisplay(player, requester, { member, author });
+  return MusicPlayerView.createNowPlayingDisplay(player, requester, { member, author }, null);
 }

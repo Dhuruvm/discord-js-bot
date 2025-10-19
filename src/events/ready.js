@@ -1,4 +1,4 @@
-const { counterHandler, inviteHandler, presenceHandler } = require("@src/handlers");
+const { counterHandler, inviteHandler, presenceHandler, musicInteractionRouter } = require("@src/handlers");
 const { cacheReactionRoles } = require("@schemas/ReactionRoles");
 const { getSettings } = require("@schemas/Guild");
 
@@ -37,6 +37,12 @@ module.exports = async (client) => {
   // Initialize Interaction Router
   if (client.interactionRouter) {
     client.interactionRouter.initialize();
+  }
+
+  // Initialize Music Interaction Router
+  if (client.config.MUSIC.ENABLED) {
+    musicInteractionRouter(client);
+    client.logger.log("Music Interaction Router initialized");
   }
 
   for (const guild of client.guilds.cache.values()) {

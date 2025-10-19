@@ -2,6 +2,8 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("
 const { Cluster } = require("lavaclient");
 const prettyMs = require("pretty-ms");
 const { load, SpotifyItemType } = require("@lavaclient/spotify");
+const MusicPlayerView = require("@helpers/MusicPlayerView");
+const { addToHistory } = require("@handlers/musicInteractionRouter");
 require("@lavaclient/queue/register");
 
 /**
@@ -60,119 +62,17 @@ module.exports = (client) => {
     const channel = client.channels.cache.get(player.channelId);
     if (!channel) return;
 
-    const currentPosition = queue.tracks.length > 0 ? 1 : 1;
-    const totalInQueue = queue.tracks.length + 1;
-    
     const trackInfo = track.info || track;
-    const duration = prettyMs(trackInfo.length, { colonNotation: true });
-    const signalBars = "▌▌▌";
-    
-    let thumbnail = null;
-    if (trackInfo.sourceName === "youtube" || track.sourceName === "youtube") {
-      const identifier = trackInfo.identifier || track.identifier;
-      thumbnail = `https://img.youtube.com/vi/${identifier}/maxresdefault.jpg`;
-    }
-
     const requester = track.requester || 'Unknown User';
-    const title = trackInfo.title || track.title || 'Unknown Track';
-    const author = trackInfo.author || track.author || 'Unknown Artist';
-
-    let description = `**Queued by ${requester.includes('@') ? requester : `<@${requester}>`}** 🎵\n\n`;
-    description += `**${String(currentPosition).padStart(2, '0')} ${signalBars} ${title}**\n`;
-    description += `${author} **[${duration}]**\n\n`;
-    
-    description += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    
-    description += `📋 **Queue • ${totalInQueue} song${totalInQueue > 1 ? 's' : ''}**\n\n`;
-    
-    if (queue.tracks.length > 0) {
-      description += `**From search**\n`;
-      const upcoming = queue.tracks.slice(0, 5);
-      upcoming.forEach((t, i) => {
-        const pos = String(currentPosition + i + 1).padStart(2, '0');
-        const tInfo = t.info || t;
-        const trackDuration = prettyMs(tInfo.length, { colonNotation: true });
-        const trackTitle = tInfo.title.length > 40 ? tInfo.title.substring(0, 40) + '...' : tInfo.title;
-        const trackAuthor = tInfo.author || 'Unknown Artist';
-        const tRequester = t.requester || 'Unknown User';
-        description += `**${pos}** ${trackTitle} - ${trackAuthor} **[${trackDuration}]** ${tRequester.includes('@') ? tRequester : `<@${tRequester}>`}\n`;
-      });
-      
-      if (queue.tracks.length > 5) {
-        description += `\n*...and ${queue.tracks.length - 5} more*\n`;
-      }
-      
-      const totalPages = Math.ceil(queue.tracks.length / 10);
-      description += `\n**Page 1 of ${totalPages}**\n`;
-    }
-
-    const embed = new EmbedBuilder()
-      .setColor("#FFFFFF")
-      .setDescription(description)
-      .setTimestamp()
-      .setFooter({ text: `Interacted just now` });
-
-    if (thumbnail) {
-      embed.setThumbnail(thumbnail);
-    }
-
-    const row1 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('music_back')
-        .setEmoji('↩️')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_previous')
-        .setEmoji('⏮️')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('music_pause')
-        .setEmoji('⏸️')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('music_next')
-        .setEmoji('⏭️')
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    const row2 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('music_stop')
-        .setEmoji('⏹️')
-        .setStyle(ButtonStyle.Danger),
-      new ButtonBuilder()
-        .setCustomId('music_shuffle')
-        .setEmoji('🔀')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_voldown')
-        .setEmoji('🔉')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_volup')
-        .setEmoji('🔊')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_loop')
-        .setEmoji('🔁')
-        .setStyle(ButtonStyle.Secondary)
-    );
-
-    const row3 = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('music_history')
-        .setLabel('🕐 View History')
-        .setStyle(ButtonStyle.Secondary)
-    );
 
     try {
-      await channel.send({ 
-        embeds: [embed], 
-        components: [row1, row2, row3] 
-      });
+      const display = MusicPlayerView.createNowPlayingDisplay(player, requester, null, null);
+      await channel.send(display);
     } catch (error) {
       client.logger.error("Failed to send now playing message:", error);
       try {
+        const title = trackInfo.title || track.title || 'Unknown Track';
+        const author = trackInfo.author || track.author || 'Unknown Artist';
         await channel.send(`🎵 Now Playing: **${title}** by ${author}`);
       } catch (err) {
         console.error("Could not send any message to channel:", err.message);
@@ -183,12 +83,12 @@ module.exports = (client) => {
   lavaclient.on("queueFinish", async (player) => {
     const channel = client.channels.cache.get(player.channelId);
     if (channel) {
-      const embed = new EmbedBuilder()
-        .setColor("#FFFFFF")
-        .setDescription("📭 **Queue has ended**\n\nAll songs have been played!")
-        .setTimestamp();
+      if (player.queue.current) {
+        addToHistory(player.guildId, player.queue.current);
+      }
       
-      await channel.send({ embeds: [embed] });
+      const display = MusicPlayerView.createEmptyQueueDisplay();
+      await channel.send(display);
     }
     await player.disconnect();
   });

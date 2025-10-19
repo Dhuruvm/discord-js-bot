@@ -2,7 +2,7 @@ const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const prettyMs = require("pretty-ms");
 const { EMBED_COLORS, MUSIC } = require("@root/config");
 const { SpotifyItemType } = require("@lavaclient/spotify");
-const MusicPlayerBuilder = require("@helpers/MusicPlayerBuilder");
+const MusicPlayerView = require("@helpers/MusicPlayerView");
 
 const search_prefix = {
   YT: "ytsearch",
@@ -165,8 +165,8 @@ async function play({ member, guild, channel }, query) {
     
     // Show the modern music player when starting playback
     if (wasEmpty && tracks.length === 1) {
-      const requester = `@${member.user.username}`;
-      return MusicPlayerBuilder.createNowPlayingDisplay(player, requester, { member });
+      const requester = member.user.username;
+      return MusicPlayerView.createNowPlayingDisplay(player, requester, { member }, null);
     }
   }
 
