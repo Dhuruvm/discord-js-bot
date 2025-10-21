@@ -55,7 +55,7 @@ class MusicPlayerView {
     const row1 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('music_queue_view')
-        .setEmoji('☰')
+        .setLabel('Queue')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true),
       new ButtonBuilder()
@@ -180,7 +180,7 @@ class MusicPlayerView {
     const row1 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('music_queue_view')
-        .setEmoji('☰')
+        .setLabel('Queue')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_previous')
@@ -199,7 +199,7 @@ class MusicPlayerView {
     const row2 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('music_back')
-        .setEmoji('↩️')
+        .setEmoji('◀️')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_stop')
@@ -302,7 +302,7 @@ class MusicPlayerView {
     const row1 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('music_back_to_player')
-        .setEmoji('↩️')
+        .setEmoji('◀️')
         .setLabel('Back to Player')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
@@ -356,7 +356,7 @@ class MusicPlayerView {
     const row1 = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('music_back_to_player')
-        .setEmoji('↩️')
+        .setEmoji('◀️')
         .setLabel('Back to Player')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
