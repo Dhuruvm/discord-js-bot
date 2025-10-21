@@ -166,6 +166,7 @@ const Schema = new mongoose.Schema({
   },
   // Global bot settings (stored with _id: "GLOBAL_SETTINGS")
   developers: [String],
+  giveaway_reaction: String, // Custom reaction emoji for giveaways
 });
 
 const Model = mongoose.model("guild", Schema);

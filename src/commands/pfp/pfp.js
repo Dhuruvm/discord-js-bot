@@ -33,17 +33,34 @@ module.exports = {
   },
 
   async messageRun(message, args) {
-    const query = String(args.join(" ") || "");
-    if (query.trim()) {
-      await searchAndDisplay(message, query.trim(), false);
-    } else {
-      await showMainMenu(message, false);
+    try {
+      const query = String(args.join(" ") || "");
+      if (query.trim()) {
+        await searchAndDisplay(message, query.trim(), false);
+      } else {
+        await showMainMenu(message, false);
+      }
+    } catch (error) {
+      console.error("PFP messageRun error:", error);
+      await message.safeReply({
+        embeds: [InteractionUtils.createErrorEmbed(`An error occurred: ${error.message}`)],
+      }).catch(() => {});
     }
   },
 
   async interactionRun(interaction) {
-    await interaction.deferReply();
-    await showMainMenu(interaction, true);
+    try {
+      await interaction.deferReply();
+      await showMainMenu(interaction, true);
+    } catch (error) {
+      console.error("PFP interactionRun error:", error);
+      const errorEmbed = InteractionUtils.createErrorEmbed(`An error occurred: ${error.message}`);
+      if (!interaction.replied) {
+        await interaction.followUp({ embeds: [errorEmbed] }).catch(() => {});
+      } else {
+        await interaction.editReply({ embeds: [errorEmbed] }).catch(() => {});
+      }
+    }
   },
 };
 

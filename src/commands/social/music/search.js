@@ -71,10 +71,17 @@ async function search({ member, guild, channel }, query) {
 
   let res;
   try {
-    res = await guild.client.musicManager.rest.loadTracks(
+    // Get the first available node's REST API
+    const node = guild.client.musicManager.nodes.values().next().value;
+    if (!node || !node.rest) {
+      return "🚫 Music system is not available. Please try again later.";
+    }
+
+    res = await node.rest.loadTracks(
       /^https?:\/\//.test(query) ? query : `${search_prefix[MUSIC.DEFAULT_SOURCE]}:${query}`
     );
   } catch (err) {
+    guild.client.logger.error("Music search error:", err);
     return "🚫 There was an error while searching";
   }
 
