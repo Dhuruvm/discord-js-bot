@@ -154,6 +154,7 @@ class InteractionRouter {
    */
   initialize() {
     // Register handlers from component modules
+    this.registerAdminHandlers();
     this.registerEmbedHandlers();
     this.registerTicketHandlers();
     this.registerGiveawayHandlers();
@@ -161,6 +162,39 @@ class InteractionRouter {
     this.registerBugReportHandlers();
     
     this.client.logger.success(`Interaction Router initialized with ${this.handlers.size} component handlers and ${this.modalHandlers.size} modal handlers`);
+  }
+
+  /**
+   * Register admin system handlers (autorole, greet, automod, logs)
+   */
+  registerAdminHandlers() {
+    const handleAutoroleInteraction = require("@src/components/admin/autorole-handler");
+    const handleGreetInteraction = require("@src/components/admin/greet-handler");
+    const handleAutomodInteraction = require("@src/components/admin/automod-handler");
+    const handleLogsInteraction = require("@src/components/admin/logs-handler");
+
+    // Autorole handlers
+    this.registerComponent("autorole", "reset", async ({ interaction, settings }) => {
+      await handleAutoroleInteraction(interaction);
+    });
+
+    // Greet handlers
+    this.registerComponent("greet", "test", async ({ interaction, settings }) => {
+      await handleGreetInteraction(interaction);
+    });
+
+    // Automod handlers  
+    this.registerComponent("automod", "enable", async ({ interaction, settings }) => {
+      await handleAutomodInteraction(interaction);
+    });
+    this.registerComponent("automod", "disable", async ({ interaction, settings }) => {
+      await handleAutomodInteraction(interaction);
+    });
+
+    // Logs handlers
+    this.registerComponent("logs", "select", async ({ interaction, settings }) => {
+      await handleLogsInteraction(interaction);
+    });
   }
 
   /**

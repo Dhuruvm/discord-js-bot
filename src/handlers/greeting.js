@@ -98,14 +98,34 @@ async function sendWelcome(member, inviterData = {}) {
   const config = (await getSettings(member.guild))?.welcome;
   if (!config || !config.enabled) return;
 
-  // check if channel exists
-  const channel = member.guild.channels.cache.get(config.channel);
-  if (!channel) return;
+  // Get channels (support both old single channel and new multi-channel)
+  const channelIds = config.channels && config.channels.length > 0 
+    ? config.channels 
+    : (config.channel ? [config.channel] : []);
 
-  // build welcome message
+  if (channelIds.length === 0) return;
+
+  // Build welcome message once
   const response = await buildGreeting(member, "WELCOME", config, inviterData);
 
-  channel.safeSend(response);
+  // Send to all configured channels
+  for (const channelId of channelIds) {
+    const channel = member.guild.channels.cache.get(channelId);
+    if (!channel) continue;
+
+    try {
+      const msg = await channel.send(response);
+      
+      // Auto-delete if configured
+      if (config.auto_delete?.enabled && config.auto_delete?.delay) {
+        setTimeout(() => {
+          msg.delete().catch(() => {});
+        }, config.auto_delete.delay * 1000);
+      }
+    } catch (error) {
+      member.client.logger.error(`Failed to send welcome to ${channelId}`, error);
+    }
+  }
 }
 
 /**
