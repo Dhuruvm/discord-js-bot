@@ -137,6 +137,11 @@ module.exports = {
     CLOSE_EMBED: "#FFFFFF",
   },
 
+  LOGS: {
+    ENABLED: true,
+    EMBED_COLOR: "#FFFFFF",
+  },
+
   // Command Categories
   COMMAND_CATEGORIES: {
     BOT: {

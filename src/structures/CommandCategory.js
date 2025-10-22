@@ -140,4 +140,10 @@ module.exports = {
     emoji: "🎨",
     enabled: false,
   },
+  LOGS: {
+    name: "Logs",
+    enabled: config.LOGS ? config.LOGS.ENABLED : true,
+    image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/file-icon.png",
+    emoji: "📋",
+  },
 };
