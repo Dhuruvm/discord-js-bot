@@ -23,11 +23,12 @@ name = "Discord Bot"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node start.js"
+args = "npm start"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Start All Services"
