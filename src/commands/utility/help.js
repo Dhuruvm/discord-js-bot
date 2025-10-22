@@ -488,14 +488,12 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
 
   const commandsList = pageCommands.join('\n');
 
-  // Format header with page number on the right (Vape menu style)
+  // Format header with page number in bold code block format
   const categoryName = `${mapping.name} Commands`;
-  const pageInfo = `page ${page + 1}/${totalPages}`;
-  const spacingLength = 40 - categoryName.length - pageInfo.length;
-  const spacing = spacingLength > 0 ? ' '.repeat(spacingLength) : ' ';
+  const pageInfo = `**\`\`\`               (Page ${page + 1}/${totalPages})               \`\`\`**`;
   
   const categoryText = ContainerBuilder.createTextDisplay(
-    `## ${categoryName}${spacing}\`${pageInfo}\`\n\n` +
+    `## ${categoryName}\n${pageInfo}\n\n` +
     `${commandsList}\n\n` +
     `*Use \`${prefix || '!'}help <command>\` for detailed information*\n\n` +
     `*Powered by Blackbit Studio*`

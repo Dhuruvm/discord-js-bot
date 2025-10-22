@@ -42,7 +42,7 @@ module.exports = {
 
   async messageRun(message, args) {
     const match = args[0];
-    const reason = message.content.split(args[0])[1].trim();
+    const reason = message.content.split(args[0])[1]?.trim() || "No reason provided";
 
     const response = await getMatchingBans(message.guild, match);
     const sent = await message.safeReply(response);

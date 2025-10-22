@@ -69,7 +69,7 @@ async function getBotStats(client) {
   }
 
   // Count total commands (both prefix and slash)
-  const prefixCommands = client.commands.size || 0;
+  const prefixCommands = client.commands.length || 0;
   const slashCommands = client.slashCommands?.size || 0;
   const totalCommands = prefixCommands + slashCommands;
 
