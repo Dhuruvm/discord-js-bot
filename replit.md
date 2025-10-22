@@ -3,6 +3,8 @@
 ## Overview
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. It features a modular command system supporting both prefix and slash commands. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
+**Recent Update (Oct 2025)**: Completed major migration of Welcome/Autorole, Automod, and Logging systems to modern interactive Discord components (buttons, modals, select menus) with centralized interaction routing and backwards-compatible database schema.
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
@@ -18,12 +20,23 @@ Preferred communication style: Simple, everyday language.
 - **Command Structure**: Centralized definitions in `src/commands/` organized by category.
 - **Command Validation**: Built-in system for permissions, cooldowns, and arguments.
 - **Context Menus**: User and message context menu support.
+- **Interactive Components**: Modern UI with buttons, modals, select menus, and pagination.
+- **Interaction Router**: Centralized component routing with namespaced custom IDs (format: `category:action:data`).
 
 ### Database Layer
 - **MongoDB with Mongoose**: Primary data persistence with separate schemas for guild settings, user data, moderation logs, giveaways, reaction roles, etc.
 
 ### Feature Modules
-- **Comprehensive Functionality**: Includes bot information, a Lavalink-based music system with modern UI, a coin-based economy, moderation and auto-moderation, invite tracking, statistics and leveling, a Mongoose-backed giveaway manager, a multi-category ticket system, flag reaction-based translation, counter channels, and a greeting system.
+- **Admin Systems**: 
+  - **Autorole** (`/autorole`): Separate bot/human autoroles with interactive management
+  - **Welcome/Greet** (`/greet`): Multi-channel support, auto-delete, embed customization, 7 subcommands
+  - **Automod** (`/automod`): Rule-based protection (antispam, antilink, antibadwords, antizalgo, anticaps) with channel whitelisting
+  - **Logging** (7 commands): Comprehensive event logging (channels, members, messages, moderation, roles)
+- **Music System**: Lavalink-based player with Euphony-style UI, queue management, Spotify integration
+- **Economy**: Coin-based system with daily rewards, begging, gambling
+- **Moderation**: Kick, ban, timeout, warn, purge with mod logs
+- **Tickets**: Multi-category support with transcripts
+- **Other Features**: Invite tracking, statistics/leveling, giveaways, reaction roles, translation, counter channels
 
 ### Web Dashboard (Optional)
 - **Express.js**: Web server framework with EJS templates, `express-session` for session management with MongoDB store, and Discord OAuth2 for authentication, providing a web-based configuration interface.
