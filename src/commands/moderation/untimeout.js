@@ -54,7 +54,7 @@ module.exports = {
 };
 
 async function untimeout(issuer, target, reason) {
-  const response = await untimeoutTarget(issuer, target, reason);
+  const response = await unTimeoutTarget(issuer, target, reason);
 
   const targetUsername = target.user?.username || target.username;
 

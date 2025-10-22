@@ -1,5 +1,5 @@
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 const { SUPPORT_SERVER, DASHBOARD, DEVELOPER, OWNER_IDS } = require("@root/config");
 const os = require("os");
 const mongoose = require("mongoose");
@@ -68,54 +68,67 @@ async function getBotStats(client) {
     }
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0x2B2D31)
-    .setTitle(`About ${client.user.username}`)
-    .setDescription(`Managed and Created by **${creatorText}**`)
-    .setThumbnail(client.user.displayAvatarURL({ size: 256 }))
-    .addFields(
-      {
-        name: "Statistics",
-        value: [
-          `> **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0).toLocaleString()}\``,
-          `> **Servers:** \`${client.guilds.cache.size}\``,
-          `> **Commands:** \`${client.commands.size}\``
-        ].join("\n"),
-        inline: false
-      },
-      {
-        name: "System",
-        value: [
-          `> **Latency:** \`${latency}\``,
-          `> **Language:** \`discord.js\``,
-          `> **System:** \`${platform}\``
-        ].join("\n"),
-        inline: false
-      }
-    )
-    .setFooter({ text: "Powered by Blackbit Studio" });
+  // Count total commands (both prefix and slash)
+  const prefixCommands = client.commands.size || 0;
+  const slashCommands = client.slashCommands?.size || 0;
+  const totalCommands = prefixCommands + slashCommands;
 
-  const buttons = [];
-
-  buttons.push(
-    new ButtonBuilder()
-      .setLabel("Invite")
-      .setEmoji("🔗")
-      .setURL(client.getInvite())
-      .setStyle(ButtonStyle.Link)
+  const mainText = ContainerBuilder.createTextDisplay(
+    `# About ${client.user.username}\n\n` +
+    `Managed and Created by **${creatorText}**\n\n` +
+    `## Statistics\n` +
+    `> **Users:** \`${client.guilds.cache.reduce((size, g) => size + g.memberCount, 0).toLocaleString()}\`\n` +
+    `> **Servers:** \`${client.guilds.cache.size}\`\n` +
+    `> **Commands:** \`${totalCommands}\` (Prefix: ${prefixCommands} | Slash: ${slashCommands})\n\n` +
+    `## System\n` +
+    `> **Latency:** \`${latency}\`\n` +
+    `> **Language:** \`discord.js\`\n` +
+    `> **System:** \`${platform}\`\n\n` +
+    `*Powered by Blackbit Studio*`
   );
 
+  // Create buttons for invite, support, and dashboard
+  const buttons = [];
+
+  buttons.push({
+    type: 2,
+    style: 5,
+    label: "Invite Bot",
+    emoji: "🔗",
+    url: client.getInvite()
+  });
+
   if (SUPPORT_SERVER) {
-    buttons.push(
-      new ButtonBuilder()
-        .setLabel("Support")
-        .setEmoji("💬")
-        .setURL(SUPPORT_SERVER)
-        .setStyle(ButtonStyle.Link)
-    );
+    buttons.push({
+      type: 2,
+      style: 5,
+      label: "Support Server",
+      emoji: "💬",
+      url: SUPPORT_SERVER
+    });
   }
 
-  const buttonRow = new ActionRowBuilder().addComponents(buttons.slice(0, 5));
+  if (DASHBOARD.enabled) {
+    buttons.push({
+      type: 2,
+      style: 5,
+      label: "Dashboard",
+      emoji: "🌐",
+      url: DASHBOARD.baseURL
+    });
+  }
 
-  return { embeds: [embed], components: [buttonRow] };
+  const buttonRow = {
+    type: 1,
+    components: buttons
+  };
+
+  const payload = new ContainerBuilder()
+    .addContainer({ 
+      accentColor: 0xFFFFFF,
+      components: [mainText, buttonRow]
+    })
+    .build();
+
+  return payload;
 }
