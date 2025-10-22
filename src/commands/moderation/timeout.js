@@ -50,7 +50,7 @@ module.exports = {
     const ms = ems(args[1]);
     if (!ms) return message.safeReply("Please provide a valid duration. Example: 1d/1h/1m/1s");
 
-    const reason = args.slice(2).join(" ").trim();
+    const reason = args.slice(2).join(" ").trim() || "No reason provided";
     const response = await timeout(message.member, target, reason, ms);
     await message.safeReply(response);
   },

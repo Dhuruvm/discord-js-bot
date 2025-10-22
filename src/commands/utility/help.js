@@ -62,16 +62,6 @@ module.exports = {
       }
 
       const categoryResponse = getCategoryEmbed(message.client, direction, data.prefix, 0);
-      const navButtons = getNavigationButtons(categoryResponse.totalPages, 0);
-
-      // Add navigation buttons to the container's components
-      if (categoryResponse.components && categoryResponse.components.length > 0) {
-        const container = categoryResponse.components[0];
-        if (container.components) {
-          container.components.push(navButtons.toJSON());
-        }
-      }
-
       const sentMsg = await message.channel.send(categoryResponse);
       return waiter(sentMsg, message.author.id, data.prefix, direction, 0);
     }
@@ -266,16 +256,6 @@ const waiter = (msg, userId, prefix, initialCategory = null, initialPage = 0) =>
         currentCategory = cat;
         currentPage = 0;
         const categoryResponse = getCategoryEmbed(msg.client, cat, prefix, currentPage);
-        const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
-
-        // Add navigation buttons to the container's components
-        if (categoryResponse.components && categoryResponse.components.length > 0) {
-          const container = categoryResponse.components[0];
-          if (container.components) {
-            container.components.push(navButtons.toJSON());
-          }
-        }
-
         currentComponents = categoryResponse.components || [];
         msg.editable && (await msg.edit(categoryResponse));
         break;
@@ -285,16 +265,6 @@ const waiter = (msg, userId, prefix, initialCategory = null, initialPage = 0) =>
         if (currentCategory && currentPage > 0) {
           currentPage--;
           const categoryResponse = getCategoryEmbed(msg.client, currentCategory, prefix, currentPage);
-          const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
-
-          // Add navigation buttons to the container's components
-          if (categoryResponse.components && categoryResponse.components.length > 0) {
-            const container = categoryResponse.components[0];
-            if (container.components) {
-              container.components.push(navButtons.toJSON());
-            }
-          }
-
           currentComponents = categoryResponse.components || [];
           msg.editable && (await msg.edit(categoryResponse));
         }
@@ -307,16 +277,6 @@ const waiter = (msg, userId, prefix, initialCategory = null, initialPage = 0) =>
           if (currentPage < tempResponse.totalPages - 1) {
             currentPage++;
             const categoryResponse = getCategoryEmbed(msg.client, currentCategory, prefix, currentPage);
-            const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
-
-            // Add navigation buttons to the container's components
-            if (categoryResponse.components && categoryResponse.components.length > 0) {
-              const container = categoryResponse.components[0];
-              if (container.components) {
-                container.components.push(navButtons.toJSON());
-              }
-            }
-
             currentComponents = categoryResponse.components || [];
             msg.editable && (await msg.edit(categoryResponse));
           }
@@ -499,12 +459,18 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
     `*Powered by Blackbit Studio*`
   );
 
+  const navButtons = getNavigationButtons(totalPages, page);
+
   const payload = new ContainerBuilder()
     .addContainer({ 
       accentColor: 0xFFFFFF, 
       components: [categoryText]
     })
     .build();
+
+  // Add navigation buttons as a separate component row
+  if (!payload.components) payload.components = [];
+  payload.components.push(navButtons);
 
   payload.totalPages = totalPages;
   return payload;
