@@ -61,13 +61,19 @@ module.exports = {
         return message.channel.send(`${emojis.error} No command or category found matching your input`);
       }
 
-      const categoryResponse = getCategoryEmbed(message.client, direction, data.prefix);
-      const backRow = getBackButton();
+      const categoryResponse = getCategoryEmbed(message.client, direction, data.prefix, 0);
+      const navButtons = getNavigationButtons(categoryResponse.totalPages, 0);
 
-      return message.channel.send({
-        ...categoryResponse,
-        components: [...categoryResponse.components, backRow],
-      });
+      // Add navigation buttons to the container's components
+      if (categoryResponse.components && categoryResponse.components.length > 0) {
+        const container = categoryResponse.components[0];
+        if (container.components) {
+          container.components.push(navButtons.toJSON());
+        }
+      }
+
+      const sentMsg = await message.channel.send(categoryResponse);
+      return waiter(sentMsg, message.author.id, data.prefix, direction, 0);
     }
 
     await message.channel.send(`${emojis.error} No command or category found matching your input`);
@@ -140,7 +146,8 @@ async function getHelpMenu(context, prefix) {
   const developers = globalSettings?.developers || [];
 
   // Build developer list
-  let developerText = `**[Falooda](${SUPPORT_SERVER})**`;
+  const ownerId = OWNER_IDS[0];
+  let developerText = `**[Falooda](https://discord.com/users/${ownerId})**`;
   if (developers.length > 0) {
     const devNames = [];
     for (const devId of developers) {
@@ -152,7 +159,7 @@ async function getHelpMenu(context, prefix) {
       }
     }
     if (devNames.length > 0) {
-      developerText = `**[Falooda](${SUPPORT_SERVER})**, ${devNames.join(', ')}`;
+      developerText = `**[Falooda](https://discord.com/users/${ownerId})**, ${devNames.join(', ')}`;
     }
   }
 
@@ -229,7 +236,7 @@ async function getHelpMenu(context, prefix) {
   return payload;
 }
 
-const waiter = (msg, userId, prefix) => {
+const waiter = (msg, userId, prefix, initialCategory = null, initialPage = 0) => {
   const collector = msg.channel.createMessageComponentCollector({
     filter: (reactor) => reactor.user.id === userId && msg.id === reactor.message.id,
     idle: IDLE_TIMEOUT * 1000,
@@ -238,6 +245,8 @@ const waiter = (msg, userId, prefix) => {
   });
 
   let currentComponents = msg.components;
+  let currentPage = initialPage;
+  let currentCategory = initialCategory;
 
   collector.on("collect", async (response) => {
     await response.deferUpdate();
@@ -246,25 +255,72 @@ const waiter = (msg, userId, prefix) => {
       case "home-btn": {
         const homeResponse = await getHelpMenu({ client: msg.client, guild: msg.guild, user: response.user }, prefix);
         currentComponents = homeResponse.components;
+        currentPage = 0;
+        currentCategory = null;
         msg.editable && (await msg.edit(homeResponse));
         break;
       }
 
       case "help-menu": {
         const cat = response.values[0].toUpperCase();
-        const categoryResponse = getCategoryEmbed(msg.client, cat, prefix);
-        const backRow = getBackButton();
+        currentCategory = cat;
+        currentPage = 0;
+        const categoryResponse = getCategoryEmbed(msg.client, cat, prefix, currentPage);
+        const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
 
-        // Add back button to the container's components
+        // Add navigation buttons to the container's components
         if (categoryResponse.components && categoryResponse.components.length > 0) {
           const container = categoryResponse.components[0];
           if (container.components) {
-            container.components.push(backRow.toJSON());
+            container.components.push(navButtons.toJSON());
           }
         }
 
         currentComponents = categoryResponse.components || [];
         msg.editable && (await msg.edit(categoryResponse));
+        break;
+      }
+
+      case "prev-btn": {
+        if (currentCategory && currentPage > 0) {
+          currentPage--;
+          const categoryResponse = getCategoryEmbed(msg.client, currentCategory, prefix, currentPage);
+          const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
+
+          // Add navigation buttons to the container's components
+          if (categoryResponse.components && categoryResponse.components.length > 0) {
+            const container = categoryResponse.components[0];
+            if (container.components) {
+              container.components.push(navButtons.toJSON());
+            }
+          }
+
+          currentComponents = categoryResponse.components || [];
+          msg.editable && (await msg.edit(categoryResponse));
+        }
+        break;
+      }
+
+      case "next-btn": {
+        if (currentCategory) {
+          const tempResponse = getCategoryEmbed(msg.client, currentCategory, prefix, currentPage + 1);
+          if (currentPage < tempResponse.totalPages - 1) {
+            currentPage++;
+            const categoryResponse = getCategoryEmbed(msg.client, currentCategory, prefix, currentPage);
+            const navButtons = getNavigationButtons(categoryResponse.totalPages, currentPage);
+
+            // Add navigation buttons to the container's components
+            if (categoryResponse.components && categoryResponse.components.length > 0) {
+              const container = categoryResponse.components[0];
+              if (container.components) {
+                container.components.push(navButtons.toJSON());
+              }
+            }
+
+            currentComponents = categoryResponse.components || [];
+            msg.editable && (await msg.edit(categoryResponse));
+          }
+        }
         break;
       }
     }
@@ -296,10 +352,67 @@ const waiter = (msg, userId, prefix) => {
   });
 };
 
-function getCategoryEmbed(client, category, prefix) {
+function getCategoryEmbed(client, category, prefix, page = 0) {
   const ContainerBuilder = require("@helpers/ContainerBuilder");
+  const COMMANDS_PER_PAGE = 10;
+
   // Get both message and slash commands for the category
-  const commands = Array.from(client.commands.values()).filter((cmd) => cmd.category === category);
+  let commands = Array.from(client.commands.values()).filter((cmd) => cmd.category === category);
+
+  // Add additional moderation commands if category is MODERATION
+  if (category === 'MODERATION') {
+    const additionalModerationCommands = [
+      { name: 'audit', description: 'View audit logs for moderation actions' },
+      { name: 'ban', description: 'Ban a member from the server' },
+      { name: 'delchannel', description: 'Delete a channel' },
+      { name: 'giverole', description: 'Give a role to a member' },
+      { name: 'hide', description: 'Hide a channel from members' },
+      { name: 'hideall', description: 'Hide all channels from members' },
+      { name: 'kick', description: 'Kick a member from the server' },
+      { name: 'lock', description: 'Lock a channel' },
+      { name: 'lockall', description: 'Lock all channels' },
+      { name: 'mute', description: 'Mute a member' },
+      { name: 'nick', description: 'Change a member\'s nickname' },
+      { name: 'role', description: 'Manage roles for members' },
+      { name: 'role all', description: 'Give role to all members' },
+      { name: 'role bots', description: 'Give role to all bots' },
+      { name: 'role cancel', description: 'Cancel ongoing role operation' },
+      { name: 'role humans', description: 'Give role to all humans' },
+      { name: 'role status', description: 'Check role operation status' },
+      { name: 'rrole', description: 'Remove role from members' },
+      { name: 'rrole bots', description: 'Remove role from all bots' },
+      { name: 'rrole cancel', description: 'Cancel ongoing role removal operation' },
+      { name: 'rrole humans', description: 'Remove role from all humans' },
+      { name: 'rrole status', description: 'Check role removal operation status' },
+      { name: 'temprole', description: 'Give temporary role to a member' },
+      { name: 'temprole add', description: 'Add a temporary role' },
+      { name: 'temprole info', description: 'View temporary role information' },
+      { name: 'temprole list', description: 'List all temporary roles' },
+      { name: 'temprole remove', description: 'Remove a temporary role' },
+      { name: 'unban', description: 'Unban a member from the server' },
+      { name: 'unbanall', description: 'Unban all banned members' },
+      { name: 'unhide', description: 'Unhide a channel' },
+      { name: 'unhideall', description: 'Unhide all channels' },
+      { name: 'unlock', description: 'Unlock a channel' },
+      { name: 'unlockall', description: 'Unlock all channels' },
+      { name: 'unmute', description: 'Unmute a member' },
+      { name: 'warn', description: 'Warn a member' },
+      { name: 'warn clear', description: 'Clear warnings for a member' },
+      { name: 'warn info', description: 'View warning information' },
+    ];
+
+    // Add additional commands that don't exist yet
+    const existingCommandNames = new Set(commands.map(cmd => cmd.name));
+    additionalModerationCommands.forEach(addCmd => {
+      if (!existingCommandNames.has(addCmd.name)) {
+        commands.push({
+          name: addCmd.name,
+          description: addCmd.description,
+          category: 'MODERATION'
+        });
+      }
+    });
+  }
 
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
@@ -334,36 +447,49 @@ function getCategoryEmbed(client, category, prefix) {
       })
       .build();
 
+    payload.totalPages = 1;
     return payload;
   }
 
-  const commandsList = commands.map(cmd => {
+  // Flatten all commands and subcommands
+  const allCommandEntries = [];
+  commands.forEach(cmd => {
     const cmdPrefix = prefix || '!';
 
     // Check for slash command subcommands first
     if (cmd.slashCommand?.enabled && cmd.slashCommand?.options) {
-      const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1); // ApplicationCommandOptionType.Subcommand
+      const subcommands = cmd.slashCommand.options.filter(opt => opt.type === 1);
       if (subcommands.length > 0) {
-        return subcommands.map(sub => 
-          `• \`${cmdPrefix}${cmd.name} ${sub.name}\` — ${sub.description}`
-        ).join('\n');
+        subcommands.forEach(sub => {
+          allCommandEntries.push(`• \`${cmdPrefix}${cmd.name} ${sub.name}\` — ${sub.description}`);
+        });
+        return;
       }
     }
 
     // Check for message command subcommands
     if (cmd.command?.subcommands && cmd.command.subcommands.length > 0) {
-      return cmd.command.subcommands.map(sub => {
+      cmd.command.subcommands.forEach(sub => {
         const trigger = sub.trigger.split(' ')[0];
-        return `• \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`;
-      }).join('\n');
+        allCommandEntries.push(`• \`${cmdPrefix}${cmd.name} ${trigger}\` — ${sub.description || 'No description'}`);
+      });
+      return;
     }
 
     // Single command
-    return `• \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`;
-  }).join('\n');
+    allCommandEntries.push(`• \`${cmdPrefix}${cmd.name}\` — ${cmd.description}`);
+  });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(allCommandEntries.length / COMMANDS_PER_PAGE);
+  const startIndex = page * COMMANDS_PER_PAGE;
+  const endIndex = Math.min(startIndex + COMMANDS_PER_PAGE, allCommandEntries.length);
+  const pageCommands = allCommandEntries.slice(startIndex, endIndex);
+
+  const commandsList = pageCommands.join('\n');
 
   const categoryText = ContainerBuilder.createTextDisplay(
-    `## ${mapping.name} Commands\n\n` +
+    `## ${mapping.name} Commands (Page ${page + 1}/${totalPages})\n\n` +
     `${commandsList}\n\n` +
     `*Use \`${prefix || '!'}help <command>\` for detailed information*\n\n` +
     `*Powered by Blackbit Studio*`
@@ -376,6 +502,7 @@ function getCategoryEmbed(client, category, prefix) {
     })
     .build();
 
+  payload.totalPages = totalPages;
   return payload;
 }
 
@@ -388,5 +515,40 @@ function getBackButton() {
       label: "Back",
       style: ButtonStyle.Secondary
     }]
+  });
+}
+
+function getNavigationButtons(totalPages, currentPage) {
+  const components = [];
+
+  // Previous button (disabled if on first page)
+  components.push({
+    type: 2,
+    custom_id: "prev-btn",
+    label: "Previous",
+    style: ButtonStyle.Primary,
+    disabled: currentPage === 0
+  });
+
+  // Back button (always enabled)
+  components.push({
+    type: 2,
+    custom_id: "home-btn",
+    label: "Back",
+    style: ButtonStyle.Secondary
+  });
+
+  // Next button (disabled if on last page)
+  components.push({
+    type: 2,
+    custom_id: "next-btn",
+    label: "Next",
+    style: ButtonStyle.Primary,
+    disabled: currentPage >= totalPages - 1
+  });
+
+  return ActionRowBuilder.from({
+    type: 1,
+    components: components
   });
 }
