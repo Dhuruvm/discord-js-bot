@@ -3,7 +3,12 @@
 ## Overview
 This project is a comprehensive, multipurpose Discord bot built with Discord.js v14, offering extensive functionality across administration, moderation, economy, music, giveaways, invites, statistics, tickets, auto-moderation, anime reactions, image manipulation, and general utilities. It features a modular command system supporting both prefix and slash commands. The bot is designed as a production-ready solution with optional web dashboard support, extensive configuration, and robust error handling.
 
-**Recent Update (Oct 2025)**: Completed major migration of Welcome/Autorole, Automod, and Logging systems to modern interactive Discord components (buttons, modals, select menus) with centralized interaction routing and backwards-compatible database schema.
+**Recent Update (Oct 2025)**: Completed major system enhancements including:
+- Migration of Welcome/Autorole, Automod, and Logging systems to modern interactive Discord components (buttons, modals, select menus) with centralized interaction routing
+- Security fix: Separated noprefix users from developer access with automatic backward-compatible migration
+- Custom command aliases system with interactive management UI and validation
+- Comprehensive moderation suite: lock/unlock channels, audit log viewer, role-based mute/unmute system
+- All owner-only commands now use prefix-only (slash commands disabled for security)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -22,9 +27,11 @@ Preferred communication style: Simple, everyday language.
 - **Context Menus**: User and message context menu support.
 - **Interactive Components**: Modern UI with buttons, modals, select menus, and pagination.
 - **Interaction Router**: Centralized component routing with namespaced custom IDs (format: `category:action:data`).
+- **Custom Aliases**: Server-specific command aliases with interactive management (max 50 per server).
 
 ### Database Layer
 - **MongoDB with Mongoose**: Primary data persistence with separate schemas for guild settings, user data, moderation logs, giveaways, reaction roles, etc.
+- **Backward-Compatible Migrations**: Automatic schema migrations preserve legacy data (e.g., noprefix users from developers array).
 
 ### Feature Modules
 - **Admin Systems**: 
@@ -34,7 +41,11 @@ Preferred communication style: Simple, everyday language.
   - **Logging** (7 commands): Comprehensive event logging (channels, members, messages, moderation, roles)
 - **Music System**: Lavalink-based player with Euphony-style UI, queue management, Spotify integration
 - **Economy**: Coin-based system with daily rewards, begging, gambling
-- **Moderation**: Kick, ban, timeout, warn, purge with mod logs
+- **Moderation**: 
+  - Standard actions: Kick, ban, timeout, warn, purge with mod logs
+  - Channel control: Lock/unlock channels
+  - Role-based muting: Mute/unmute with automatic "Muted" role creation
+  - Audit logs: Interactive audit log viewer with filters and pagination (`/audit`)
 - **Tickets**: Multi-category support with transcripts
 - **Other Features**: Invite tracking, statistics/leveling, giveaways, reaction roles, translation, counter channels
 
