@@ -108,7 +108,8 @@ async function getHelpMenu(context, prefix) {
     'PROFILE',
     'LEADERBOARD',
     'SUGGESTION',
-    'BOT'
+    'BOT',
+    'LOGS'
   ];
 
   const categoryMapping = {
@@ -126,6 +127,7 @@ async function getHelpMenu(context, prefix) {
     'LEADERBOARD': { name: 'Leaderboard' },
     'SUGGESTION': { name: 'Suggestions' },
     'BOT': { name: 'Bot' },
+    'LOGS': { name: 'Logs' },
   };
 
   const prefixText = prefix || '!';
@@ -389,6 +391,7 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
     'LEADERBOARD': { name: 'Leaderboard' },
     'SUGGESTION': { name: 'Suggestions' },
     'BOT': { name: 'Bot' },
+    'LOGS': { name: 'Logs' },
   };
 
   const categoryInfo = CommandCategory[category];
