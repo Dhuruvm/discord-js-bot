@@ -114,7 +114,7 @@ async function getHelpMenu(context, prefix) {
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
     'ANTINUKE': { name: 'Antinuke' },
-    'AUTOMOD': { name: 'Auto Moderation' },
+    'AUTOMOD': { name: 'Automod' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
     'INFORMATION': { name: 'Information' },
@@ -377,7 +377,7 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
   const categoryMapping = {
     'OWNER': { name: 'Owner' },
     'ANTINUKE': { name: 'Antinuke' },
-    'AUTOMOD': { name: 'Auto Moderation' },
+    'AUTOMOD': { name: 'Automod' },
     'MUSIC': { name: 'Music' },
     'MODERATION': { name: 'Moderation' },
     'INFORMATION': { name: 'Information' },
@@ -451,7 +451,7 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
   // Format header with page number in bold code block format
   const categoryName = `${mapping.name} Commands`;
   const pageInfo = `**\`\`\`               (Page ${page + 1}/${totalPages})               \`\`\`**`;
-  
+
   const categoryText = ContainerBuilder.createTextDisplay(
     `## ${categoryName}\n${pageInfo}\n\n` +
     `${commandsList}\n\n` +
