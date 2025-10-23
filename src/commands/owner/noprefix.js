@@ -104,29 +104,29 @@ module.exports = {
 };
 
 async function addUser(settings, userId, userTag) {
-  if (!settings.developers) settings.developers = [];
+  if (!settings.noprefix_users) settings.noprefix_users = [];
   
-  if (settings.developers.includes(userId)) {
+  if (settings.noprefix_users.includes(userId)) {
     return `${userTag} is already in the no-prefix whitelist!`;
   }
 
-  settings.developers.push(userId);
+  settings.noprefix_users.push(userId);
   await settings.save();
   return `Successfully added ${userTag} to the no-prefix whitelist!`;
 }
 
 async function removeUser(settings, userId, userTag) {
-  if (!settings.developers || !settings.developers.includes(userId)) {
+  if (!settings.noprefix_users || !settings.noprefix_users.includes(userId)) {
     return `${userTag} is not in the no-prefix whitelist!`;
   }
 
-  settings.developers = settings.developers.filter(id => id !== userId);
+  settings.noprefix_users = settings.noprefix_users.filter(id => id !== userId);
   await settings.save();
   return `Successfully removed ${userTag} from the no-prefix whitelist!`;
 }
 
 async function listUsers(settings, guild) {
-  if (!settings.developers || settings.developers.length === 0) {
+  if (!settings.noprefix_users || settings.noprefix_users.length === 0) {
     return "No users in the no-prefix whitelist!";
   }
 
@@ -134,7 +134,7 @@ async function listUsers(settings, guild) {
     .setTitle("No-Prefix Whitelist")
     .setColor(EMBED_COLORS.BOT_EMBED)
     .setDescription(
-      settings.developers
+      settings.noprefix_users
         .map((userId, index) => {
           const user = guild.members.cache.get(userId);
           return `${index + 1}. ${user ? user.user.tag : userId}`;

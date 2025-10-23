@@ -245,8 +245,17 @@ const Schema = new mongoose.Schema({
       },
     },
   },
+  // Custom command aliases per guild
+  custom_aliases: [{
+    _id: false,
+    alias: String, // The custom alias
+    command: String, // The original command name
+    created_by: String, // User ID who created it
+    created_at: { type: Date, default: Date.now },
+  }],
   // Global bot settings (stored with _id: "GLOBAL_SETTINGS")
   developers: [String],
+  noprefix_users: [String], // Users who can use commands without prefix
   giveaway_reaction: String, // Custom reaction emoji for giveaways
 });
 
@@ -362,6 +371,20 @@ module.exports = {
         mod_logs: { enabled: false },
         role_logs: { enabled: false }
       };
+    }
+
+    // Migrate legacy noprefix users from developers to noprefix_users
+    if (guildData.developers && guildData.developers.length > 0) {
+      if (!guildData.noprefix_users) {
+        guildData.noprefix_users = [];
+      }
+      
+      for (const userId of guildData.developers) {
+        if (!guildData.noprefix_users.includes(userId)) {
+          guildData.noprefix_users.push(userId);
+          needsSave = true;
+        }
+      }
     }
 
     // Save migrations if needed

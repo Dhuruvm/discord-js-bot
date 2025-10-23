@@ -82,12 +82,24 @@ module.exports = async (client, message) => {
       return message.channel.send(payload);
     }
 
-    // Check for no-prefix commands (for owners and whitelisted users only)
-    const isOwner = OWNER_IDS.includes(message.author.id);
-    const isWhitelisted = settings.developers && settings.developers.includes(message.author.id);
+    // Helper function to resolve custom aliases
+    const resolveCustomAlias = (invoke) => {
+      if (settings.custom_aliases && settings.custom_aliases.length > 0) {
+        const customAlias = settings.custom_aliases.find(ca => ca.alias === invoke.toLowerCase());
+        if (customAlias) {
+          return customAlias.command;
+        }
+      }
+      return invoke;
+    };
 
-    if ((isOwner || isWhitelisted) && message.content && !message.content.startsWith(settings.prefix)) {
-      const invoke = message.content.split(/\s+/)[0];
+    // Check for no-prefix commands (for owners and noprefix whitelisted users)
+    const isOwner = OWNER_IDS.includes(message.author.id);
+    const isNoPrefixUser = settings.noprefix_users && settings.noprefix_users.includes(message.author.id);
+
+    if ((isOwner || isNoPrefixUser) && message.content && !message.content.startsWith(settings.prefix)) {
+      let invoke = message.content.split(/\s+/)[0];
+      invoke = resolveCustomAlias(invoke);
       const cmd = client.getCommand(invoke);
       if (cmd) {
         isCommand = true;
@@ -97,7 +109,8 @@ module.exports = async (client, message) => {
 
     // Check for regular prefix commands
     if (!isCommand && message.content && message.content.startsWith(settings.prefix)) {
-      const invoke = message.content.replace(`${settings.prefix}`, "").split(/\s+/)[0];
+      let invoke = message.content.replace(`${settings.prefix}`, "").split(/\s+/)[0];
+      invoke = resolveCustomAlias(invoke);
       const cmd = client.getCommand(invoke);
       if (cmd) {
         isCommand = true;
