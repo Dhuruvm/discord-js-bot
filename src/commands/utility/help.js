@@ -464,13 +464,9 @@ function getCategoryEmbed(client, category, prefix, page = 0) {
   const payload = new ContainerBuilder()
     .addContainer({ 
       accentColor: 0xFFFFFF, 
-      components: [categoryText]
+      components: [categoryText, navButtons]
     })
     .build();
-
-  // Add navigation buttons as a separate component row
-  if (!payload.components) payload.components = [];
-  payload.components.push(navButtons);
 
   payload.totalPages = totalPages;
   return payload;
