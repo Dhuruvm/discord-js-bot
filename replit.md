@@ -9,6 +9,7 @@ This project is a comprehensive, multipurpose Discord bot built with Discord.js 
 - Custom command aliases system with interactive management UI and validation
 - Comprehensive moderation suite: lock/unlock channels, audit log viewer, role-based mute/unmute system
 - All owner-only commands now use prefix-only (slash commands disabled for security)
+- Full prefix command support for greet and automod commands (supports both prefix and slash command interfaces)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -35,9 +36,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Feature Modules
 - **Admin Systems**: 
-  - **Autorole** (`/autorole`): Separate bot/human autoroles with interactive management
-  - **Welcome/Greet** (`/greet`): Multi-channel support, auto-delete, embed customization, 7 subcommands
-  - **Automod** (`/automod`): Rule-based protection (antispam, antilink, antibadwords, antizalgo, anticaps) with channel whitelisting
+  - **Autorole** (`/autorole` or `!autorole`): Separate bot/human autoroles with interactive management
+  - **Welcome/Greet** (`/greet` or `!greet`): Multi-channel support, auto-delete, embed customization, 7 subcommands with full prefix support
+  - **Automod** (`/automod` or `!automod`): Rule-based protection (antispam, antilink, antibadwords, antizalgo, anticaps) with channel whitelisting and full prefix support
   - **Logging** (7 commands): Comprehensive event logging (channels, members, messages, moderation, roles)
 - **Music System**: Lavalink-based player with Euphony-style UI, queue management, Spotify integration
 - **Economy**: Coin-based system with daily rewards, begging, gambling
