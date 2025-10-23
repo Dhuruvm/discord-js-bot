@@ -103,6 +103,8 @@ module.exports = {
   },
 
   async interactionRun(interaction, data) {
+    await interaction.deferReply({ ephemeral: true });
+    
     const group = interaction.options.getSubcommandGroup(false);
     const sub = interaction.options.getSubcommand();
     const settings = data.settings;
