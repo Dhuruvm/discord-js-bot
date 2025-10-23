@@ -164,7 +164,56 @@ module.exports = {
   },
 
   async messageRun(message, args, data) {
-    return message.safeReply("Please use slash commands for automod configuration: `/automod`");
+    const settings = data.settings;
+    
+    if (args.length === 0) {
+      return message.safeReply(`Usage: \`${data.prefix}automod <subcommand>\`\n\nAvailable subcommands:\n• \`antispam <true/false> [threshold] [timeframe]\` - Configure anti-spam\n• \`antilink <true/false>\` - Configure anti-link\n• \`antibadwords <true/false>\` - Configure bad word filter\n• \`antizalgo <true/false> [threshold]\` - Configure zalgo detection\n• \`anticaps <true/false> [threshold]\` - Configure caps detection\n• \`whitelist add <#channel>\` - Add whitelisted channel\n• \`whitelist remove <#channel>\` - Remove whitelisted channel\n• \`whitelist list\` - View whitelisted channels\n• \`config\` - View configuration`);
+    }
+
+    const sub = args[0].toLowerCase();
+    let response;
+
+    if (sub === "whitelist") {
+      const action = args[1]?.toLowerCase();
+      if (action === "add") {
+        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
+        if (!channel) return message.safeReply("Please provide a valid channel");
+        response = await addWhitelist(settings, channel);
+      } else if (action === "remove") {
+        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
+        if (!channel) return message.safeReply("Please provide a valid channel");
+        response = await removeWhitelist(settings, channel);
+      } else if (action === "list") {
+        response = await listWhitelist(message.guild, settings);
+      } else {
+        return message.safeReply(`Invalid whitelist action. Use: \`${data.prefix}automod whitelist <add/remove/list>\``);
+      }
+    } else if (sub === "antispam") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      const threshold = parseInt(args[2]) || 5;
+      const timeframe = parseInt(args[3]) || 5;
+      response = await setAntiSpam(settings, enabled, threshold, timeframe);
+    } else if (sub === "antilink") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      response = await setAntiLink(settings, enabled);
+    } else if (sub === "antibadwords") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      response = await setAntiBadwords(settings, enabled);
+    } else if (sub === "antizalgo") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      const threshold = parseInt(args[2]) || 50;
+      response = await setAntiZalgo(settings, enabled, threshold);
+    } else if (sub === "anticaps") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      const threshold = parseInt(args[2]) || 70;
+      response = await setAntiCaps(settings, enabled, threshold);
+    } else if (sub === "config") {
+      response = await showConfig(settings);
+    } else {
+      return message.safeReply(`Unknown subcommand. Use \`${data.prefix}automod\` to see available options.`);
+    }
+
+    await message.safeReply(response);
   },
 
   async interactionRun(interaction, data) {

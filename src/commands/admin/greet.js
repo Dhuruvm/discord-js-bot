@@ -150,7 +150,63 @@ module.exports = {
   },
 
   async messageRun(message, args, data) {
-    return message.safeReply("Please use slash commands for greet configuration: `/greet`");
+    const settings = data.settings;
+    
+    if (args.length === 0) {
+      return message.safeReply(`Usage: \`${data.prefix}greet <subcommand>\`\n\nAvailable subcommands:\n• \`channel add <#channel>\` - Add greeting channel\n• \`channel remove <#channel>\` - Remove greeting channel\n• \`embed toggle <true/false>\` - Toggle embed mode\n• \`embed message <text>\` - Set embed message\n• \`embed reset\` - Reset embed settings\n• \`autodel <true/false> [delay]\` - Configure auto-delete\n• \`message <text>\` - Set plain text message\n• \`config\` - View configuration\n• \`test\` - Send test greeting\n• \`variables\` - Show available variables\n• \`reset\` - Reset all settings`);
+    }
+
+    const sub = args[0].toLowerCase();
+    let response;
+
+    if (sub === "channel") {
+      const action = args[1]?.toLowerCase();
+      if (action === "add") {
+        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
+        if (!channel) return message.safeReply("Please provide a valid channel");
+        response = await addChannel({ guild: message.guild }, channel, settings);
+      } else if (action === "remove") {
+        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
+        if (!channel) return message.safeReply("Please provide a valid channel");
+        response = await removeChannel(message, channel, settings);
+      } else {
+        return message.safeReply(`Invalid channel action. Use: \`${data.prefix}greet channel <add/remove> <#channel>\``);
+      }
+    } else if (sub === "embed") {
+      const action = args[1]?.toLowerCase();
+      if (action === "toggle") {
+        const enabled = args[2]?.toLowerCase() === "true" || args[2]?.toLowerCase() === "yes";
+        response = await toggleEmbed(settings, enabled);
+      } else if (action === "message") {
+        const msg = args.slice(2).join(" ");
+        if (!msg) return message.safeReply("Please provide a message");
+        response = await setEmbedMessage(settings, msg);
+      } else if (action === "reset") {
+        response = await resetEmbed(settings);
+      } else {
+        return message.safeReply(`Invalid embed action. Use: \`${data.prefix}greet embed <toggle/message/reset>\``);
+      }
+    } else if (sub === "autodel") {
+      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
+      const delay = parseInt(args[2]) || 10;
+      response = await setAutoDelete(settings, enabled, delay);
+    } else if (sub === "message") {
+      const msg = args.slice(1).join(" ");
+      if (!msg) return message.safeReply("Please provide a message");
+      response = await setMessage(settings, msg);
+    } else if (sub === "config") {
+      response = await showConfig({ guild: message.guild }, settings);
+    } else if (sub === "test") {
+      response = await sendTest({ member: message.member, guild: message.guild }, settings);
+    } else if (sub === "variables") {
+      response = showVariables();
+    } else if (sub === "reset") {
+      response = await resetGreeting(settings);
+    } else {
+      return message.safeReply(`Unknown subcommand. Use \`${data.prefix}greet\` to see available options.`);
+    }
+
+    await message.safeReply(response);
   },
 
   async interactionRun(interaction, data) {
