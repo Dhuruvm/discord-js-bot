@@ -1,5 +1,6 @@
-const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandOptionType, ButtonStyle } = require("discord.js");
 const { PREFIX_COMMANDS } = require("@root/config");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
 
 module.exports = {
   name: "aliases",
@@ -29,11 +30,19 @@ module.exports = {
     const cmd = message.client.getCommand(trigger);
 
     if (!cmd) {
-      return message.safeReply("No command found with that name.");
+      const errorContainer = new ContainerBuilder()
+        .addContainer({
+          accentColor: 0xFF0000,
+          components: [
+            ContainerBuilder.createTextDisplay("## ❌ Command Not Found\n\nNo command found with that name.")
+          ]
+        })
+        .build();
+      return message.safeReply(errorContainer);
     }
 
-    const embed = getAliasesEmbed(cmd, data.prefix, false);
-    return message.safeReply({ embeds: [embed] });
+    const response = getAliasesContainer(cmd, data.prefix, false);
+    return message.safeReply(response);
   },
 
   async interactionRun(interaction, data) {
@@ -42,41 +51,62 @@ module.exports = {
     const prefixCmd = interaction.client.getCommand(cmdName);
 
     if (!slashCmd && !prefixCmd) {
-      return interaction.followUp("No command found with that name.");
+      const errorContainer = new ContainerBuilder()
+        .addContainer({
+          accentColor: 0xFF0000,
+          components: [
+            ContainerBuilder.createTextDisplay("## ❌ Command Not Found\n\nNo command found with that name.")
+          ]
+        })
+        .build();
+      return interaction.followUp(errorContainer);
     }
 
     const prefix = data?.settings?.prefix || PREFIX_COMMANDS.DEFAULT_PREFIX;
-    const embed = getAliasesEmbed(slashCmd || prefixCmd, prefix, !!slashCmd);
-    return interaction.followUp({ embeds: [embed] });
+    const response = getAliasesContainer(slashCmd || prefixCmd, prefix, !!slashCmd);
+    return interaction.followUp(response);
   },
 };
 
-function getAliasesEmbed(cmd, prefix, isSlashContext) {
+function getAliasesContainer(cmd, prefix, isSlashContext) {
   const aliases = cmd.command?.aliases || [];
   
-  const embed = new EmbedBuilder()
-    .setColor("#FFFFFF")
-    .setTitle(`${cmd.name} Command Information`);
-
+  let content;
+  let accentColor;
+  
   if (isSlashContext) {
-    embed.setDescription(
+    accentColor = 0x5865F2; // Blue for info
+    content = ContainerBuilder.createTextDisplay(
+      `## 📋 ${cmd.name} Command Information\n\n` +
       `**Command:** \`/${cmd.name}\`\n\n` +
       `**Aliases:** Slash commands do not support aliases.\n\n` +
       `**Description:** ${cmd.description || 'No description available'}\n\n` +
       `**Category:** ${cmd.category || 'NONE'}\n\n` +
-      `💡 **Tip:** To use command aliases, use the prefix form: \`${prefix}${cmd.name}\``
-    )
-    .setFooter({ text: "Aliases are only available with prefix commands." });
+      `💡 **Tip:** To use command aliases, use the prefix form: \`${prefix}${cmd.name}\`\n\n` +
+      `*Aliases are only available with prefix commands.*`
+    );
   } else {
-    embed.setDescription(
+    accentColor = 0x00FF00; // Green for success
+    const aliasText = aliases.length > 0 
+      ? aliases.map(a => `\`${prefix}${a}\``).join(', ')
+      : 'No aliases available';
+    
+    content = ContainerBuilder.createTextDisplay(
+      `## 📋 ${cmd.name} Command Information\n\n` +
       `**Prefix Command:** \`${prefix}${cmd.name}\`\n\n` +
-      `**Aliases:** ${aliases.length > 0 ? aliases.map(a => `\`${prefix}${a}\``).join(', ') : 'No aliases available'}\n\n` +
+      `**Aliases:** ${aliasText}\n\n` +
       `**Description:** ${cmd.description || 'No description available'}\n\n` +
-      `**Category:** ${cmd.category || 'NONE'}`
-    )
-    .setFooter({ text: "Note: Aliases only work with prefix commands, not slash commands." });
+      `**Category:** ${cmd.category || 'NONE'}\n\n` +
+      `*Note: Aliases only work with prefix commands, not slash commands.*`
+    );
   }
 
-  embed.setTimestamp();
-  return embed;
+  const payload = new ContainerBuilder()
+    .addContainer({
+      accentColor,
+      components: [content]
+    })
+    .build();
+
+  return payload;
 }

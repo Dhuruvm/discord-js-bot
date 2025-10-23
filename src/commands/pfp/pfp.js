@@ -260,12 +260,18 @@ async function searchAndDisplay(source, query, isInteraction) {
 async function displayResult(message, state) {
   const result = state.results[state.currentIndex];
   
+  // Ensure result has required properties
+  if (!result || !result.link) {
+    console.error("Invalid result object:", result);
+    return;
+  }
+  
   const embed = InteractionUtils.createThemedEmbed({
     title: `🔍 ${state.query}`,
     description: result.isFallback
       ? "⚠️ Pinterest scraping unavailable. Click the link below to search manually."
       : result.description || "Click download to save this image",
-    thumbnail: result.image && !result.isFallback ? result.image : undefined,
+    thumbnail: (result.image && !result.isFallback) ? result.image : undefined,
     footer: `Result ${state.currentIndex + 1} of ${state.results.length} • No duplicates`,
     timestamp: true,
     url: result.link,
