@@ -14,6 +14,15 @@ This project is a comprehensive, multipurpose Discord bot built with Discord.js 
 - **Server Utilities**: New `spfp` and `sname` commands for changing server icon and name with modern UI
 - **Modern Giveaway UI**: Professional giveaway embeds with toggle button to switch between modern (ContainerBuilder) and classic (embed) views, featuring server icon, markdown styling, and beautiful formatting
 - **PFP Command Fix**: Resolved "Expected a string primitive" error with proper string validation in PinterestScraper
+- **UI Component Upgrade (Oct 25, 2025)**: Comprehensive admin UI modernization:
+  - All embeds/containers now use consistent white color (0xFFFFFF) throughout the system
+  - Enhanced EmojiManager with 60-second cache to prevent repeated file reads and improve performance
+  - Complete rewrite of greet, automod, autorole handlers with modern string select menus for channel/role selection
+  - New antinuke handler with user/channel select menus, modal configuration, and preset security profiles
+  - All admin handlers now use emojis from centralized emojis.json configuration
+  - Fixed slow button interactions in autorole enable/disable functionality
+  - Optimized interaction handling with proper error recovery and user feedback
+  - Event-based interaction routing for admin components bypassing router context for better performance
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
