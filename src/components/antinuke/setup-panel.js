@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require("discord.js");
 const ContainerBuilder = require("@helpers/ContainerBuilder");
+const EmojiManager = require("@helpers/EmojiManager");
 const { getSettings } = require("@schemas/Guild");
 
 /**
@@ -11,11 +12,12 @@ async function createSetupPanel(guild) {
 
   const components = [];
   
-  components.push(ContainerBuilder.createTextDisplay("# 🛡️ Antinuke Control Panel"));
+  components.push(ContainerBuilder.createTextDisplay(`# ${EmojiManager.get("shield", "🛡️")} Antinuke Control Panel`));
   components.push(ContainerBuilder.createSeparator());
   
-  const status = antinuke.enabled ? "<:success:1424072640829722745> **ACTIVE**" : "<:error:1424072711671382076> **INACTIVE**";
-  components.push(ContainerBuilder.createTextDisplay(`**Protection Status:** ${status}`));
+  const statusEmoji = antinuke.enabled ? EmojiManager.getSuccess() : EmojiManager.getError();
+  const status = antinuke.enabled ? "**ACTIVE**" : "**INACTIVE**";
+  components.push(ContainerBuilder.createTextDisplay(`**Protection Status:** ${statusEmoji} ${status}`));
   
   if (antinuke.log_channel) {
     components.push(ContainerBuilder.createTextDisplay(`**Log Channel:** <#${antinuke.log_channel}>`));
@@ -34,17 +36,17 @@ async function createSetupPanel(guild) {
       .setCustomId("antinuke_toggle")
       .setLabel(antinuke.enabled ? "Disable Protection" : "Enable Protection")
       .setStyle(antinuke.enabled ? ButtonStyle.Danger : ButtonStyle.Success)
-      .setEmoji(antinuke.enabled ? "🛑" : "<:success:1424072640829722745>"),
+      .setEmoji(antinuke.enabled ? EmojiManager.get("off", "🔴") : EmojiManager.getSuccess()),
     new ButtonBuilder()
       .setCustomId("antinuke_configure")
       .setLabel("Configure Modules")
       .setStyle(ButtonStyle.Primary)
-      .setEmoji("⚙️"),
+      .setEmoji(EmojiManager.get("settings", "⚙️")),
     new ButtonBuilder()
       .setCustomId("antinuke_punishment")
       .setLabel("Punishment Settings")
       .setStyle(ButtonStyle.Secondary)
-      .setEmoji("⚔️")
+      .setEmoji(EmojiManager.get("hammer", "🔨"))
   );
 
   // Row 2: Module Selection
@@ -126,17 +128,16 @@ async function createSetupPanel(guild) {
       .setEmoji("🔄")
   );
 
-  return {
-    flags: 1 << 15,
-    components: [
-      {
-        type: 17,
-        accent_color: antinuke.enabled ? 0x00FF00 : 0xFFA500,
-        components: components
-      }
-    ],
-    components_v2: [mainControls, moduleSelect, settingsRow, quickActions]
-  };
+  const payload = new ContainerBuilder()
+    .addContainer({
+      accentColor: 0xFFFFFF,
+      components: components
+    })
+    .build();
+  
+  payload.components.push(mainControls, moduleSelect, settingsRow, quickActions);
+  
+  return payload;
 }
 
 module.exports = { createSetupPanel };

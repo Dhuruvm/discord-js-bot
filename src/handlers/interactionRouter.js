@@ -165,35 +165,38 @@ class InteractionRouter {
   }
 
   /**
-   * Register admin system handlers (autorole, greet, automod, logs)
+   * Register admin system handlers (autorole, greet, automod, logs, antinuke)
    */
   registerAdminHandlers() {
     const handleAutoroleInteraction = require("@src/components/admin/autorole-handler");
     const handleGreetInteraction = require("@src/components/admin/greet-handler");
     const handleAutomodInteraction = require("@src/components/admin/automod-handler");
     const handleLogsInteraction = require("@src/components/admin/logs-handler");
+    const handleAntinukeInteraction = require("@src/components/antinuke/antinuke-handler");
 
-    // Autorole handlers
-    this.registerComponent("autorole", "reset", async ({ interaction, settings }) => {
-      await handleAutoroleInteraction(interaction);
-    });
+    this.client.on("interactionCreate", async (interaction) => {
+      try {
+        if (!interaction.isButton() && !interaction.isStringSelectMenu() && 
+            !interaction.isRoleSelectMenu() && !interaction.isUserSelectMenu() &&
+            !interaction.isChannelSelectMenu() && !interaction.isModalSubmit()) return;
 
-    // Greet handlers
-    this.registerComponent("greet", "test", async ({ interaction, settings }) => {
-      await handleGreetInteraction(interaction);
-    });
+        const customId = interaction.customId;
+        if (!customId) return;
 
-    // Automod handlers  
-    this.registerComponent("automod", "enable", async ({ interaction, settings }) => {
-      await handleAutomodInteraction(interaction);
-    });
-    this.registerComponent("automod", "disable", async ({ interaction, settings }) => {
-      await handleAutomodInteraction(interaction);
-    });
-
-    // Logs handlers
-    this.registerComponent("logs", "select", async ({ interaction, settings }) => {
-      await handleLogsInteraction(interaction);
+        if (customId.startsWith("greet")) {
+          await handleGreetInteraction(interaction);
+        } else if (customId.startsWith("automod")) {
+          await handleAutomodInteraction(interaction);
+        } else if (customId.startsWith("autorole")) {
+          await handleAutoroleInteraction(interaction);
+        } else if (customId.startsWith("antinuke")) {
+          await handleAntinukeInteraction(interaction);
+        } else if (customId.startsWith("logs")) {
+          await handleLogsInteraction(interaction);
+        }
+      } catch (error) {
+        this.client.logger.error("[Admin Handlers] Error:", error);
+      }
     });
   }
 
