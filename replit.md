@@ -10,6 +10,10 @@ This project is a comprehensive, multipurpose Discord bot built with Discord.js 
 - Comprehensive moderation suite: lock/unlock channels, audit log viewer, role-based mute/unmute system
 - All owner-only commands now use prefix-only (slash commands disabled for security)
 - Full prefix command support for greet and automod commands (supports both prefix and slash command interfaces)
+- **Security Category**: Complete antinuke protection suite with 11 commands (antiban, antikick, antirole, antichannel, antibot, antiwebhook, antiemoji, antiguild-update, antieveryone, autorecovery, antinuke) - all support both prefix and slash modes
+- **Server Utilities**: New `spfp` and `sname` commands for changing server icon and name with modern UI
+- **Modern Giveaway UI**: Professional giveaway embeds with toggle button to switch between modern (ContainerBuilder) and classic (embed) views, featuring server icon, markdown styling, and beautiful formatting
+- **PFP Command Fix**: Resolved "Expected a string primitive" error with proper string validation in PinterestScraper
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -47,8 +51,24 @@ Preferred communication style: Simple, everyday language.
   - Channel control: Lock/unlock channels
   - Role-based muting: Mute/unmute with automatic "Muted" role creation
   - Audit logs: Interactive audit log viewer with filters and pagination (`/audit`)
+- **Security**: 
+  - Complete antinuke protection suite with 11 commands
+  - Configurable protection modules (ban, kick, role, channel, bot, webhook, emoji, guild settings, @everyone)
+  - Whitelist system for trusted users
+  - Auto-recovery for channel/role deletions
+  - Punishment system (ban, kick, strip roles)
+  - All commands support both prefix and slash modes
 - **Tickets**: Multi-category support with transcripts
-- **Other Features**: Invite tracking, statistics/leveling, giveaways, reaction roles, translation, counter channels
+- **Giveaways**: 
+  - Modern professional UI with ContainerBuilder design
+  - Toggle button to switch between modern and classic views
+  - Server icon integration
+  - Interactive setup with modals
+  - Custom reaction emoji support
+- **Server Utilities**:
+  - `spfp`: Change server icon with image URL or attachment
+  - `sname`: Change server name with validation
+- **Other Features**: Invite tracking, statistics/leveling, reaction roles, translation, counter channels
 
 ### Web Dashboard (Optional)
 - **Express.js**: Web server framework with EJS templates, `express-session` for session management with MongoDB store, and Discord OAuth2 for authentication, providing a web-based configuration interface.
@@ -73,13 +93,14 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 - **Components V2 System**: Utilizes Discord's latest Components V2 for modern, clean message layouts, including Container, Text Display, and Separator components.
 - **ContainerBuilder Helper**: Custom helper class for consistent UI element creation, supporting accent colors, text displays, separators, and action rows.
-- **Message Flags**: All container-based messages use flag `1 << 15` (IS_COMPONENTS_V2).
+- **Message Flags**: Container-based interaction responses use flag `1 << 15` (IS_COMPONENTS_V2) - only for interaction responses, not channel messages.
 - **Interactive Components**: Action rows with buttons/select menus are positioned below containers.
 - **Design Patterns**: Clean containers, markdown headers, emoji integration, and color-coded accent bars (Blue for info, Green for success, Red for error, Yellow for warning).
 - **ModernEmbed Fallback**: Maintained for commands not yet migrated to Components V2.
 - **No ASCII Decorations**: Replaced with native Discord markdown and component layouts.
 - **Centralized Emoji System**: All bot emojis managed through `emojis.json` config file with owner commands for runtime management.
 - **Music Player UI**: Euphony-style redesign with orange accent, dark theme, professional button layouts, track numbering, dynamic volume indicators, "Queued by" attribution, queue display with ratings, pagination, history, and album artwork.
+- **Giveaway UI**: Modern professional design with toggle button, supporting both modern (ContainerBuilder with markdown) and classic (embed) views, featuring server name integration and beautiful formatting.
 
 ## External Dependencies
 
