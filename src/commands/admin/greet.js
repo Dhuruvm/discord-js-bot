@@ -1,6 +1,6 @@
-const { ApplicationCommandOptionType, ChannelType } = require("discord.js");
-const ModernEmbed = require("@helpers/ModernEmbed");
-const InteractionHelpers = require("@helpers/InteractionHelpers");
+const { ApplicationCommandOptionType, ChannelType, ComponentType, ButtonStyle, TextInputStyle } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const InteractionUtils = require("@helpers/InteractionUtils");
 const { buildGreeting } = require("@handlers/greeting");
 
 /**
@@ -8,420 +8,612 @@ const { buildGreeting } = require("@handlers/greeting");
  */
 module.exports = {
   name: "greet",
-  description: "Configure welcome greeting system",
+  description: "Configure welcome greeting system with interactive panel",
   category: "GATEWAY",
   userPermissions: ["ManageGuild"],
   command: {
     enabled: true,
-    aliases: ["welcome"],
+    aliases: ["welcome", "greeting"],
   },
   slashCommand: {
     enabled: true,
     ephemeral: true,
-    options: [
-      {
-        name: "channel",
-        description: "Manage greeting channels",
-        type: ApplicationCommandOptionType.SubcommandGroup,
-        options: [
-          {
-            name: "add",
-            description: "Add a greeting channel",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "channel",
-                description: "Channel to send greetings",
-                type: ApplicationCommandOptionType.Channel,
-                channelTypes: [ChannelType.GuildText],
-                required: true,
-              },
-            ],
-          },
-          {
-            name: "remove",
-            description: "Remove a greeting channel",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "channel",
-                description: "Channel to remove",
-                type: ApplicationCommandOptionType.Channel,
-                channelTypes: [ChannelType.GuildText],
-                required: true,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: "embed",
-        description: "Configure greeting embed",
-        type: ApplicationCommandOptionType.SubcommandGroup,
-        options: [
-          {
-            name: "toggle",
-            description: "Enable or disable embed mode",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "enabled",
-                description: "Enable embed mode",
-                type: ApplicationCommandOptionType.Boolean,
-                required: true,
-              },
-            ],
-          },
-          {
-            name: "message",
-            description: "Set embed description message",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "message",
-                description: "Embed description (use {variables})",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-              },
-            ],
-          },
-          {
-            name: "reset",
-            description: "Reset embed settings to default",
-            type: ApplicationCommandOptionType.Subcommand,
-          },
-        ],
-      },
-      {
-        name: "autodel",
-        description: "Configure auto-delete for greetings",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable auto-delete",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-          {
-            name: "delay",
-            description: "Seconds before deletion (default: 10)",
-            type: ApplicationCommandOptionType.Integer,
-            required: false,
-            minValue: 5,
-            maxValue: 300,
-          },
-        ],
-      },
-      {
-        name: "message",
-        description: "Set plain text greeting message",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "message",
-            description: "Greeting message (use {variables})",
-            type: ApplicationCommandOptionType.String,
-            required: true,
-          },
-        ],
-      },
-      {
-        name: "config",
-        description: "View current greeting configuration",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-      {
-        name: "test",
-        description: "Send a test greeting",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-      {
-        name: "variables",
-        description: "Show available message variables",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-      {
-        name: "reset",
-        description: "Reset all greeting settings",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-    ],
   },
 
   async messageRun(message, args, data) {
-    const settings = data.settings;
-    
-    if (args.length === 0) {
-      return message.safeReply(`Usage: \`${data.prefix}greet <subcommand>\`\n\nAvailable subcommands:\n• \`channel add <#channel>\` - Add greeting channel\n• \`channel remove <#channel>\` - Remove greeting channel\n• \`embed toggle <true/false>\` - Toggle embed mode\n• \`embed message <text>\` - Set embed message\n• \`embed reset\` - Reset embed settings\n• \`autodel <true/false> [delay]\` - Configure auto-delete\n• \`message <text>\` - Set plain text message\n• \`config\` - View configuration\n• \`test\` - Send test greeting\n• \`variables\` - Show available variables\n• \`reset\` - Reset all settings`);
-    }
-
-    const sub = args[0].toLowerCase();
-    let response;
-
-    if (sub === "channel") {
-      const action = args[1]?.toLowerCase();
-      if (action === "add") {
-        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
-        if (!channel) return message.safeReply("Please provide a valid channel");
-        response = await addChannel({ guild: message.guild }, channel, settings);
-      } else if (action === "remove") {
-        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
-        if (!channel) return message.safeReply("Please provide a valid channel");
-        response = await removeChannel(message, channel, settings);
-      } else {
-        return message.safeReply(`Invalid channel action. Use: \`${data.prefix}greet channel <add/remove> <#channel>\``);
-      }
-    } else if (sub === "embed") {
-      const action = args[1]?.toLowerCase();
-      if (action === "toggle") {
-        const enabled = args[2]?.toLowerCase() === "true" || args[2]?.toLowerCase() === "yes";
-        response = await toggleEmbed(settings, enabled);
-      } else if (action === "message") {
-        const msg = args.slice(2).join(" ");
-        if (!msg) return message.safeReply("Please provide a message");
-        response = await setEmbedMessage(settings, msg);
-      } else if (action === "reset") {
-        response = await resetEmbed(settings);
-      } else {
-        return message.safeReply(`Invalid embed action. Use: \`${data.prefix}greet embed <toggle/message/reset>\``);
-      }
-    } else if (sub === "autodel") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      const delay = parseInt(args[2]) || 10;
-      response = await setAutoDelete(settings, enabled, delay);
-    } else if (sub === "message") {
-      const msg = args.slice(1).join(" ");
-      if (!msg) return message.safeReply("Please provide a message");
-      response = await setMessage(settings, msg);
-    } else if (sub === "config") {
-      response = await showConfig({ guild: message.guild }, settings);
-    } else if (sub === "test") {
-      response = await sendTest({ member: message.member, guild: message.guild }, settings);
-    } else if (sub === "variables") {
-      response = showVariables();
-    } else if (sub === "reset") {
-      response = await resetGreeting(settings);
-    } else {
-      return message.safeReply(`Unknown subcommand. Use \`${data.prefix}greet\` to see available options.`);
-    }
-
-    await message.safeReply(response);
+    await showGreetingPanel(message, false, data.settings);
   },
 
   async interactionRun(interaction, data) {
     await interaction.deferReply({ ephemeral: true });
-    
-    const group = interaction.options.getSubcommandGroup(false);
-    const sub = interaction.options.getSubcommand();
-    const settings = data.settings;
-
-    let response;
-
-    if (group === "channel") {
-      if (sub === "add") {
-        const channel = interaction.options.getChannel("channel");
-        response = await addChannel(interaction, channel, settings);
-      } else if (sub === "remove") {
-        const channel = interaction.options.getChannel("channel");
-        response = await removeChannel(interaction, channel, settings);
-      }
-    } else if (group === "embed") {
-      if (sub === "toggle") {
-        const enabled = interaction.options.getBoolean("enabled");
-        response = await toggleEmbed(settings, enabled);
-      } else if (sub === "message") {
-        const message = interaction.options.getString("message");
-        response = await setEmbedMessage(settings, message);
-      } else if (sub === "reset") {
-        response = await resetEmbed(settings);
-      }
-    } else {
-      if (sub === "autodel") {
-        const enabled = interaction.options.getBoolean("enabled");
-        const delay = interaction.options.getInteger("delay") || 10;
-        response = await setAutoDelete(settings, enabled, delay);
-      } else if (sub === "message") {
-        const message = interaction.options.getString("message");
-        response = await setMessage(settings, message);
-      } else if (sub === "config") {
-        response = await showConfig(interaction, settings);
-      } else if (sub === "test") {
-        response = await sendTest(interaction, settings);
-      } else if (sub === "variables") {
-        response = showVariables();
-      } else if (sub === "reset") {
-        response = await resetGreeting(settings);
-      }
-    }
-
-    await interaction.followUp(response);
+    await showGreetingPanel(interaction, true, data.settings);
   },
 };
 
-async function addChannel({ guild }, channel, settings) {
-  if (!channel.permissionsFor(guild.members.me).has(["SendMessages", "EmbedLinks"])) {
-    return ModernEmbed.simpleError(`I need SendMessages and EmbedLinks permissions in ${channel}`);
-  }
-
-  if (!settings.welcome) settings.welcome = { enabled: true };
-  if (!settings.welcome.channels) settings.welcome.channels = [];
-
-  if (settings.welcome.channels.includes(channel.id)) {
-    return ModernEmbed.simpleError(`${channel} is already a greeting channel`);
-  }
-
-  settings.welcome.channels.push(channel.id);
-  settings.welcome.enabled = true;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Greeting Channel Added\n\n${channel} will now receive welcome messages`);
-}
-
-async function removeChannel(interaction, channel, settings) {
-  if (!settings.welcome?.channels?.includes(channel.id)) {
-    return ModernEmbed.simpleError(`${channel} is not a greeting channel`);
-  }
-
-  settings.welcome.channels = settings.welcome.channels.filter(id => id !== channel.id);
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Greeting Channel Removed\n\n${channel} will no longer receive welcome messages`);
-}
-
-async function toggleEmbed(settings, enabled) {
-  if (!settings.welcome) settings.welcome = {};
-  if (!settings.welcome.embed) settings.welcome.embed = {};
-
-  settings.welcome.embed.enabled = enabled;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Embed Mode ${enabled ? 'Enabled' : 'Disabled'}\n\nGreetings will ${enabled ? 'use embed format' : 'use plain text format'}`);
-}
-
-async function setEmbedMessage(settings, message) {
-  if (!settings.welcome) settings.welcome = {};
-  if (!settings.welcome.embed) settings.welcome.embed = {};
-
-  settings.welcome.embed.description = message;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Embed Message Updated\n\nNew greeting: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`);
-}
-
-async function resetEmbed(settings) {
-  if (!settings.welcome) settings.welcome = {};
-  settings.welcome.embed = {
-    enabled: false,
-    description: "Welcome to {server}, {user}!",
-    color: "#FFFFFF",
-    thumbnail: true,
-    footer: "Member #{memberCount}",
-    image: null
-  };
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Embed Settings Reset\n\nEmbed configuration restored to defaults`);
-}
-
-async function setAutoDelete(settings, enabled, delay) {
-  if (!settings.welcome) settings.welcome = {};
-  settings.welcome.auto_delete = { enabled, delay };
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(
-    `✅ Auto-Delete ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? `Greetings will be deleted after ${delay} seconds` : 'Greetings will not be auto-deleted'}`
-  );
-}
-
-async function setMessage(settings, message) {
-  if (!settings.welcome) settings.welcome = {};
-  settings.welcome.content = message;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Greeting Message Updated\n\nNew message: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`);
-}
-
-async function showConfig({ guild }, settings) {
-  const embed = new ModernEmbed()
-    .setColor(0x5865F2)
-    .setHeader("⚙️ Greeting Configuration", "Current welcome system settings");
-
-  const status = settings.welcome?.enabled ? "✅ Enabled" : "❌ Disabled";
-  embed.addField("Status", status, true);
-
-  const channels = settings.welcome?.channels?.length > 0
-    ? settings.welcome.channels.map(id => `<#${id}>`).join(", ")
-    : "None configured";
-  embed.addField("Channels", channels, false);
-
-  const embedMode = settings.welcome?.embed?.enabled ? "✅ Enabled" : "❌ Disabled";
-  embed.addField("Embed Mode", embedMode, true);
-
-  const autoDelete = settings.welcome?.auto_delete?.enabled
-    ? `✅ ${settings.welcome.auto_delete.delay}s`
-    : "❌ Disabled";
-  embed.addField("Auto-Delete", autoDelete, true);
-
-  const message = settings.welcome?.content || settings.welcome?.embed?.description || "Not set";
-  embed.addField("Message", message.substring(0, 100), false);
-
-  embed.setFooter("Use /greet to configure settings");
-
-  return embed.build();
-}
-
-async function sendTest({ member, guild }, settings) {
-  if (!settings.welcome?.enabled || !settings.welcome?.channels?.length) {
-    return ModernEmbed.simpleError("Please configure at least one greeting channel first");
-  }
-
-  const channel = guild.channels.cache.get(settings.welcome.channels[0]);
-  if (!channel) {
-    return ModernEmbed.simpleError("Configured channel not found");
-  }
-
-  try {
-    const greeting = await buildGreeting(member, "WELCOME", settings.welcome);
-    await channel.send(greeting);
-    return ModernEmbed.simpleSuccess(`✅ Test greeting sent to ${channel}`);
-  } catch (error) {
-    return ModernEmbed.simpleError(`Failed to send test: ${error.message}`);
-  }
-}
-
-function showVariables() {
-  const embed = new ModernEmbed()
-    .setColor(0x5865F2)
-    .setHeader("📝 Available Variables", "Use these in your greeting messages");
-
-  embed.addField("User Variables", 
-    "`{user}` - User mention\n`{username}` - Username\n`{tag}` - User#1234\n`{id}` - User ID", false);
+/**
+ * Show main greeting panel
+ */
+async function showGreetingPanel(source, isInteraction, settings) {
+  const welcome = settings.welcome || {};
   
-  embed.addField("Server Variables",
-    "`{server}` - Server name\n`{memberCount}` - Total members\n`{members}` - Same as memberCount", false);
-
-  embed.setFooter("Example: Welcome {user} to {server}! You are member #{memberCount}");
-
-  return embed.build();
+  const components = [];
+  
+  components.push(ContainerBuilder.createTextDisplay("# 👋 Welcome Greeting System"));
+  components.push(ContainerBuilder.createSeparator());
+  
+  components.push(ContainerBuilder.createTextDisplay(
+    "## Configuration Status\n" +
+    "Set up automatic welcome messages for new members joining your server."
+  ));
+  
+  components.push(ContainerBuilder.createSeparator());
+  
+  const statusEmoji = (value) => value ? "<:success:1424072640829722745>" : "<:error:1424072711671382076>";
+  
+  // Status
+  const isEnabled = welcome.enabled && welcome.channels?.length > 0;
+  const status = isEnabled ? `${statusEmoji(true)} **Active**` : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**System Status:** ${status}`));
+  
+  // Channels
+  const channelCount = welcome.channels?.length || 0;
+  const channelText = channelCount > 0 
+    ? welcome.channels.map(id => `<#${id}>`).join(", ")
+    : "No channels configured";
+  components.push(ContainerBuilder.createTextDisplay(`**Greeting Channels (${channelCount}):** ${channelText}`));
+  
+  components.push(ContainerBuilder.createSeparator());
+  
+  // Settings
+  const embedMode = welcome.embed?.enabled 
+    ? `${statusEmoji(true)} **Enabled**` 
+    : `${statusEmoji(false)} Plain Text`;
+  components.push(ContainerBuilder.createTextDisplay(`**Embed Mode:** ${embedMode}`));
+  
+  const autoDelete = welcome.auto_delete?.enabled
+    ? `${statusEmoji(true)} **${welcome.auto_delete.delay}s delay**`
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Auto-Delete:** ${autoDelete}`));
+  
+  const message = welcome.content || welcome.embed?.description || "Not set";
+  const messagePreview = message.length > 100 ? message.substring(0, 100) + "..." : message;
+  components.push(ContainerBuilder.createTextDisplay(`**Message:** \`${messagePreview}\``));
+  
+  const buttonRow1 = InteractionUtils.createButtonRow([
+    {
+      customId: "greet_channels",
+      label: "Manage Channels",
+      emoji: "📺",
+      style: ButtonStyle.Primary,
+    },
+    {
+      customId: "greet_message",
+      label: "Set Message",
+      emoji: "✏️",
+      style: ButtonStyle.Primary,
+    },
+    {
+      customId: "greet_embed",
+      label: "Embed Settings",
+      emoji: "📋",
+      style: ButtonStyle.Primary,
+    },
+  ]);
+  
+  const buttonRow2 = InteractionUtils.createButtonRow([
+    {
+      customId: "greet_autodel",
+      label: "Auto-Delete",
+      emoji: "🗑️",
+      style: ButtonStyle.Secondary,
+    },
+    {
+      customId: "greet_test",
+      label: "Test Greeting",
+      emoji: "🧪",
+      style: ButtonStyle.Success,
+      disabled: !isEnabled,
+    },
+    {
+      customId: "greet_variables",
+      label: "Variables",
+      emoji: "📝",
+      style: ButtonStyle.Secondary,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({
+      accentColor: 0x5865F2,
+      components: components
+    })
+    .build();
+  
+  payload.components.push(buttonRow1, buttonRow2);
+  
+  const msg = isInteraction
+    ? await source.editReply(payload)
+    : await source.safeReply(payload);
+  
+  setupCollector(msg, source, isInteraction, settings);
 }
 
-async function resetGreeting(settings) {
-  settings.welcome = {
-    enabled: false,
-    channels: [],
-    content: null,
-    auto_delete: { enabled: false, delay: 10 },
-    embed: {
-      enabled: false,
+/**
+ * Setup collector
+ */
+function setupCollector(message, source, isInteraction, settings) {
+  const collector = message.createMessageComponentCollector({
+    componentType: ComponentType.Button,
+    filter: (i) => i.user.id === (isInteraction ? source.user.id : source.author.id),
+    time: 300000,
+  });
+  
+  collector.on("collect", async (interaction) => {
+    try {
+      switch (interaction.customId) {
+        case "greet_channels":
+          await handleChannels(interaction, source, isInteraction, settings);
+          break;
+        case "greet_message":
+          await handleMessage(interaction, settings);
+          await showGreetingPanel(source, isInteraction, settings);
+          break;
+        case "greet_embed":
+          await handleEmbedSettings(interaction, settings);
+          await showGreetingPanel(source, isInteraction, settings);
+          break;
+        case "greet_autodel":
+          await handleAutoDelete(interaction, settings);
+          await showGreetingPanel(source, isInteraction, settings);
+          break;
+        case "greet_test":
+          await handleTest(interaction, source, settings);
+          break;
+        case "greet_variables":
+          await handleVariables(interaction);
+          break;
+      }
+    } catch (error) {
+      console.error("Greet panel error:", error);
+      await interaction.reply({
+        content: `❌ An error occurred: ${error.message}`,
+        ephemeral: true,
+      }).catch(() => {});
+    }
+  });
+  
+  collector.on("end", () => {
+    if (message && message.components) {
+      message.edit({
+        components: InteractionUtils.disableComponents(message.components)
+      }).catch(() => {});
+    }
+  });
+}
+
+/**
+ * Handle channel management
+ */
+async function handleChannels(interaction, source, isInteraction, settings) {
+  const welcome = settings.welcome || {};
+  const channels = welcome.channels || [];
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 📺 Greeting Channels"));
+  components.push(ContainerBuilder.createSeparator());
+  
+  if (channels.length === 0) {
+    components.push(ContainerBuilder.createTextDisplay("**No channels configured**\n\nAdd channels to send welcome greetings."));
+  } else {
+    const channelList = channels.map(id => `<#${id}>`).join("\n");
+    components.push(ContainerBuilder.createTextDisplay(`**Active Channels (${channels.length}):**\n${channelList}`));
+  }
+  
+  const buttonRow = InteractionUtils.createButtonRow([
+    {
+      customId: "greet_channel_add",
+      label: "Add Channel",
+      emoji: "➕",
+      style: ButtonStyle.Success,
+    },
+    {
+      customId: "greet_channel_remove",
+      label: "Remove Channel",
+      emoji: "➖",
+      style: ButtonStyle.Danger,
+      disabled: channels.length === 0,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(buttonRow);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({ content: "⏱️ Channel selection timed out", components: [] });
+  }
+  
+  if (response.customId === "greet_channel_add") {
+    const modal = InteractionUtils.createModal("greet_add_channel", "Add Greeting Channel", [
+      {
+        customId: "channel_id",
+        label: "Channel ID",
+        style: TextInputStyle.Short,
+        placeholder: "Enter channel ID",
+        required: true,
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "greet_add_channel", 120000);
+    if (!modalSubmit) return;
+    
+    const channelId = modalSubmit.fields.getTextInputValue("channel_id");
+    const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
+    
+    if (!channel || channel.type !== ChannelType.GuildText) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed("Invalid text channel ID!")],
+        ephemeral: true
+      });
+    }
+    
+    if (!channel.permissionsFor(interaction.guild.members.me).has(["SendMessages", "EmbedLinks"])) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed(`I need SendMessages and EmbedLinks permissions in ${channel}!`)],
+        ephemeral: true
+      });
+    }
+    
+    if (!settings.welcome) settings.welcome = { enabled: true };
+    if (!settings.welcome.channels) settings.welcome.channels = [];
+    
+    if (settings.welcome.channels.includes(channel.id)) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed(`${channel} is already a greeting channel`)],
+        ephemeral: true
+      });
+    }
+    
+    settings.welcome.channels.push(channel.id);
+    settings.welcome.enabled = true;
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Greeting Channel Added\n\n${channel} will now receive welcome messages`
+      )],
+      ephemeral: true
+    });
+    
+    await showGreetingPanel(source, isInteraction, settings);
+  } else if (response.customId === "greet_channel_remove") {
+    const modal = InteractionUtils.createModal("greet_remove_channel", "Remove Greeting Channel", [
+      {
+        customId: "channel_id",
+        label: "Channel ID",
+        style: TextInputStyle.Short,
+        placeholder: "Enter channel ID to remove",
+        required: true,
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "greet_remove_channel", 120000);
+    if (!modalSubmit) return;
+    
+    const channelId = modalSubmit.fields.getTextInputValue("channel_id");
+    
+    if (!settings.welcome?.channels?.includes(channelId)) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed("Channel is not in the greeting list")],
+        ephemeral: true
+      });
+    }
+    
+    settings.welcome.channels = settings.welcome.channels.filter(id => id !== channelId);
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Channel Removed\n\n<#${channelId}> will no longer receive greetings`
+      )],
+      ephemeral: true
+    });
+    
+    await showGreetingPanel(source, isInteraction, settings);
+  }
+}
+
+/**
+ * Handle message setting
+ */
+async function handleMessage(interaction, settings) {
+  const currentMessage = settings.welcome?.content || settings.welcome?.embed?.description || "Welcome to {server}, {user}!";
+  
+  const modal = InteractionUtils.createModal("greet_message_modal", "Set Greeting Message", [
+    {
+      customId: "message",
+      label: "Greeting Message",
+      style: TextInputStyle.Paragraph,
+      placeholder: "Welcome to {server}, {user}!\nUse {variables} for dynamic content",
+      required: true,
+      value: currentMessage,
+      maxLength: 1000,
+    },
+  ]);
+  
+  await interaction.showModal(modal);
+  
+  const modalSubmit = await InteractionUtils.awaitModalSubmit(interaction, "greet_message_modal", 120000);
+  if (!modalSubmit) return;
+  
+  const message = modalSubmit.fields.getTextInputValue("message");
+  
+  if (!settings.welcome) settings.welcome = {};
+  
+  if (settings.welcome.embed?.enabled) {
+    if (!settings.welcome.embed) settings.welcome.embed = {};
+    settings.welcome.embed.description = message;
+  } else {
+    settings.welcome.content = message;
+  }
+  
+  await settings.save();
+  
+  await modalSubmit.reply({
+    embeds: [InteractionUtils.createSuccessEmbed(
+      `✅ Message Updated\n\nPreview: ${message.substring(0, 150)}${message.length > 150 ? '...' : ''}`
+    )],
+    ephemeral: true
+  });
+}
+
+/**
+ * Handle embed settings
+ */
+async function handleEmbedSettings(interaction, settings) {
+  const currentEnabled = settings.welcome?.embed?.enabled || false;
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 📋 Embed Mode Settings"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    `**Current Mode:** ${currentEnabled ? '<:success:1424072640829722745> Embed' : '<:error:1424072711671382076> Plain Text'}\n\n` +
+    `Embed mode shows greetings in a styled embed format instead of plain text.`
+  ));
+  
+  const toggleButton = InteractionUtils.createButtonRow([
+    {
+      customId: `embed_toggle_${!currentEnabled}`,
+      label: currentEnabled ? "Disable Embed" : "Enable Embed",
+      emoji: currentEnabled ? "📄" : "📋",
+      style: currentEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(toggleButton);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({ content: "⏱️ Configuration timed out", components: [] });
+  }
+  
+  const newEnabled = response.customId === "embed_toggle_true";
+  
+  if (!settings.welcome) settings.welcome = {};
+  if (!settings.welcome.embed) {
+    settings.welcome.embed = {
+      enabled: newEnabled,
       description: "Welcome to {server}, {user}!",
       color: "#FFFFFF",
       thumbnail: true,
       footer: "Member #{memberCount}",
-      image: null
-    }
-  };
+    };
+  } else {
+    settings.welcome.embed.enabled = newEnabled;
+  }
+  
   await settings.save();
+  
+  await response.update({
+    embeds: [InteractionUtils.createSuccessEmbed(
+      `✅ Embed Mode ${newEnabled ? 'Enabled' : 'Disabled'}\n\nGreetings will now use ${newEnabled ? 'embed' : 'plain text'} format`
+    )],
+    components: []
+  });
+}
 
-  return ModernEmbed.simpleSuccess(`✅ Greeting System Reset\n\nAll greeting settings have been reset to defaults`);
+/**
+ * Handle auto-delete
+ */
+async function handleAutoDelete(interaction, settings) {
+  const currentEnabled = settings.welcome?.auto_delete?.enabled || false;
+  const currentDelay = settings.welcome?.auto_delete?.delay || 10;
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 🗑️ Auto-Delete Settings"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    `**Status:** ${currentEnabled ? '<:success:1424072640829722745> Enabled' : '<:error:1424072711671382076> Disabled'}\n` +
+    `**Delay:** ${currentDelay} seconds\n\n` +
+    `Auto-delete removes greeting messages after a delay to keep channels clean.`
+  ));
+  
+  const toggleButton = InteractionUtils.createButtonRow([
+    {
+      customId: `autodel_toggle_${!currentEnabled}`,
+      label: currentEnabled ? "Disable" : "Enable",
+      emoji: currentEnabled ? "🔴" : "🟢",
+      style: currentEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+    },
+    {
+      customId: "autodel_config",
+      label: "Set Delay",
+      emoji: "⏱️",
+      style: ButtonStyle.Primary,
+      disabled: !currentEnabled,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(toggleButton);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({ content: "⏱️ Configuration timed out", components: [] });
+  }
+  
+  if (response.customId.startsWith("autodel_toggle_")) {
+    const newEnabled = response.customId === "autodel_toggle_true";
+    
+    if (!settings.welcome) settings.welcome = {};
+    settings.welcome.auto_delete = { enabled: newEnabled, delay: currentDelay };
+    await settings.save();
+    
+    await response.update({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Auto-Delete ${newEnabled ? 'Enabled' : 'Disabled'}`
+      )],
+      components: []
+    });
+  } else if (response.customId === "autodel_config") {
+    const modal = InteractionUtils.createModal("autodel_delay_modal", "Set Auto-Delete Delay", [
+      {
+        customId: "delay",
+        label: "Delay in Seconds (5-300)",
+        style: TextInputStyle.Short,
+        placeholder: "e.g., 10",
+        required: true,
+        value: currentDelay.toString(),
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "autodel_delay_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const delay = parseInt(modalSubmit.fields.getTextInputValue("delay")) || 10;
+    const clampedDelay = Math.max(5, Math.min(300, delay));
+    
+    if (!settings.welcome) settings.welcome = {};
+    settings.welcome.auto_delete = { enabled: true, delay: clampedDelay };
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Auto-Delete Configured\n\nGreetings will be deleted after ${clampedDelay} seconds`
+      )],
+      ephemeral: true
+    });
+  }
+}
+
+/**
+ * Handle test greeting
+ */
+async function handleTest(interaction, source, settings) {
+  await interaction.deferReply({ ephemeral: true });
+  
+  if (!settings.welcome?.channels?.length) {
+    return interaction.followUp({
+      embeds: [InteractionUtils.createErrorEmbed("Please configure at least one greeting channel first")],
+      ephemeral: true
+    });
+  }
+  
+  const channel = interaction.guild.channels.cache.get(settings.welcome.channels[0]);
+  if (!channel) {
+    return interaction.followUp({
+      embeds: [InteractionUtils.createErrorEmbed("Configured channel not found")],
+      ephemeral: true
+    });
+  }
+  
+  try {
+    const member = interaction.guild.members.cache.get(interaction.user.id);
+    const greeting = await buildGreeting(member, "WELCOME", settings.welcome);
+    await channel.send(greeting);
+    
+    await interaction.followUp({
+      embeds: [InteractionUtils.createSuccessEmbed(`✅ Test greeting sent to ${channel}`)],
+      ephemeral: true
+    });
+  } catch (error) {
+    await interaction.followUp({
+      embeds: [InteractionUtils.createErrorEmbed(`Failed to send test: ${error.message}`)],
+      ephemeral: true
+    });
+  }
+}
+
+/**
+ * Show variables
+ */
+async function handleVariables(interaction) {
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 📝 Available Variables"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    "**User Variables:**\n" +
+    "`{user}` - User mention\n" +
+    "`{username}` - Username\n" +
+    "`{tag}` - User#1234\n" +
+    "`{id}` - User ID"
+  ));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    "**Server Variables:**\n" +
+    "`{server}` - Server name\n" +
+    "`{memberCount}` - Total members\n" +
+    "`{members}` - Same as memberCount"
+  ));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    "**Example:**\n" +
+    "`Welcome {user} to {server}! You are member #{memberCount}`"
+  ));
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  await interaction.reply({ ...payload, ephemeral: true });
 }

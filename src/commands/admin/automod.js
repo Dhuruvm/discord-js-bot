@@ -1,13 +1,13 @@
-const { ApplicationCommandOptionType, ChannelType } = require("discord.js");
-const ModernEmbed = require("@helpers/ModernEmbed");
-const InteractionHelpers = require("@helpers/InteractionHelpers");
+const { ApplicationCommandOptionType, ChannelType, ComponentType, ButtonStyle } = require("discord.js");
+const ContainerBuilder = require("@helpers/ContainerBuilder");
+const InteractionUtils = require("@helpers/InteractionUtils");
 
 /**
  * @type {import("@structures/Command")}
  */
 module.exports = {
   name: "automod",
-  description: "Configure automatic moderation rules",
+  description: "Configure automatic moderation rules with interactive panel",
   category: "AUTOMOD",
   userPermissions: ["ManageGuild"],
   command: {
@@ -17,376 +17,663 @@ module.exports = {
   slashCommand: {
     enabled: true,
     ephemeral: true,
-    options: [
-      {
-        name: "antispam",
-        description: "Configure anti-spam protection",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable anti-spam",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-          {
-            name: "threshold",
-            description: "Messages before action (default: 5)",
-            type: ApplicationCommandOptionType.Integer,
-            required: false,
-            minValue: 3,
-            maxValue: 10,
-          },
-          {
-            name: "timeframe",
-            description: "Seconds to check (default: 5)",
-            type: ApplicationCommandOptionType.Integer,
-            required: false,
-            minValue: 3,
-            maxValue: 30,
-          },
-        ],
-      },
-      {
-        name: "antilink",
-        description: "Configure anti-link protection",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable anti-link",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-        ],
-      },
-      {
-        name: "antibadwords",
-        description: "Configure bad word filter",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable bad word filter",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-        ],
-      },
-      {
-        name: "antizalgo",
-        description: "Configure zalgo text detection",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable anti-zalgo",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-          {
-            name: "threshold",
-            description: "Detection threshold % (default: 50)",
-            type: ApplicationCommandOptionType.Integer,
-            required: false,
-            minValue: 30,
-            maxValue: 90,
-          },
-        ],
-      },
-      {
-        name: "anticaps",
-        description: "Configure excessive caps detection",
-        type: ApplicationCommandOptionType.Subcommand,
-        options: [
-          {
-            name: "enabled",
-            description: "Enable anti-caps",
-            type: ApplicationCommandOptionType.Boolean,
-            required: true,
-          },
-          {
-            name: "threshold",
-            description: "Caps % threshold (default: 70)",
-            type: ApplicationCommandOptionType.Integer,
-            required: false,
-            minValue: 50,
-            maxValue: 95,
-          },
-        ],
-      },
-      {
-        name: "whitelist",
-        description: "Manage whitelisted channels",
-        type: ApplicationCommandOptionType.SubcommandGroup,
-        options: [
-          {
-            name: "add",
-            description: "Add channel to whitelist",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "channel",
-                description: "Channel to whitelist",
-                type: ApplicationCommandOptionType.Channel,
-                channelTypes: [ChannelType.GuildText],
-                required: true,
-              },
-            ],
-          },
-          {
-            name: "remove",
-            description: "Remove channel from whitelist",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-              {
-                name: "channel",
-                description: "Channel to remove",
-                type: ApplicationCommandOptionType.Channel,
-                channelTypes: [ChannelType.GuildText],
-                required: true,
-              },
-            ],
-          },
-          {
-            name: "list",
-            description: "View whitelisted channels",
-            type: ApplicationCommandOptionType.Subcommand,
-          },
-        ],
-      },
-      {
-        name: "config",
-        description: "View automod configuration",
-        type: ApplicationCommandOptionType.Subcommand,
-      },
-    ],
   },
 
   async messageRun(message, args, data) {
-    const settings = data.settings;
-    
-    if (args.length === 0) {
-      return message.safeReply(`Usage: \`${data.prefix}automod <subcommand>\`\n\nAvailable subcommands:\n• \`antispam <true/false> [threshold] [timeframe]\` - Configure anti-spam\n• \`antilink <true/false>\` - Configure anti-link\n• \`antibadwords <true/false>\` - Configure bad word filter\n• \`antizalgo <true/false> [threshold]\` - Configure zalgo detection\n• \`anticaps <true/false> [threshold]\` - Configure caps detection\n• \`whitelist add <#channel>\` - Add whitelisted channel\n• \`whitelist remove <#channel>\` - Remove whitelisted channel\n• \`whitelist list\` - View whitelisted channels\n• \`config\` - View configuration`);
-    }
-
-    const sub = args[0].toLowerCase();
-    let response;
-
-    if (sub === "whitelist") {
-      const action = args[1]?.toLowerCase();
-      if (action === "add") {
-        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
-        if (!channel) return message.safeReply("Please provide a valid channel");
-        response = await addWhitelist(settings, channel);
-      } else if (action === "remove") {
-        const channel = message.mentions.channels.first() || message.guild.channels.cache.get(args[2]);
-        if (!channel) return message.safeReply("Please provide a valid channel");
-        response = await removeWhitelist(settings, channel);
-      } else if (action === "list") {
-        response = await listWhitelist(message.guild, settings);
-      } else {
-        return message.safeReply(`Invalid whitelist action. Use: \`${data.prefix}automod whitelist <add/remove/list>\``);
-      }
-    } else if (sub === "antispam") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      const threshold = parseInt(args[2]) || 5;
-      const timeframe = parseInt(args[3]) || 5;
-      response = await setAntiSpam(settings, enabled, threshold, timeframe);
-    } else if (sub === "antilink") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      response = await setAntiLink(settings, enabled);
-    } else if (sub === "antibadwords") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      response = await setAntiBadwords(settings, enabled);
-    } else if (sub === "antizalgo") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      const threshold = parseInt(args[2]) || 50;
-      response = await setAntiZalgo(settings, enabled, threshold);
-    } else if (sub === "anticaps") {
-      const enabled = args[1]?.toLowerCase() === "true" || args[1]?.toLowerCase() === "yes";
-      const threshold = parseInt(args[2]) || 70;
-      response = await setAntiCaps(settings, enabled, threshold);
-    } else if (sub === "config") {
-      response = await showConfig(settings);
-    } else {
-      return message.safeReply(`Unknown subcommand. Use \`${data.prefix}automod\` to see available options.`);
-    }
-
-    await message.safeReply(response);
+    await showAutomodPanel(message, false, data.settings);
   },
 
   async interactionRun(interaction, data) {
     await interaction.deferReply({ ephemeral: true });
-    
-    const group = interaction.options.getSubcommandGroup(false);
-    const sub = interaction.options.getSubcommand();
-    const settings = data.settings;
-
-    let response;
-
-    if (group === "whitelist") {
-      if (sub === "add") {
-        const channel = interaction.options.getChannel("channel");
-        response = await addWhitelist(settings, channel);
-      } else if (sub === "remove") {
-        const channel = interaction.options.getChannel("channel");
-        response = await removeWhitelist(settings, channel);
-      } else if (sub === "list") {
-        response = await listWhitelist(interaction.guild, settings);
-      }
-    } else {
-      if (sub === "antispam") {
-        const enabled = interaction.options.getBoolean("enabled");
-        const threshold = interaction.options.getInteger("threshold") || 5;
-        const timeframe = interaction.options.getInteger("timeframe") || 5;
-        response = await setAntiSpam(settings, enabled, threshold, timeframe);
-      } else if (sub === "antilink") {
-        const enabled = interaction.options.getBoolean("enabled");
-        response = await setAntiLink(settings, enabled);
-      } else if (sub === "antibadwords") {
-        const enabled = interaction.options.getBoolean("enabled");
-        response = await setAntiBadwords(settings, enabled);
-      } else if (sub === "antizalgo") {
-        const enabled = interaction.options.getBoolean("enabled");
-        const threshold = interaction.options.getInteger("threshold") || 50;
-        response = await setAntiZalgo(settings, enabled, threshold);
-      } else if (sub === "anticaps") {
-        const enabled = interaction.options.getBoolean("enabled");
-        const threshold = interaction.options.getInteger("threshold") || 70;
-        response = await setAntiCaps(settings, enabled, threshold);
-      } else if (sub === "config") {
-        response = await showConfig(settings);
-      }
-    }
-
-    await interaction.followUp(response);
+    await showAutomodPanel(interaction, true, data.settings);
   },
 };
 
-async function setAntiSpam(settings, enabled, threshold, timeframe) {
-  if (!settings.automod) settings.automod = {};
-  settings.automod.anti_spam = { enabled, threshold, timeframe };
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(
-    `✅ Anti-Spam ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? `Will trigger after ${threshold} messages in ${timeframe} seconds` : ''}`
-  );
-}
-
-async function setAntiLink(settings, enabled) {
-  if (!settings.automod) settings.automod = {};
-  settings.automod.anti_links = enabled;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Anti-Link ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? 'Links will be automatically deleted' : ''}`);
-}
-
-async function setAntiBadwords(settings, enabled) {
-  if (!settings.automod) settings.automod = {};
-  if (!settings.automod.anti_badwords) settings.automod.anti_badwords = { keywords: [], action: "DELETE" };
-  settings.automod.anti_badwords.enabled = enabled;
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(
-    `✅ Bad Word Filter ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? 'Use the dashboard or database to manage keyword list' : ''}`
-  );
-}
-
-async function setAntiZalgo(settings, enabled, threshold) {
-  if (!settings.automod) settings.automod = {};
-  settings.automod.anti_zalgo = { enabled, threshold };
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(
-    `✅ Anti-Zalgo ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? `Detection threshold: ${threshold}%` : ''}`
-  );
-}
-
-async function setAntiCaps(settings, enabled, threshold) {
-  if (!settings.automod) settings.automod = {};
-  settings.automod.anti_caps = { enabled, threshold, min_length: 10 };
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(
-    `✅ Anti-Caps ${enabled ? 'Enabled' : 'Disabled'}\n\n${enabled ? `Messages with >${threshold}% caps will be deleted` : ''}`
-  );
-}
-
-async function addWhitelist(settings, channel) {
-  if (!settings.automod) settings.automod = {};
-  if (!settings.automod.wh_channels) settings.automod.wh_channels = [];
-
-  if (settings.automod.wh_channels.includes(channel.id)) {
-    return ModernEmbed.simpleError(`${channel} is already whitelisted`);
-  }
-
-  settings.automod.wh_channels.push(channel.id);
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Channel Whitelisted\n\n${channel} is now exempt from automod`);
-}
-
-async function removeWhitelist(settings, channel) {
-  if (!settings.automod?.wh_channels?.includes(channel.id)) {
-    return ModernEmbed.simpleError(`${channel} is not whitelisted`);
-  }
-
-  settings.automod.wh_channels = settings.automod.wh_channels.filter(id => id !== channel.id);
-  await settings.save();
-
-  return ModernEmbed.simpleSuccess(`✅ Channel Removed\n\n${channel} is no longer whitelisted`);
-}
-
-async function listWhitelist(guild, settings) {
-  const channels = settings.automod?.wh_channels || [];
+/**
+ * Show main automod interactive panel
+ */
+async function showAutomodPanel(source, isInteraction, settings) {
+  const automod = settings.automod || {};
   
-  if (channels.length === 0) {
-    return ModernEmbed.simpleError("No channels are whitelisted");
-  }
-
-  const embed = new ModernEmbed()
-    .setColor(0x5865F2)
-    .setHeader("📋 Whitelisted Channels", `${channels.length} channel(s) exempt from automod`);
-
-  const list = channels.map(id => `<#${id}>`).join("\n");
-  embed.addField("Channels", list, false);
-
-  return embed.build();
+  const components = [];
+  
+  components.push(ContainerBuilder.createTextDisplay("# 🤖 AutoMod Control Panel"));
+  components.push(ContainerBuilder.createSeparator());
+  
+  components.push(ContainerBuilder.createTextDisplay(
+    "## Protection Status\n" +
+    `Configure automatic moderation rules to keep your server safe.`
+  ));
+  
+  components.push(ContainerBuilder.createSeparator());
+  
+  const statusEmoji = (enabled) => enabled ? "<:success:1424072640829722745>" : "<:error:1424072711671382076>";
+  
+  const antiSpamStatus = automod.anti_spam?.enabled 
+    ? `${statusEmoji(true)} **Active** (${automod.anti_spam.threshold} msgs/${automod.anti_spam.timeframe}s)`
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Anti-Spam:** ${antiSpamStatus}`));
+  
+  const antiLinkStatus = automod.anti_links 
+    ? `${statusEmoji(true)} **Active**` 
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Anti-Link:** ${antiLinkStatus}`));
+  
+  const antiBadwordsStatus = automod.anti_badwords?.enabled
+    ? `${statusEmoji(true)} **Active** (${automod.anti_badwords.keywords?.length || 0} keywords)`
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Bad Words Filter:** ${antiBadwordsStatus}`));
+  
+  const antiZalgoStatus = automod.anti_zalgo?.enabled
+    ? `${statusEmoji(true)} **Active** (${automod.anti_zalgo.threshold}% threshold)`
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Anti-Zalgo:** ${antiZalgoStatus}`));
+  
+  const antiCapsStatus = automod.anti_caps?.enabled
+    ? `${statusEmoji(true)} **Active** (${automod.anti_caps.threshold}% threshold)`
+    : `${statusEmoji(false)} Disabled`;
+  components.push(ContainerBuilder.createTextDisplay(`**Anti-Caps:** ${antiCapsStatus}`));
+  
+  const whitelistedCount = automod.wh_channels?.length || 0;
+  components.push(ContainerBuilder.createTextDisplay(`**Whitelisted Channels:** ${whitelistedCount}`));
+  
+  const buttonRow1 = InteractionUtils.createButtonRow([
+    {
+      customId: "automod_antispam",
+      label: "Anti-Spam",
+      emoji: "🚫",
+      style: automod.anti_spam?.enabled ? ButtonStyle.Success : ButtonStyle.Secondary,
+    },
+    {
+      customId: "automod_antilink",
+      label: "Anti-Link",
+      emoji: "🔗",
+      style: automod.anti_links ? ButtonStyle.Success : ButtonStyle.Secondary,
+    },
+    {
+      customId: "automod_badwords",
+      label: "Bad Words",
+      emoji: "🤬",
+      style: automod.anti_badwords?.enabled ? ButtonStyle.Success : ButtonStyle.Secondary,
+    },
+  ]);
+  
+  const buttonRow2 = InteractionUtils.createButtonRow([
+    {
+      customId: "automod_zalgo",
+      label: "Anti-Zalgo",
+      emoji: "👾",
+      style: automod.anti_zalgo?.enabled ? ButtonStyle.Success : ButtonStyle.Secondary,
+    },
+    {
+      customId: "automod_caps",
+      label: "Anti-Caps",
+      emoji: "📢",
+      style: automod.anti_caps?.enabled ? ButtonStyle.Success : ButtonStyle.Secondary,
+    },
+    {
+      customId: "automod_whitelist",
+      label: "Whitelist",
+      emoji: "📋",
+      style: ButtonStyle.Primary,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({
+      accentColor: 0x5865F2,
+      components: components
+    })
+    .build();
+  
+  payload.components.push(buttonRow1, buttonRow2);
+  
+  const msg = isInteraction
+    ? await source.editReply(payload)
+    : await source.safeReply(payload);
+  
+  setupCollector(msg, source, isInteraction, settings);
 }
 
-async function showConfig(settings) {
-  const embed = new ModernEmbed()
-    .setColor(0x5865F2)
-    .setHeader("⚙️ Automod Configuration", "Current automatic moderation settings");
+/**
+ * Setup button collector
+ */
+function setupCollector(message, source, isInteraction, settings) {
+  const collector = message.createMessageComponentCollector({
+    componentType: ComponentType.Button,
+    filter: (i) => i.user.id === (isInteraction ? source.user.id : source.author.id),
+    time: 300000,
+  });
+  
+  collector.on("collect", async (interaction) => {
+    try {
+      switch (interaction.customId) {
+        case "automod_antispam":
+          await handleAntiSpam(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+        case "automod_antilink":
+          await handleAntiLink(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+        case "automod_badwords":
+          await handleBadWords(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+        case "automod_zalgo":
+          await handleAntiZalgo(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+        case "automod_caps":
+          await handleAntiCaps(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+        case "automod_whitelist":
+          await handleWhitelist(interaction, settings);
+          await showAutomodPanel(source, isInteraction, settings);
+          break;
+      }
+    } catch (error) {
+      console.error("Automod panel error:", error);
+      await interaction.reply({
+        content: `❌ An error occurred: ${error.message}`,
+        ephemeral: true,
+      }).catch(() => {});
+    }
+  });
+  
+  collector.on("end", () => {
+    if (message && message.components) {
+      message.edit({
+        components: InteractionUtils.disableComponents(message.components)
+      }).catch(() => {});
+    }
+  });
+}
 
-  const antiSpam = settings.automod?.anti_spam?.enabled
-    ? `✅ ${settings.automod.anti_spam.threshold} msgs/${settings.automod.anti_spam.timeframe}s`
-    : "❌ Disabled";
-  embed.addField("Anti-Spam", antiSpam, true);
+/**
+ * Handle Anti-Spam configuration
+ */
+async function handleAntiSpam(interaction, settings) {
+  const currentEnabled = settings.automod?.anti_spam?.enabled || false;
+  const currentThreshold = settings.automod?.anti_spam?.threshold || 5;
+  const currentTimeframe = settings.automod?.anti_spam?.timeframe || 5;
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 🚫 Anti-Spam Protection"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    `**Current Status:** ${currentEnabled ? '<:success:1424072640829722745> Enabled' : '<:error:1424072711671382076> Disabled'}\n` +
+    `**Threshold:** ${currentThreshold} messages\n` +
+    `**Timeframe:** ${currentTimeframe} seconds`
+  ));
+  
+  const toggleButton = InteractionUtils.createButtonRow([
+    {
+      customId: `spam_toggle_${!currentEnabled}`,
+      label: currentEnabled ? "Disable" : "Enable",
+      emoji: currentEnabled ? "🔴" : "🟢",
+      style: currentEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+    },
+    {
+      customId: "spam_config",
+      label: "Configure",
+      emoji: "⚙️",
+      style: ButtonStyle.Primary,
+      disabled: !currentEnabled,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(toggleButton);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({
+      content: "⏱️ Configuration timed out",
+      components: []
+    });
+  }
+  
+  if (response.customId.startsWith("spam_toggle_")) {
+    const newEnabled = response.customId === "spam_toggle_true";
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_spam = { 
+      enabled: newEnabled, 
+      threshold: currentThreshold, 
+      timeframe: currentTimeframe 
+    };
+    await settings.save();
+    
+    await response.update({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Spam ${newEnabled ? 'enabled' : 'disabled'}`
+      )],
+      components: []
+    });
+  } else if (response.customId === "spam_config") {
+    const modal = InteractionUtils.createModal("spam_config_modal", "Configure Anti-Spam", [
+      {
+        customId: "threshold",
+        label: "Message Threshold (3-10)",
+        style: 1,
+        placeholder: "Messages before action",
+        required: true,
+        value: currentThreshold.toString(),
+      },
+      {
+        customId: "timeframe",
+        label: "Timeframe in Seconds (3-30)",
+        style: 1,
+        placeholder: "Seconds to check",
+        required: true,
+        value: currentTimeframe.toString(),
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "spam_config_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const threshold = parseInt(modalSubmit.fields.getTextInputValue("threshold")) || 5;
+    const timeframe = parseInt(modalSubmit.fields.getTextInputValue("timeframe")) || 5;
+    
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_spam = { enabled: true, threshold, timeframe };
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Spam configured: ${threshold} messages per ${timeframe} seconds`
+      )],
+      ephemeral: true
+    });
+  }
+}
 
-  const antiLink = settings.automod?.anti_links ? "✅ Enabled" : "❌ Disabled";
-  embed.addField("Anti-Link", antiLink, true);
+/**
+ * Handle Anti-Link configuration
+ */
+async function handleAntiLink(interaction, settings) {
+  const currentEnabled = settings.automod?.anti_links || false;
+  
+  if (!settings.automod) settings.automod = {};
+  settings.automod.anti_links = !currentEnabled;
+  await settings.save();
+  
+  await interaction.reply({
+    embeds: [InteractionUtils.createSuccessEmbed(
+      `✅ Anti-Link ${!currentEnabled ? 'enabled' : 'disabled'}`
+    )],
+    ephemeral: true
+  });
+}
 
-  const antiBadwords = settings.automod?.anti_badwords?.enabled
-    ? `✅ ${settings.automod.anti_badwords.keywords?.length || 0} keywords`
-    : "❌ Disabled";
-  embed.addField("Bad Words", antiBadwords, true);
+/**
+ * Handle Bad Words configuration
+ */
+async function handleBadWords(interaction, settings) {
+  const currentEnabled = settings.automod?.anti_badwords?.enabled || false;
+  
+  if (!settings.automod) settings.automod = {};
+  if (!settings.automod.anti_badwords) {
+    settings.automod.anti_badwords = { keywords: [], action: "DELETE" };
+  }
+  settings.automod.anti_badwords.enabled = !currentEnabled;
+  await settings.save();
+  
+  await interaction.reply({
+    embeds: [InteractionUtils.createSuccessEmbed(
+      `✅ Bad Words Filter ${!currentEnabled ? 'enabled' : 'disabled'}\n\n` +
+      `${!currentEnabled ? 'Use the dashboard or database to manage keyword list' : ''}`
+    )],
+    ephemeral: true
+  });
+}
 
-  const antiZalgo = settings.automod?.anti_zalgo?.enabled
-    ? `✅ ${settings.automod.anti_zalgo.threshold}%`
-    : "❌ Disabled";
-  embed.addField("Anti-Zalgo", antiZalgo, true);
+/**
+ * Handle Anti-Zalgo configuration
+ */
+async function handleAntiZalgo(interaction, settings) {
+  const currentEnabled = settings.automod?.anti_zalgo?.enabled || false;
+  const currentThreshold = settings.automod?.anti_zalgo?.threshold || 50;
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 👾 Anti-Zalgo Protection"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    `**Current Status:** ${currentEnabled ? '<:success:1424072640829722745> Enabled' : '<:error:1424072711671382076> Disabled'}\n` +
+    `**Detection Threshold:** ${currentThreshold}%`
+  ));
+  
+  const toggleButton = InteractionUtils.createButtonRow([
+    {
+      customId: `zalgo_toggle_${!currentEnabled}`,
+      label: currentEnabled ? "Disable" : "Enable",
+      emoji: currentEnabled ? "🔴" : "🟢",
+      style: currentEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+    },
+    {
+      customId: "zalgo_config",
+      label: "Configure",
+      emoji: "⚙️",
+      style: ButtonStyle.Primary,
+      disabled: !currentEnabled,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(toggleButton);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({
+      content: "⏱️ Configuration timed out",
+      components: []
+    });
+  }
+  
+  if (response.customId.startsWith("zalgo_toggle_")) {
+    const newEnabled = response.customId === "zalgo_toggle_true";
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_zalgo = { enabled: newEnabled, threshold: currentThreshold };
+    await settings.save();
+    
+    await response.update({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Zalgo ${newEnabled ? 'enabled' : 'disabled'}`
+      )],
+      components: []
+    });
+  } else if (response.customId === "zalgo_config") {
+    const modal = InteractionUtils.createModal("zalgo_config_modal", "Configure Anti-Zalgo", [
+      {
+        customId: "threshold",
+        label: "Detection Threshold % (30-90)",
+        style: 1,
+        placeholder: "Detection threshold percentage",
+        required: true,
+        value: currentThreshold.toString(),
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "zalgo_config_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const threshold = parseInt(modalSubmit.fields.getTextInputValue("threshold")) || 50;
+    
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_zalgo = { enabled: true, threshold };
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Zalgo configured with ${threshold}% threshold`
+      )],
+      ephemeral: true
+    });
+  }
+}
 
-  const antiCaps = settings.automod?.anti_caps?.enabled
-    ? `✅ ${settings.automod.anti_caps.threshold}%`
-    : "❌ Disabled";
-  embed.addField("Anti-Caps", antiCaps, true);
+/**
+ * Handle Anti-Caps configuration
+ */
+async function handleAntiCaps(interaction, settings) {
+  const currentEnabled = settings.automod?.anti_caps?.enabled || false;
+  const currentThreshold = settings.automod?.anti_caps?.threshold || 70;
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 📢 Anti-Caps Protection"));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(ContainerBuilder.createTextDisplay(
+    `**Current Status:** ${currentEnabled ? '<:success:1424072640829722745> Enabled' : '<:error:1424072711671382076> Disabled'}\n` +
+    `**Caps Threshold:** ${currentThreshold}%`
+  ));
+  
+  const toggleButton = InteractionUtils.createButtonRow([
+    {
+      customId: `caps_toggle_${!currentEnabled}`,
+      label: currentEnabled ? "Disable" : "Enable",
+      emoji: currentEnabled ? "🔴" : "🟢",
+      style: currentEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+    },
+    {
+      customId: "caps_config",
+      label: "Configure",
+      emoji: "⚙️",
+      style: ButtonStyle.Primary,
+      disabled: !currentEnabled,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(toggleButton);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({
+      content: "⏱️ Configuration timed out",
+      components: []
+    });
+  }
+  
+  if (response.customId.startsWith("caps_toggle_")) {
+    const newEnabled = response.customId === "caps_toggle_true";
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_caps = { enabled: newEnabled, threshold: currentThreshold, min_length: 10 };
+    await settings.save();
+    
+    await response.update({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Caps ${newEnabled ? 'enabled' : 'disabled'}`
+      )],
+      components: []
+    });
+  } else if (response.customId === "caps_config") {
+    const modal = InteractionUtils.createModal("caps_config_modal", "Configure Anti-Caps", [
+      {
+        customId: "threshold",
+        label: "Caps Threshold % (50-95)",
+        style: 1,
+        placeholder: "Caps threshold percentage",
+        required: true,
+        value: currentThreshold.toString(),
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "caps_config_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const threshold = parseInt(modalSubmit.fields.getTextInputValue("threshold")) || 70;
+    
+    if (!settings.automod) settings.automod = {};
+    settings.automod.anti_caps = { enabled: true, threshold, min_length: 10 };
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Anti-Caps configured with ${threshold}% threshold`
+      )],
+      ephemeral: true
+    });
+  }
+}
 
-  const whitelisted = settings.automod?.wh_channels?.length || 0;
-  embed.addField("Whitelisted", `${whitelisted} channel(s)`, true);
-
-  embed.setFooter("Use /automod to configure rules");
-
-  return embed.build();
+/**
+ * Handle Whitelist management
+ */
+async function handleWhitelist(interaction, settings) {
+  const whitelistChannels = settings.automod?.wh_channels || [];
+  
+  const components = [];
+  components.push(ContainerBuilder.createTextDisplay("## 📋 Whitelist Management"));
+  components.push(ContainerBuilder.createSeparator());
+  
+  if (whitelistChannels.length === 0) {
+    components.push(ContainerBuilder.createTextDisplay(
+      "**No channels whitelisted**\n\nWhitelisted channels are exempt from automod rules."
+    ));
+  } else {
+    const channelList = whitelistChannels.map(id => `<#${id}>`).join("\n");
+    components.push(ContainerBuilder.createTextDisplay(
+      `**Whitelisted Channels (${whitelistChannels.length}):**\n${channelList}`
+    ));
+  }
+  
+  const buttonRow = InteractionUtils.createButtonRow([
+    {
+      customId: "whitelist_add",
+      label: "Add Channel",
+      emoji: "➕",
+      style: ButtonStyle.Success,
+    },
+    {
+      customId: "whitelist_remove",
+      label: "Remove Channel",
+      emoji: "➖",
+      style: ButtonStyle.Danger,
+      disabled: whitelistChannels.length === 0,
+    },
+  ]);
+  
+  const payload = new ContainerBuilder()
+    .addContainer({ accentColor: 0x5865F2, components: components })
+    .build();
+  
+  payload.components.push(buttonRow);
+  
+  await interaction.reply({ ...payload, ephemeral: true });
+  
+  const response = await InteractionUtils.awaitComponent(
+    await interaction.fetchReply(),
+    interaction.user.id,
+    { componentType: ComponentType.Button },
+    60000
+  );
+  
+  if (!response) {
+    return interaction.editReply({
+      content: "⏱️ Configuration timed out",
+      components: []
+    });
+  }
+  
+  if (response.customId === "whitelist_add") {
+    const modal = InteractionUtils.createModal("whitelist_add_modal", "Add Whitelisted Channel", [
+      {
+        customId: "channel_id",
+        label: "Channel ID",
+        style: 1,
+        placeholder: "Enter channel ID to whitelist",
+        required: true,
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "whitelist_add_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const channelId = modalSubmit.fields.getTextInputValue("channel_id");
+    const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
+    
+    if (!channel) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed("Invalid channel ID!")],
+        ephemeral: true
+      });
+    }
+    
+    if (!settings.automod) settings.automod = {};
+    if (!settings.automod.wh_channels) settings.automod.wh_channels = [];
+    
+    if (settings.automod.wh_channels.includes(channel.id)) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed(`${channel} is already whitelisted`)],
+        ephemeral: true
+      });
+    }
+    
+    settings.automod.wh_channels.push(channel.id);
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Channel Whitelisted\n\n${channel} is now exempt from automod`
+      )],
+      ephemeral: true
+    });
+  } else if (response.customId === "whitelist_remove") {
+    const modal = InteractionUtils.createModal("whitelist_remove_modal", "Remove Whitelisted Channel", [
+      {
+        customId: "channel_id",
+        label: "Channel ID",
+        style: 1,
+        placeholder: "Enter channel ID to remove",
+        required: true,
+      },
+    ]);
+    
+    await response.showModal(modal);
+    
+    const modalSubmit = await InteractionUtils.awaitModalSubmit(response, "whitelist_remove_modal", 120000);
+    if (!modalSubmit) return;
+    
+    const channelId = modalSubmit.fields.getTextInputValue("channel_id");
+    
+    if (!settings.automod?.wh_channels?.includes(channelId)) {
+      return modalSubmit.reply({
+        embeds: [InteractionUtils.createErrorEmbed("Channel is not whitelisted")],
+        ephemeral: true
+      });
+    }
+    
+    settings.automod.wh_channels = settings.automod.wh_channels.filter(id => id !== channelId);
+    await settings.save();
+    
+    await modalSubmit.reply({
+      embeds: [InteractionUtils.createSuccessEmbed(
+        `✅ Channel Removed\n\n<#${channelId}> is no longer whitelisted`
+      )],
+      ephemeral: true
+    });
+  }
 }

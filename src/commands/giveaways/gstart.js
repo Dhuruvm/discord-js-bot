@@ -466,9 +466,13 @@ async function startGiveaway(interaction, data, btnInteraction) {
         },
       ]);
 
+      // Ensure components array exists and add toggle button
+      const componentsList = Array.isArray(modernMessage.components) ? [...modernMessage.components] : [];
+      componentsList.push(toggleRow);
+
       await message.edit({
         ...modernMessage,
-        components: [...(modernMessage.components || []), toggleRow],
+        components: componentsList,
       });
 
       // Setup collector for toggle button
@@ -544,15 +548,14 @@ function setupToggleCollector(message, giveawayData) {
         },
       ]);
 
-      const editPayload = isModern
-        ? {
-            ...newMessage,
-            components: [...(newMessage.components || []), toggleRow],
-          }
-        : {
-            ...newMessage,
-            components: [...(newMessage.components || []), toggleRow],
-          };
+      // Ensure components array exists and add toggle button
+      const componentsList = Array.isArray(newMessage.components) ? [...newMessage.components] : [];
+      componentsList.push(toggleRow);
+
+      const editPayload = {
+        ...newMessage,
+        components: componentsList,
+      };
 
       await message.edit(editPayload);
     } catch (error) {
