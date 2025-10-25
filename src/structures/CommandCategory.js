@@ -12,6 +12,12 @@ module.exports = {
     emoji: "🛡️",
     enabled: true,
   },
+  SECURITY: {
+    name: "Security",
+    image: "https://icons.iconarchive.com/icons/paomedia/small-n-flat/128/shield-icon.png",
+    emoji: "🛡️",
+    enabled: true,
+  },
   AUTOMOD: {
     name: "Auto Moderation",
     enabled: config.AUTOMOD.ENABLED,
