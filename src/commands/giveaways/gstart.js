@@ -231,21 +231,40 @@ async function processGiveawaySetup(interaction) {
  * Show giveaway confirmation
  */
 async function showGiveawayConfirmation(interaction, data) {
+  // Default to modern style
+  data.useModernStyle = true;
+  
   const embed = InteractionUtils.createThemedEmbed({
     title: "🎉 Giveaway Preview",
-    description: "Review your giveaway settings:",
+    description: "Review your giveaway settings and choose the display style:",
     fields: [
       { name: "Prize", value: data.prize, inline: false },
       { name: "Duration", value: data.durationStr, inline: true },
       { name: "Winners", value: data.winners.toString(), inline: true },
       { name: "Channel", value: data.channel.toString(), inline: true },
       { name: "Host", value: data.host.toString(), inline: true },
+      { name: "UI Style", value: "🎨 Modern (Default)", inline: false },
     ],
-    footer: "Confirm to start the giveaway",
+    footer: "Choose style and confirm to start the giveaway",
     timestamp: true,
   });
 
-  const row = InteractionUtils.createButtonRow([
+  const styleRow = InteractionUtils.createButtonRow([
+    {
+      customId: "style_modern",
+      label: "Modern Style",
+      emoji: "🎨",
+      style: ButtonStyle.Success,
+    },
+    {
+      customId: "style_classic",
+      label: "Classic Style",
+      emoji: "📜",
+      style: ButtonStyle.Secondary,
+    },
+  ]);
+
+  const confirmRow = InteractionUtils.createButtonRow([
     {
       customId: "confirm_giveaway",
       label: "Start Giveaway",
@@ -262,34 +281,70 @@ async function showGiveawayConfirmation(interaction, data) {
 
   const msg = await interaction.followUp({
     embeds: [embed],
-    components: [row],
+    components: [styleRow, confirmRow],
     ephemeral: true,
   });
 
-  const btnInteraction = await InteractionUtils.awaitComponent(
-    msg,
-    interaction.user.id,
-    { componentType: ComponentType.Button },
-    60000
-  );
+  // Create collector for style toggle and confirm
+  const collector = msg.createMessageComponentCollector({
+    componentType: ComponentType.Button,
+    filter: (i) => i.user.id === interaction.user.id,
+    time: 60000,
+  });
 
-  if (!btnInteraction) {
-    return msg.edit({
-      embeds: [InteractionUtils.createErrorEmbed("Confirmation timed out.")],
-      components: [],
-    });
-  }
+  collector.on("collect", async (btnInteraction) => {
+    if (btnInteraction.customId === "style_modern") {
+      data.useModernStyle = true;
+      const updatedEmbed = InteractionUtils.createThemedEmbed({
+        title: "🎉 Giveaway Preview",
+        description: "Review your giveaway settings and choose the display style:",
+        fields: [
+          { name: "Prize", value: data.prize, inline: false },
+          { name: "Duration", value: data.durationStr, inline: true },
+          { name: "Winners", value: data.winners.toString(), inline: true },
+          { name: "Channel", value: data.channel.toString(), inline: true },
+          { name: "Host", value: data.host.toString(), inline: true },
+          { name: "UI Style", value: "🎨 Modern ✅", inline: false },
+        ],
+        footer: "Choose style and confirm to start the giveaway",
+        timestamp: true,
+      });
+      await btnInteraction.update({ embeds: [updatedEmbed] });
+    } else if (btnInteraction.customId === "style_classic") {
+      data.useModernStyle = false;
+      const updatedEmbed = InteractionUtils.createThemedEmbed({
+        title: "🎉 Giveaway Preview",
+        description: "Review your giveaway settings and choose the display style:",
+        fields: [
+          { name: "Prize", value: data.prize, inline: false },
+          { name: "Duration", value: data.durationStr, inline: true },
+          { name: "Winners", value: data.winners.toString(), inline: true },
+          { name: "Channel", value: data.channel.toString(), inline: true },
+          { name: "Host", value: data.host.toString(), inline: true },
+          { name: "UI Style", value: "📜 Classic ✅", inline: false },
+        ],
+        footer: "Choose style and confirm to start the giveaway",
+        timestamp: true,
+      });
+      await btnInteraction.update({ embeds: [updatedEmbed] });
+    } else if (btnInteraction.customId === "confirm_giveaway") {
+      await btnInteraction.deferUpdate();
+      collector.stop();
+      await startGiveaway(interaction, data, btnInteraction);
+    } else if (btnInteraction.customId === "cancel_giveaway") {
+      await btnInteraction.update({
+        embeds: [InteractionUtils.createWarningEmbed("Giveaway cancelled.")],
+        components: [],
+      });
+      collector.stop();
+    }
+  });
 
-  if (btnInteraction.customId === "cancel_giveaway") {
-    await btnInteraction.update({
-      embeds: [InteractionUtils.createWarningEmbed("Giveaway cancelled.")],
-      components: [],
-    });
-    return;
-  }
-
-  await btnInteraction.deferUpdate();
-  await startGiveaway(interaction, data, btnInteraction);
+  collector.on("end", () => {
+    if (msg.components.length > 0) {
+      msg.edit({ components: InteractionUtils.disableComponents(msg.components) }).catch(() => {});
+    }
+  });
 }
 
 /**
@@ -421,15 +476,25 @@ async function startGiveaway(interaction, data, btnInteraction) {
     const settings = await getSettings(interaction.guild);
     const reactionEmoji = settings.giveaway_reaction || GIVEAWAYS.REACTION || "🎁";
     
-    // Start with modern UI by default
-    const modernMessage = createModernGiveawayEmbed({
-      prize: data.prize,
-      winnerCount: data.winners,
-      endTime: endTime,
-      hostedBy: data.host,
-      guild: interaction.guild,
-      reaction: reactionEmoji,
-    });
+    // Use selected style (modern or classic)
+    const useModern = data.useModernStyle !== false;
+    const displayMessage = useModern
+      ? createModernGiveawayEmbed({
+          prize: data.prize,
+          winnerCount: data.winners,
+          endTime: endTime,
+          hostedBy: data.host,
+          guild: interaction.guild,
+          reaction: reactionEmoji,
+        })
+      : createClassicGiveawayEmbed({
+          prize: data.prize,
+          winnerCount: data.winners,
+          endTime: endTime,
+          hostedBy: data.host,
+          guild: interaction.guild,
+          reaction: reactionEmoji,
+        });
 
     const options = {
       duration: data.duration,
@@ -453,25 +518,25 @@ async function startGiveaway(interaction, data, btnInteraction) {
 
     const giveaway = await interaction.client.giveawaysManager.start(data.channel, options);
     
-    // Update giveaway message with modern design and toggle button
+    // Update giveaway message with selected design and toggle button
     try {
       const message = await data.channel.messages.fetch(giveaway.messageId);
       
       const toggleRow = InteractionUtils.createButtonRow([
         {
-          customId: `giveaway_toggle_${giveaway.messageId}_modern`,
-          label: "Switch to Classic",
+          customId: `giveaway_toggle_${giveaway.messageId}_${useModern ? "modern" : "classic"}`,
+          label: useModern ? "Switch to Classic" : "Switch to Modern",
           emoji: "🔄",
           style: ButtonStyle.Secondary,
         },
       ]);
 
       // Ensure components array exists and add toggle button
-      const componentsList = Array.isArray(modernMessage.components) ? [...modernMessage.components] : [];
+      const componentsList = Array.isArray(displayMessage.components) ? [...displayMessage.components] : [];
       componentsList.push(toggleRow);
 
       await message.edit({
-        ...modernMessage,
+        ...displayMessage,
         components: componentsList,
       });
 
@@ -498,7 +563,7 @@ async function startGiveaway(interaction, data, btnInteraction) {
         { name: "Winners", value: data.winners.toString(), inline: true },
         { name: "Reaction", value: reactionEmoji, inline: true },
         { name: "Message ID", value: giveaway.messageId || "N/A", inline: false },
-        { name: "UI Style", value: "Modern (with toggle button)", inline: false },
+        { name: "UI Style", value: useModern ? "Modern (with toggle button)" : "Classic (with toggle button)", inline: false },
       ],
       color: EMBED_COLORS.SUCCESS,
     });
@@ -525,7 +590,7 @@ function setupToggleCollector(message, giveawayData) {
     time: giveawayData.endTime.getTime() - Date.now(),
   });
 
-  let isModern = true;
+  let isModern = giveawayData.messageId.endsWith("modern");
 
   collector.on("collect", async (interaction) => {
     try {
