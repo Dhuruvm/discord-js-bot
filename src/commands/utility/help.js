@@ -168,7 +168,7 @@ async function getHelpMenu(context, prefix) {
   );
 
   // Categories to exclude from help dropdown (OWNER will be conditionally added)
-  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET', 'ANTINUKE'];
+  const excludedCategories = ['SUGGESTION', 'PROFILE', 'TICKET'];
 
   // Build menu options in specific order, filtering based on ownership
   const menuOptions = categoryOrder
