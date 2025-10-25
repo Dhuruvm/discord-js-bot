@@ -225,17 +225,23 @@ class PinterestScraper {
    * Search with custom query
    */
   async searchCustomQuery(query, limit = 5) {
-    const category = "custom";
-    const cacheKey = `custom_${this.generateHash(query)}`;
+    const queryStr = String(query || "").trim();
     
-    debug(`Scraping Pinterest for custom query: ${query}`);
-    const pins = await this.scrapePinterest(query, cacheKey);
+    if (!queryStr || queryStr.length === 0) {
+      return this.getFallbackResults("pinterest search").slice(0, limit);
+    }
+    
+    const category = "custom";
+    const cacheKey = `custom_${this.generateHash(queryStr)}`;
+    
+    debug(`Scraping Pinterest for custom query: ${queryStr}`);
+    const pins = await this.scrapePinterest(queryStr, cacheKey);
     
     if (pins.length > 0) {
       return pins.slice(0, limit);
     }
     
-    return this.getFallbackResults(query).slice(0, limit);
+    return this.getFallbackResults(queryStr).slice(0, limit);
   }
 
   /**
@@ -273,13 +279,14 @@ class PinterestScraper {
    * Get fallback results when scraping fails
    */
   getFallbackResults(query) {
+    const queryStr = String(query || "pinterest search").trim();
     const placeholders = [];
-    const baseQuery = encodeURIComponent(query);
+    const baseQuery = encodeURIComponent(queryStr);
     
     for (let i = 0; i < 5; i++) {
       placeholders.push({
         id: `fallback-${i}`,
-        title: `${query} - Result ${i + 1}`,
+        title: `${queryStr} - Result ${i + 1}`,
         description: "Unable to fetch from Pinterest. Please try again later.",
         image: null,
         link: `https://www.pinterest.com/search/pins/?q=${baseQuery}`,

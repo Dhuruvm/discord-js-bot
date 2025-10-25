@@ -293,63 +293,121 @@ async function showGiveawayConfirmation(interaction, data) {
 }
 
 /**
- * Create custom giveaway embed with Container design
+ * Create modern professional giveaway embed with Container design
  */
-function createGiveawayEmbed(options) {
+function createModernGiveawayEmbed(options) {
   const {
     prize,
     winnerCount,
     endTime,
     hostedBy,
+    guild,
     isEnded = false,
     winners = null,
-    reaction = "🎁", // Pass the resolved reaction emoji from caller
+    reaction = "🎁",
   } = options;
 
   const endTimestamp = Math.floor(endTime.getTime() / 1000);
+  const serverIcon = guild.iconURL({ size: 128 }) || "https://cdn.discordapp.com/embed/avatars/0.png";
   
   if (isEnded) {
-    // Ended giveaway embed with Container
     const components = [];
     
-    components.push(ContainerBuilder.createTextDisplay(`# 🎉 GIVEAWAY ENDED 🎉`));
-    components.push(ContainerBuilder.createTextDisplay(`## ${prize}`));
+    components.push(ContainerBuilder.createTextDisplay(`# 🎉 **GIVEAWAY ENDED**`));
+    components.push(ContainerBuilder.createSeparator());
+    components.push(ContainerBuilder.createTextDisplay(`## 🏆 ${prize}`));
     components.push(ContainerBuilder.createSeparator());
     
     if (winners && winners.length > 0) {
-      components.push(ContainerBuilder.createTextDisplay(`**Winner(s)**\n${winners.map(w => `<@${w}>`).join(", ")}`));
+      const winnerList = winners.map((w, i) => `\`${i + 1}.\` <@${w}>`).join("\n");
+      components.push(ContainerBuilder.createTextDisplay(`### 👑 Winners\n${winnerList}`));
     } else {
-      components.push(ContainerBuilder.createTextDisplay(`**Winner(s)**\nNo valid participants`));
+      components.push(ContainerBuilder.createTextDisplay(`### ⚠️ No Winners\n\`No valid participants entered\``));
     }
     
-    components.push(ContainerBuilder.createTextDisplay(`**Ended**\n<t:${endTimestamp}:R>`));
-    components.push(ContainerBuilder.createTextDisplay(`**Hosted by**\n${hostedBy}`));
+    components.push(ContainerBuilder.createSeparator());
+    components.push(
+      ContainerBuilder.createTextDisplay(
+        `• **Ended:** <t:${endTimestamp}:R>\n• **Host:** ${hostedBy}\n• **Server:** ${guild.name}`
+      )
+    );
     
     return new ContainerBuilder()
       .addContainer({ 
-        accentColor: parseInt(GIVEAWAYS.END_EMBED?.replace("#", "0x") || "0xFF0000", 16),
-        components 
+        accentColor: 0xFF4444,
+        components: components
       })
       .build();
   }
   
-  // Active giveaway embed with Container
   const components = [];
   
-  components.push(ContainerBuilder.createTextDisplay(`# 🎉 GIVEAWAY 🎉`));
-  components.push(ContainerBuilder.createTextDisplay(`## ${prize}`));
+  components.push(ContainerBuilder.createTextDisplay(`# 🎁 **GIVEAWAY**`));
   components.push(ContainerBuilder.createSeparator());
-  components.push(ContainerBuilder.createTextDisplay(`**React with ${reaction} to enter!**`));
-  components.push(ContainerBuilder.createTextDisplay(`**Winners:** ${winnerCount}`));
-  components.push(ContainerBuilder.createTextDisplay(`**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)`));
-  components.push(ContainerBuilder.createTextDisplay(`**Hosted by:** ${hostedBy}`));
+  components.push(ContainerBuilder.createTextDisplay(`## 🎉 ${prize}`));
+  components.push(ContainerBuilder.createSeparator());
+  components.push(
+    ContainerBuilder.createTextDisplay(
+      `### How to Enter\nReact with ${reaction} below to participate in this giveaway!`
+    )
+  );
+  components.push(ContainerBuilder.createSeparator());
+  components.push(
+    ContainerBuilder.createTextDisplay(
+      `• **Winners:** \`${winnerCount}\` ${winnerCount === 1 ? "person" : "people"}\n• **Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)\n• **Host:** ${hostedBy}\n• **Server:** ${guild.name}`
+    )
+  );
   
   return new ContainerBuilder()
     .addContainer({ 
-      accentColor: parseInt(GIVEAWAYS.START_EMBED?.replace("#", "0x") || "0x00FF00", 16),
-      components 
+      accentColor: 0x5865F2,
+      components: components
     })
     .build();
+}
+
+/**
+ * Create default/classic giveaway embed
+ */
+function createClassicGiveawayEmbed(options) {
+  const {
+    prize,
+    winnerCount,
+    endTime,
+    hostedBy,
+    guild,
+    isEnded = false,
+    winners = null,
+    reaction = "🎁",
+  } = options;
+
+  const endTimestamp = Math.floor(endTime.getTime() / 1000);
+  
+  const embed = new EmbedBuilder()
+    .setTitle(isEnded ? "🎉 GIVEAWAY ENDED" : "🎉 GIVEAWAY")
+    .setDescription(
+      isEnded
+        ? `**${prize}**\n\n${
+            winners && winners.length > 0
+              ? `**Winners:** ${winners.map((w) => `<@${w}>`).join(", ")}`
+              : "No valid participants"
+          }`
+        : `**${prize}**\n\nReact with ${reaction} to enter!`
+    )
+    .setColor(isEnded ? 0xff0000 : parseInt(GIVEAWAYS.START_EMBED?.replace("#", "0x") || "0x00FF00", 16))
+    .addFields(
+      { name: "Winners", value: `${winnerCount}`, inline: true },
+      {
+        name: isEnded ? "Ended" : "Ends",
+        value: `<t:${endTimestamp}:R>`,
+        inline: true,
+      },
+      { name: "Hosted by", value: `${hostedBy}`, inline: true }
+    )
+    .setFooter({ text: guild.name, iconURL: guild.iconURL() })
+    .setTimestamp();
+
+  return { embeds: [embed] };
 }
 
 /**
@@ -363,13 +421,14 @@ async function startGiveaway(interaction, data, btnInteraction) {
     const settings = await getSettings(interaction.guild);
     const reactionEmoji = settings.giveaway_reaction || GIVEAWAYS.REACTION || "🎁";
     
-    // Create custom giveaway message with Container
-    const giveawayMessage = createGiveawayEmbed({
+    // Start with modern UI by default
+    const modernMessage = createModernGiveawayEmbed({
       prize: data.prize,
       winnerCount: data.winners,
       endTime: endTime,
       hostedBy: data.host,
-      reaction: reactionEmoji, // Pass the resolved emoji
+      guild: interaction.guild,
+      reaction: reactionEmoji,
     });
 
     const options = {
@@ -378,7 +437,7 @@ async function startGiveaway(interaction, data, btnInteraction) {
       winnerCount: data.winners,
       hostedBy: data.host,
       thumbnail: "https://i.imgur.com/DJuTuxs.png",
-      reaction: reactionEmoji, // Use custom reaction from settings
+      reaction: reactionEmoji,
       messages: {
         giveaway: "🎉 **GIVEAWAY** 🎉",
         giveawayEnded: "🎉 **GIVEAWAY ENDED** 🎉",
@@ -394,12 +453,36 @@ async function startGiveaway(interaction, data, btnInteraction) {
 
     const giveaway = await interaction.client.giveawaysManager.start(data.channel, options);
     
-    // Update the giveaway message to use Container design
+    // Update giveaway message with modern design and toggle button
     try {
       const message = await data.channel.messages.fetch(giveaway.messageId);
-      await message.edit(giveawayMessage);
+      
+      const toggleRow = InteractionUtils.createButtonRow([
+        {
+          customId: `giveaway_toggle_${giveaway.messageId}_modern`,
+          label: "Switch to Classic",
+          emoji: "🔄",
+          style: ButtonStyle.Secondary,
+        },
+      ]);
+
+      await message.edit({
+        ...modernMessage,
+        components: [...(modernMessage.components || []), toggleRow],
+      });
+
+      // Setup collector for toggle button
+      setupToggleCollector(message, {
+        prize: data.prize,
+        winnerCount: data.winners,
+        endTime: endTime,
+        hostedBy: data.host,
+        guild: interaction.guild,
+        reaction: reactionEmoji,
+        messageId: giveaway.messageId,
+      });
     } catch (err) {
-      console.error("Failed to update giveaway message with Container design:", err);
+      console.error("Failed to update giveaway message:", err);
     }
 
     const successEmbed = InteractionUtils.createThemedEmbed({
@@ -411,6 +494,7 @@ async function startGiveaway(interaction, data, btnInteraction) {
         { name: "Winners", value: data.winners.toString(), inline: true },
         { name: "Reaction", value: reactionEmoji, inline: true },
         { name: "Message ID", value: giveaway.messageId || "N/A", inline: false },
+        { name: "UI Style", value: "Modern (with toggle button)", inline: false },
       ],
       color: EMBED_COLORS.SUCCESS,
     });
@@ -426,4 +510,57 @@ async function startGiveaway(interaction, data, btnInteraction) {
       components: [],
     });
   }
+}
+
+/**
+ * Setup toggle collector for switching between modern and classic UI
+ */
+function setupToggleCollector(message, giveawayData) {
+  const collector = message.createMessageComponentCollector({
+    componentType: ComponentType.Button,
+    time: giveawayData.endTime.getTime() - Date.now(),
+  });
+
+  let isModern = true;
+
+  collector.on("collect", async (interaction) => {
+    try {
+      if (!interaction.customId.startsWith("giveaway_toggle_")) return;
+
+      await interaction.deferUpdate();
+
+      isModern = !isModern;
+
+      const newMessage = isModern
+        ? createModernGiveawayEmbed(giveawayData)
+        : createClassicGiveawayEmbed(giveawayData);
+
+      const toggleRow = InteractionUtils.createButtonRow([
+        {
+          customId: `giveaway_toggle_${giveawayData.messageId}_${isModern ? "modern" : "classic"}`,
+          label: isModern ? "Switch to Classic" : "Switch to Modern",
+          emoji: "🔄",
+          style: ButtonStyle.Secondary,
+        },
+      ]);
+
+      const editPayload = isModern
+        ? {
+            ...newMessage,
+            components: [...(newMessage.components || []), toggleRow],
+          }
+        : {
+            ...newMessage,
+            components: [...(newMessage.components || []), toggleRow],
+          };
+
+      await message.edit(editPayload);
+    } catch (error) {
+      console.error("Toggle button error:", error);
+    }
+  });
+
+  collector.on("end", () => {
+    // Collector ended, giveaway is over
+  });
 }
