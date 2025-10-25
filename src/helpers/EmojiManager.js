@@ -6,15 +6,24 @@ const EMOJI_FILE = path.join(__dirname, "../../emojis.json");
 class EmojiManager {
   constructor() {
     this.emojis = this.loadEmojis();
+    this.lastLoadTime = Date.now();
+    this.cacheTimeout = 60000;
   }
 
   loadEmojis() {
     try {
       const data = fs.readFileSync(EMOJI_FILE, "utf8");
+      this.lastLoadTime = Date.now();
       return JSON.parse(data);
     } catch (error) {
       console.error("Error loading emojis:", error);
-      return {};
+      return {
+        success: "<:success:1424072640829722745>",
+        error: "<:error:1424072711671382076>",
+        warning: "⚠️",
+        info: "ℹ️",
+        loading: "⏳"
+      };
     }
   }
 
@@ -28,8 +37,27 @@ class EmojiManager {
     }
   }
 
-  get(key) {
-    return this.emojis[key] || "";
+  get(key, fallback = "") {
+    if (Date.now() - this.lastLoadTime > this.cacheTimeout) {
+      this.reload();
+    }
+    return this.emojis[key] || fallback;
+  }
+  
+  has(key) {
+    return key in this.emojis;
+  }
+  
+  getAll() {
+    if (Date.now() - this.lastLoadTime > this.cacheTimeout) {
+      this.reload();
+    }
+    return { ...this.emojis };
+  }
+  
+  format(name, text) {
+    const emoji = this.get(name);
+    return emoji ? `${emoji} ${text}` : text;
   }
 
   set(key, value) {
